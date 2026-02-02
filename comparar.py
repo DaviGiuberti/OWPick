@@ -117,9 +117,7 @@ def executar():
         else:
             avg = math.inf
         folder_stats.append({"path": ppath, "results": results, "avg_score": avg})
-        if results:
-            print(f" -> {len(results)} imagens em {ppath} | avg score = {avg:.4f}")
-        else:
+        if not results:
             print(f" -> nenhuma imagem em {ppath}")
 
     # escolhe a pasta com menor erro médio.
@@ -141,7 +139,7 @@ def executar():
             f.write(f"{matched_name}\n")
 
     print(f"Melhor pasta: {best_path} (avg_score={best['avg_score']:.4f}).")
-    print(f"Gravado {len(best_results)} linhas em {out_file.resolve()}")
+    # print(f"Gravado {len(best_results)} linhas em {out_file.resolve()}")
 
 if __name__ == "__main__":
     executar()

@@ -19,7 +19,8 @@ def print_map():
 
     # Coloca a primeira letra de cada palavra em maiúscula
     texto = texto.title()
-    print("Mapa selecionado: ' '{texto}'")
+    print(f"Mapa selecionado: {texto}")
+
     return texto
 
 # Função "para executavel", mas tambem funciona no python normal

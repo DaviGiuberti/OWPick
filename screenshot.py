@@ -44,7 +44,7 @@ def executar():
                     line = line.strip()
                     if line:
                         role = line.upper()
-                        print(f"Função: '{role}'")
+                        #print(f"Função: '{role}'")
                         return role
         except Exception as e:
             print(f"Erro ao ler Roles.txt: {e}.")
@@ -131,9 +131,9 @@ def executar():
             crop.save(out_path)
             saved_count += 1
 
-        print(f"Salvos {saved_count} recortes em: {perk_dir} (pulados/deletados: {skipped_count})")
+        #print(f"Salvos {saved_count} recortes em: {perk_dir} (pulados/deletados: {skipped_count})")
 
-    print("Pronto!")
+    # print("Pronto!")
 
 if __name__ == "__main__":
     executar()
