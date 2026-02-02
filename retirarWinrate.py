@@ -122,7 +122,7 @@ def executar():
             avg = (num1[name] + num2[name]) / 2
             ws.cell(row=row, column=4, value=f"{avg:.2f}".replace(".", ","))
 
-            saida = (0.2 * avg - 10.0) * 2
+            saida = (0.2 * avg - 10.0) * 1.5
             ws.cell(row=row, column=5, value=f"{saida:.2f}".replace(".", ","))
 
         # cálculo da média das pickrates e conversão para a escala -2..2
@@ -135,8 +135,8 @@ def executar():
             avg_pick = pick2[name]
 
         if avg_pick is not None:
-            # escala linear: 4% -> -2 ; 20% -> 2  => score = 0.25 * pick_pct - 3
-            score = 0.25 * avg_pick - 3.0
+            # escala linear: 0% -> -2 ; 30% -> 2  => score = (2/15) * pick_pct - 2
+            score = ((2.0 / 15.0) * avg_pick - 2.0) * 1.5
             ws.cell(row=row, column=6, value=f"{score:.2f}".replace(".", ","))
 
         row += 1

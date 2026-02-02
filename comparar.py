@@ -20,7 +20,7 @@ templates_dir = Path(resource_path("heroes")) # Pasta empacatoda onde estão os 
 
 # A pasta 'print' continua relativa ao local de execução (não usa resource_path)
 watch_dir = Path("print")
-perks_names = ["0perk", "1perk", "2perk"]
+perks_names = ["0perk", "1perk", "2perk", "bug"]
 output_filename = "lineup.txt"
 target_size = (42, 42)             
 

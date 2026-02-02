@@ -96,22 +96,6 @@ def _convert_to_float_safe(val) -> Optional[float]:
         return None
 
 
-def _pick_pct_to_score(pick_pct: float) -> float:
-    """
-    Converte pick rate percentual para score usando escala linear:
-      4% -> -2
-      20% -> +2
-    Fórmula: score = 0.25 * pick_pct - 3
-    Depois limitada ao intervalo [-2, 2].
-    """
-    score = 0.25 * pick_pct - 3.0
-    if score < -2.0:
-        score = -2.0
-    if score > 2.0:
-        score = 2.0
-    return score
-
-
 def read_winrate_data(filepath: str = "winrate.xlsx") -> Tuple[Dict[str, float], Dict[str, float]]:
     """
     Lê winrate.xlsx e retorna:
@@ -151,15 +135,7 @@ def read_winrate_data(filepath: str = "winrate.xlsx") -> Tuple[Dict[str, float],
         if pick_f is None:
             pickrate_dict[key] = 0.0
         else:
-            # Detecta se o valor parece ser % (porcentagem) ou já score.
-            # Heurística: se valor estiver fora do intervalo [-2,2], assumimos que é % (ex.: 17.1)
-            if pick_f < -2.0 or pick_f > 2.0:
-                # trata como porcentagem -> converte p/ score
-                pick_score = _pick_pct_to_score(pick_f)
-                pickrate_dict[key] = pick_score
-            else:
-                # já parece ser um score -2..2 -> usa direto
-                pickrate_dict[key] = pick_f
+            pickrate_dict[key] = pick_f
 
     return winrate_dict, pickrate_dict
 

@@ -29,11 +29,11 @@ def executar():
         ('0perk', 207),
         ('1perk', 203),
         ('2perk', 182),
+        ('bug', 197),
     ]
 
     # --- Ler role a partir de Roles.txt (mesmo diretório do script) ---
     def read_role():
-        base_dir = os.path.dirname(__file__) if '__file__' in globals() else os.getcwd()
         role_path = "Roles.txt"
         if not os.path.exists(role_path):
             print("Role não encontrada. Escolha a sua Função")

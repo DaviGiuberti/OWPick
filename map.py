@@ -111,7 +111,7 @@ def executar():
     if best_match:
         save_to_file(best_match)
         print(f"\n✓ Mapa encontrado: {best_match}")
-        print(f"✓ Salvo em: map.txt")
+        # print(f"✓ Salvo em: map.txt")
     else:
         print("\n✗ Nenhum mapa encontrado que corresponda à sua entrada.")
         print("Tente novamente com um nome mais próximo ao original.")
