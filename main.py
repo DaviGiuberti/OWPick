@@ -182,6 +182,7 @@ def input_loop():   # função em loop
         elif cmd.endswith("4"):
             call_and_pause_main(run_favorite)
         elif cmd.endswith("5"):
+            print('Separando as winrates atualizadas de todos os mapas')
             call_and_pause_main(run_site)
         elif cmd.endswith("6"):
             # remover mapa é imediato, não precisa 'pausar' longa execução,
@@ -202,6 +203,17 @@ def input_loop():   # função em loop
 # Configuração Inicial
 
 if __name__ == "__main__":
+
+    if not os.path.exists("Roles.txt"):
+        run_role()
+    if not os.path.exists("ALL.txt"):
+        if not os.path.isdir("winratemaps"):
+            print("\nApós escolher os personagens favoritos, o programa irá atualizar as winrates no site do Overwatch\n")
+        run_favorite()
+    if not os.path.isdir("winratemaps"):
+        print('Baixando as winrates atualizadas de todos os mapas')
+        run_site()
+
     # Inicialmente estamos no menu principal
     IN_MAIN = True
     enable_pipeline_hotkey_hook()  # registra TAB+1
