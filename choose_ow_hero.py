@@ -1,138 +1,171 @@
-import pandas as pd
-from typing import List, Dict, Tuple
 import os
 import sys
+from typing import List, Dict, Tuple, Optional
+import pandas as pd
 
-def print_map():
-    # Caminho do arquivo map.txt
-    map_path = "map.txt"
-    if not os.path.exists(map_path):
-        # Se não existir, retorna dict vazio
-        return {}
-
-    # Abre e lê o arquivo
-    with open(map_path, "r", encoding="utf-8") as arquivo:
-        texto = arquivo.read().strip()
-
-    # Substitui "-" por espaço
-    texto = texto.replace("-", " ")
-
-    # Coloca a primeira letra de cada palavra em maiúscula
-    texto = texto.title()
-    print(f"Mapa selecionado: {texto}")
-
-    return
-
-# Função "para executavel", mas tambem funciona no python normal
-def resource_path(relative_path):
+# --------------------------
+# Utilitários
+# --------------------------
+def resource_path(relative_path: str) -> str:
+    """
+    Retorna o caminho absoluto para o arquivo, tanto em execução normal quanto
+    quando empacotado em .exe (PyInstaller).
+    """
     try:
-        base_path = sys._MEIPASS # Só existe quando vira .exe e extrai os arquivos para um pasta temporaria e esta variavel anota o caminho
+        base_path = sys._MEIPASS
     except Exception:
         base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
 
-    return os.path.join(base_path, relative_path) # Mostra o caminho final
 
-def read_role() -> str: #Função que descobre qual role o usuario escolheu
+def print_map() -> str:
+    map_path = "map.txt"
+    if not os.path.exists(map_path):
+        return ""
+
+    with open(map_path, "r", encoding="utf-8") as f:
+        texto = f.read().strip()
+
+    texto = texto.replace("-", " ").title()
+    print(f"Mapa selecionado: {texto}")
+    return texto
+
+# --------------------------
+# Leitura de arquivos de entrada
+# --------------------------
+def read_role() -> Optional[str]:
     role_file = "Roles.txt"
-    
-    if not os.path.exists(role_file): # Não achou o Roles.txt
+    if not os.path.exists(role_file):
         print("Arquivo 'Roles.txt' não encontrado!")
         print("Por favor, defina sua Role (DPS, Support, Tank ou AllRoles)")
         return None
-    
-    with open(role_file, 'r', encoding='utf-8') as f:
+
+    with open(role_file, "r", encoding="utf-8") as f:
         role = f.read().strip()
-    
-    if not role: # Roles.txt vazio
+
+    if not role:
         print("Arquivo 'Roles.txt' está vazio!")
         print("Por favor, defina sua Role (DPS, Support, Tank ou AllRoles)")
         return None
-    
-    role_heroes_file = f"{role}.txt" # Pega o que tem dentro do Role.txt e encontra um arquivo com esse nome
-    if not os.path.exists(role_heroes_file): # Se não existir = erro
+
+    role_heroes_file = f"{role}.txt"
+    if not os.path.exists(role_heroes_file):
         print(f"Arquivo '{role_heroes_file}' não encontrado!")
         print("Por favor, defina seus Personagens Favoritos.")
         return None
-    
+
     return role
 
 
 def read_playable_heroes(role: str) -> List[str]:
-
-    role_file = f"{role}.txt" # Lê os personagens favoritos da Role escolhida
-    
-    with open(role_file, 'r', encoding='utf-8') as f:
+    role_file = f"{role}.txt"
+    with open(role_file, "r", encoding="utf-8") as f:
         heroes = [line.strip() for line in f.readlines() if line.strip()]
-    
-    return heroes # Retorna os personagens
+    return heroes
 
 
-def read_lineup(filepath: str = "lineup.txt") -> Tuple[List[str], List[str]]: # Lê o time inimigo e aliado
-    with open(filepath, 'r', encoding='utf-8') as f:
-        lines = [line.strip() for line in f.readlines()]
-    
-    allies = lines[:4] # 4 primeiros são aliados
-    enemies = lines[4:9] # 5 ultimos sao inimigos
-    
-    return allies, enemies # Retorna os aliados e inimigos
-
-# Lê o arquivo heroes ally.xlsx com os matchups de aliados
-def read_heroes_ally_data(filepath: str = "heroes ally.xlsx") -> pd.DataFrame:
-    final_path = resource_path(filepath) # resource_path acha o heroes ally.xlsx que é pré-definido
-    df = pd.read_excel(final_path, sheet_name=0, header=0) # primeira coluna = nome dos herois, outras colunas = matchups
-    return df
-
-# Lê o arquivo heroes enemy.xlsx com os matchups de aliados
-def read_heroes_enemy_data(filepath: str = "heroes enemy.xlsx") -> pd.DataFrame:
-    final_path = resource_path(filepath) # resource_path acha o heroes enemy.xlsx que é pré-definido
-    df = pd.read_excel(final_path, sheet_name=0, header=0) # primeira coluna = nome dos herois, outras colunas = matchups
-    return df
-
-# Lê o arquivo winrate.xlsx e retorna dicionário {herói: winrate} e {herói: pickrate_numérica}
-def read_winrate_data(filepath: str = "winrate.xlsx") -> Tuple[Dict[str, float], Dict[str, float]]:
+def read_lineup(filepath: str = "lineup.txt") -> Tuple[List[str], List[str]]:
     if not os.path.exists(filepath):
-        print('Nenhum mapa será somado a pontuação final')
-        print('Selecione um mapa ou atualize as winrates')
+        raise FileNotFoundError(filepath)
+    with open(filepath, "r", encoding="utf-8") as f:
+        lines = [line.strip() for line in f.readlines()]
+    allies = lines[:4]
+    enemies = lines[4:9]
+    return allies, enemies
+
+
+def read_heroes_ally_data(filepath: str = "heroes ally.xlsx") -> pd.DataFrame:
+    final_path = resource_path(filepath)
+    return pd.read_excel(final_path, sheet_name=0, header=0)
+
+
+def read_heroes_enemy_data(filepath: str = "heroes enemy.xlsx") -> pd.DataFrame:
+    final_path = resource_path(filepath)
+    return pd.read_excel(final_path, sheet_name=0, header=0)
+
+# --------------------------
+# Leitura de winrate + pickrate
+# --------------------------
+def _convert_to_float_safe(val) -> Optional[float]:
+    if pd.isna(val):
+        return None
+    try:
+        s = str(val).strip().replace(",", ".").replace("%", "")
+        return float(s)
+    except Exception:
+        return None
+
+
+def _pick_pct_to_score(pick_pct: float) -> float:
+    """
+    Converte pick rate percentual para score usando escala linear:
+      4% -> -2
+      20% -> +2
+    Fórmula: score = 0.25 * pick_pct - 3
+    Depois limitada ao intervalo [-2, 2].
+    """
+    score = 0.25 * pick_pct - 3.0
+    if score < -2.0:
+        score = -2.0
+    if score > 2.0:
+        score = 2.0
+    return score
+
+
+def read_winrate_data(filepath: str = "winrate.xlsx") -> Tuple[Dict[str, float], Dict[str, float]]:
+    """
+    Lê winrate.xlsx e retorna:
+      - winrate_dict: {hero: winrate_value (float)}
+      - pickrate_dict: {hero: pick_score (float, já convertido para -2..2)}
+    Observações:
+      - Coluna A (índice 0) = nome do herói
+      - Coluna E (índice 4) = winrate (numérico ou string com vírgula)
+      - Coluna F (índice 5) = pickrate (pode ser percentual como 17.1 ou já score)
+    """
+    if not os.path.exists(filepath):
+        print("Nenhum mapa será somado a pontuação final")
+        print("Selecione um mapa ou atualize as winrates")
         return {}, {}
 
     df = pd.read_excel(filepath, sheet_name=0)
-    winrate_dict = {}
-    pickrate_dict = {}
+
+    winrate_dict: Dict[str, float] = {}
+    pickrate_dict: Dict[str, float] = {}
 
     for _, row in df.iterrows():
-        hero_name = row.iloc[0]  # Coluna A (nome)
-        winrate_value = row.iloc[4] if len(row) > 4 else None # Coluna E (winrate)
-        pickrate_value = row.iloc[5] if len(row) > 5 else None # Coluna F (pickrate)
+        hero_name_raw = row.iloc[0] if len(row) > 0 else None
+        if pd.isna(hero_name_raw):
+            continue
+        key = str(hero_name_raw).strip()
 
-        if pd.notna(hero_name):
-            key = str(hero_name).strip()
-            # Processa winrate
-            if pd.notna(winrate_value):
-                # Converter valor para string e trocar vírgula por ponto
-                win_str = str(winrate_value).replace(',', '.')
-                try:
-                    winrate_dict[key] = float(win_str)
-                except (ValueError, TypeError):
-                    winrate_dict[key] = 0.0
-            else:
-                winrate_dict[key] = 0.0
+        # WINRATE (coluna E / índice 4)
+        win_raw = row.iloc[4] if len(row) > 4 else None
+        win_f = _convert_to_float_safe(win_raw)
+        winrate_dict[key] = float(win_f) if win_f is not None else 0.0
 
-            # Processa pickrate (pode ser score já convertido ou %; tratamos ambos)
-            if pd.notna(pickrate_value):
-                pick_str = str(pickrate_value).strip().replace(',', '.')
-                # Se tiver um símbolo de porcentagem, removemos
-                pick_str = pick_str.replace('%', '')
-                try:
-                    pick_val = float(pick_str)
-                except (ValueError, TypeError):
-                    pick_val = 0.0
-                pickrate_dict[key] = pick_val
+        # PICKRATE (coluna F / índice 5)
+        pick_raw = row.iloc[5] if len(row) > 5 else None
+        pick_f = _convert_to_float_safe(pick_raw)
+
+        # Se valor ausente, assume 0
+        if pick_f is None:
+            pickrate_dict[key] = 0.0
+        else:
+            # Detecta se o valor parece ser % (porcentagem) ou já score.
+            # Heurística: se valor estiver fora do intervalo [-2,2], assumimos que é % (ex.: 17.1)
+            if pick_f < -2.0 or pick_f > 2.0:
+                # trata como porcentagem -> converte p/ score
+                pick_score = _pick_pct_to_score(pick_f)
+                pickrate_dict[key] = pick_score
             else:
-                pickrate_dict[key] = 0.0
+                # já parece ser um score -2..2 -> usa direto
+                pickrate_dict[key] = pick_f
 
     return winrate_dict, pickrate_dict
 
-
+# --------------------------
+# Cálculo de pontuação por herói (compatível)
+# --------------------------
 def calculate_hero_score(
     hero_name: str,
     ally_df: pd.DataFrame,
@@ -140,15 +173,19 @@ def calculate_hero_score(
     allies: List[str],
     enemies: List[str],
     winrate_dict: Dict[str, float],
-    pickrate_dict: Dict[str, float]
+    pickrate_dict: Optional[Dict[str, float]] = None
 ) -> Dict[str, float]:
     """
     Calcula a pontuação de um herói jogável incluindo:
       - enemy_score (matchups contra inimigos)
       - ally_score  (matchups com aliados * 0.65)
       - map_winrate (valor vindo do winrate.xlsx coluna E)
-      - map_pickrate (valor vindo do winrate.xlsx coluna F)
+      - map_pickrate (valor vindo do winrate.xlsx coluna F convertida p/ -2..2)
+    pickrate_dict é opcional para compatibilidade com versões antigas.
     """
+    if pickrate_dict is None:
+        pickrate_dict = {}
+
     enemy_score = 0.0
     hero_row_enemy = enemy_df[enemy_df.iloc[:, 0] == hero_name]
     if not hero_row_enemy.empty:
@@ -156,97 +193,97 @@ def calculate_hero_score(
             if enemy in enemy_df.columns:
                 value = hero_row_enemy[enemy].values[0]
                 if pd.notna(value):
-                    enemy_score += float(value)
+                    try:
+                        enemy_score += float(value)
+                    except Exception:
+                        pass
 
     ally_score = 0.0
     hero_row_ally = ally_df[ally_df.iloc[:, 0] == hero_name]
     if not hero_row_ally.empty:
         for ally in allies:
             if ally in ally_df.columns:
-                value = hero_row_ally[ally].values[0] * 0.65
+                value = hero_row_ally[ally].values[0]
                 if pd.notna(value):
-                    ally_score += float(value)
+                    try:
+                        ally_score += float(value) * 0.65
+                    except Exception:
+                        pass
 
-    map_winrate = winrate_dict.get(hero_name, 0.0)
-    map_pickrate = pickrate_dict.get(hero_name, 0.0)
+    map_winrate = float(winrate_dict.get(hero_name, 0.0))
+    map_pickrate = float(pickrate_dict.get(hero_name, 0.0))
 
     total_score = enemy_score + ally_score + map_winrate + map_pickrate
 
     return {
-        'hero': hero_name,
-        'enemy_score': enemy_score,
-        'ally_score': ally_score,
-        'map_winrate': map_winrate,
-        'map_pickrate': map_pickrate,
-        'total': total_score
+        "hero": hero_name,
+        "enemy_score": enemy_score,
+        "ally_score": ally_score,
+        "map_winrate": map_winrate,
+        "map_pickrate": map_pickrate,
+        "total": total_score
     }
 
-
+# --------------------------
+# Impressão do ranking
+# --------------------------
 def print_ranking(rankings: List[Dict[str, float]]) -> None:
-    """
-    Imprime o ranking mostrando agora também a coluna PICK (map_pickrate).
-    """
-    sorted_rankings = sorted(rankings, key=lambda x: x['total'], reverse=True)
+    sorted_rankings = sorted(rankings, key=lambda x: x["total"], reverse=True)
 
-    print("=" * 85)
-    print(f"{'RANK':<6} | {'HERO':<15} | {'ENEMY':>8} | {'ALLY':>8} | {'MAP':>8} | {'PICK':>8} | {'TOTAL':>8}")
-    print("=" * 85)
-
+    print("=" * 95)
+    print(f"{'RANK':<6} | {'HERO':<18} | {'ENEMY':>8} | {'ALLY':>8} | {'MAP':>8} | {'PICK':>8} | {'TOTAL':>8}")
+    print("=" * 95)
     for rank, hero_data in enumerate(sorted_rankings, start=1):
         print(
             f"{rank:<6} | "
-            f"{hero_data['hero']:<15} | "
+            f"{hero_data['hero']:<18} | "
             f"{hero_data['enemy_score']:>8.2f} | "
             f"{hero_data['ally_score']:>8.2f} | "
             f"{hero_data['map_winrate']:>8.2f} | "
             f"{hero_data['map_pickrate']:>8.2f} | "
             f"{hero_data['total']:>8.2f}"
         )
+    print("-" * 95)
 
-    print("-" * 85)
-
-
+# --------------------------
+# Fluxo principal
+# --------------------------
 def run_hero_ranking():
-    """
-    Função principal que executa todo o processo de ranking
-    """
-    # Ler a role do jogador
     role = read_role()
     if role is None:
         return
-    
-    print(f"Role selecionada: {role}")
-    print()
-    
-    # Ler heróis jogáveis da role
+    print(f"Role selecionada: {role}\n")
+
     playable_heroes = read_playable_heroes(role)
-    print(f"Heróis disponíveis: {', '.join(playable_heroes)}")
-    print()
-    
-    # Ler dados
+    print(f"Heróis disponíveis: {', '.join(playable_heroes)}\n")
+
     try:
         allies, enemies = read_lineup()
         print(f"Aliados: {', '.join(allies)}")
-        print(f"Inimigos: {', '.join(enemies)}")
+        print(f"Inimigos: {', '.join(enemies)}\n")
     except FileNotFoundError:
         print("Arquivo 'lineup.txt' não encontrado. Rode a análise de imagem (TAB+1) primeiro.")
         return
-    print()
-    
-    # Tratamento de erro caso os excels não existam
+
     try:
         ally_df = read_heroes_ally_data()
         enemy_df = read_heroes_enemy_data()
     except FileNotFoundError as e:
         print(f"ERRO CRÍTICO: Não foi possível ler as planilhas de dados: {e}")
         return
-    
-    print_map()
 
-    winrate_dict = read_winrate_data()
-    
-    # Calcular pontuação para cada herói jogável
-    rankings = []
+    mapa_formatado = print_map()
+
+    # Leitura de winrate + pickrate (compatível)
+    res = read_winrate_data()
+    if isinstance(res, tuple) and len(res) == 2:
+        winrate_dict, pickrate_dict = res
+    else:
+        # Compatibilidade (caso read_winrate_data retorne apenas um dict)
+        winrate_dict = res if isinstance(res, dict) else {}
+        pickrate_dict = {}
+
+    rankings: List[Dict[str, float]] = []
     for hero in playable_heroes:
         score_data = calculate_hero_score(
             hero,
@@ -254,12 +291,13 @@ def run_hero_ranking():
             enemy_df,
             allies,
             enemies,
-            winrate_dict
+            winrate_dict,
+            pickrate_dict
         )
         rankings.append(score_data)
-    
-    # Imprimir ranking
+
     print_ranking(rankings)
+
 
 if __name__ == "__main__":
     run_hero_ranking()
