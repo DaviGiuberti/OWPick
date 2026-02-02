@@ -105,8 +105,8 @@ def executar():
     ws["B1"] = "Winrate Master"
     ws["C1"] = "Winrate Grandmaster"
     ws["D1"] = "Average"
-    ws["E1"] = "Saida (0,2*avg - 10) * 2"
-    ws["F1"] = "Pickrate Score (4%=-2,20%=2)"
+    ws["E1"] = "Winrate Score"
+    ws["F1"] = "Pickrate Score"
 
     row = 2
     for name in names_sorted:
