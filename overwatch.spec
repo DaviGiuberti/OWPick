@@ -81,7 +81,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='Overwatch Best Pick',
+    name='OWPICK',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -92,7 +92,7 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='icon.ico',
+    icon='icone.ico',
 )
 
 coll = COLLECT(
@@ -103,5 +103,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='Overwatch Best Pick',
+    name='OWPick',
 )
