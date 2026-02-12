@@ -133,6 +133,21 @@ def executar():
 
         #print(f"Salvos {saved_count} recortes em: {perk_dir} (pulados/deletados: {skipped_count})")
 
+    # --- NOVO BLOCO: Recorte da pasta MAP ---
+    map_dir = os.path.join(outdir, "map")
+    os.makedirs(map_dir, exist_ok=True)
+    
+    # Coordenadas base fornecidas
+    map_base = {'left': 982, 'top': 19, 'width': 184, 'height': 26}
+    # Aplicar escala e clamp
+    m_left, m_top, m_right, m_bottom = scale_and_clamp(
+        map_base['left'], map_base['top'], map_base['width'], map_base['height'], full_w, full_h
+    )
+    
+    map_crop = full_img.crop((m_left, m_top, m_right, m_bottom))
+    map_crop.save(os.path.join(map_dir, "map.png"))
+    # ----------------------------------------
+
     # print("Pronto!")
 
 if __name__ == "__main__":

@@ -50,7 +50,7 @@ def executar():
                 # Monta a URL
                 url = (
                     "https://overwatch.blizzard.com/en-us/rates/"
-                    f"?input=PC&map={map_name}&region=Americas&role=All&rq=1&tier={tier}"
+                    f"?input=PC&map={map_name}&region=Americas&role=All&rq=2&tier={tier}"
                 )
 
                 # --- LÓGICA DA BARRA DE CARREGAMENTO ---

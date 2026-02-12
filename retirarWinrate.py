@@ -9,11 +9,14 @@ WINRATE_DIR = "winratemaps"
 OUTPUT_XLSX = "winrate.xlsx"
 
 pattern = re.compile(
-    r'{"name"\s*:\s*"(?P<name>[^"]+)"[^}]*?"winrate"\s*:\s*(?P<wr>\d+(?:\.\d+)?)',
+    r'{"name"\s*:\s*"(?P<name>[^"]+)"[^}]*?"winrate"\s*:\s*(?P<wr>-?\d+(?:\.\d+)?)',
     re.IGNORECASE | re.UNICODE
 )
 
-pickrate_search = re.compile(r'"pickrate"\s*:\s*(?P<pr>\d+(?:\.\d+)?)', re.IGNORECASE)
+pickrate_search = re.compile(
+    r'"pickrate"\s*:\s*(?P<pr>-?\d+(?:\.\d+)?)',
+    re.IGNORECASE
+)
 
 def get_input_files():
     try:
@@ -32,6 +35,7 @@ def get_input_files():
 
     return html_master, html_grandmaster
 
+
 def parse_file(path):
     try:
         with open(path, "r", encoding="utf-8") as f:
@@ -41,10 +45,10 @@ def parse_file(path):
         return None, None, None, None
 
     text = html.unescape(raw)
-    num_map = {}       # winrate numeric
-    str_map = {}       # winrate string (comma decimal)
-    pick_map = {}      # pickrate numeric
-    pick_str_map = {}  # pickrate string (comma decimal)
+    num_map = {}
+    str_map = {}
+    pick_map = {}
+    pick_str_map = {}
 
     for m in pattern.finditer(text):
         name = m.group("name").strip()
@@ -56,25 +60,33 @@ def parse_file(path):
         except ValueError:
             continue
 
-        # procura pickrate dentro do mesmo trecho capturado (se houver)
+        # 🔥 Se for -1, vira 0
+        if wr_num < 0:
+            wr_num = 0.0
+
         snippet = m.group(0)
         pick_m = pickrate_search.search(snippet)
+
         if pick_m:
             try:
                 pr_num = float(pick_m.group("pr"))
+                # Se for -1, vira 0
+                if pr_num < 0:
+                    pr_num = 0.0
             except ValueError:
                 pr_num = None
         else:
             pr_num = None
 
         num_map[name] = wr_num
-        str_map[name] = wr_text.replace(".", ",")
+        str_map[name] = f"{wr_num:.2f}".replace(".", ",")
 
         if pr_num is not None:
             pick_map[name] = pr_num
             pick_str_map[name] = f"{pr_num:.2f}".replace(".", ",")
 
     return num_map, str_map, pick_map, pick_str_map
+
 
 def executar():
     INPUT_HTML1, INPUT_HTML2 = get_input_files()
@@ -94,7 +106,7 @@ def executar():
     )
 
     if not names_sorted:
-        print("Nenhuma winrate encontrada nos arquivos. Atualize as winrates.")
+        print("Nenhuma winrate encontrada nos arquivos.")
         return
 
     wb = Workbook()
@@ -125,7 +137,6 @@ def executar():
             saida = (0.2 * avg - 10.0) * 1.5
             ws.cell(row=row, column=5, value=f"{saida:.2f}".replace(".", ","))
 
-        # cálculo da média das pickrates e conversão para a escala -2..2
         avg_pick = None
         if name in pick1 and name in pick2:
             avg_pick = (pick1[name] + pick2[name]) / 2
@@ -135,7 +146,6 @@ def executar():
             avg_pick = pick2[name]
 
         if avg_pick is not None:
-            # escala linear: 0% -> -2 ; 30% -> 2  => score = (2/15) * pick_pct - 2
             score = ((2.0 / 15.0) * avg_pick - 2.0) * 1.5
             ws.cell(row=row, column=6, value=f"{score:.2f}".replace(".", ","))
 
@@ -143,6 +153,7 @@ def executar():
 
     wb.save(OUTPUT_XLSX)
     print(f"OK — {len(names_sorted)} heróis salvos em '{OUTPUT_XLSX}'.")
+
 
 if __name__ == "__main__":
     executar()

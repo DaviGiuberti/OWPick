@@ -5,17 +5,17 @@ import os
 # Lista completa de heróis do Overwatch organizados por função
 HEROES = {
     "DPS": [
-        "Ashe", "Bastion", "Cassidy", "Echo", "Freja", "Genji", "Hanzo",
+        "Anran", "Ashe", "Bastion", "Cassidy", "Echo", "Emre", "Freja", "Genji", "Hanzo",
         "Junkrat", "Mei", "Pharah", "Reaper", "Sojourn", "Soldier 76",
         "Sombra", "Symmetra", "Torbjörn", "Tracer", "Vendetta", "Venture",
         "Widowmaker"
     ],
     "SUP": [
-        "Ana", "Baptiste", "Brigitte", "Illari", "Juno", "Kiriko",
-        "Lifeweaver", "Lúcio", "Mercy", "Moira", "Wuyang", "Zenyatta"
+        "Ana", "Baptiste", "Brigitte", "Illari", "Jetpack Cat", "Juno", "Kiriko",
+        "Lifeweaver", "Lúcio", "Mercy", "Mizuki", "Moira", "Wuyang", "Zenyatta"
     ],
     "TANK": [
-        "DVa", "Doomfist", "Hazard", "Junker Queen", "Mauga", "Orisa",
+        "DVa", "Domina", "Doomfist", "Hazard", "Junker Queen", "Mauga", "Orisa",
         "Ramattra", "Reinhardt", "Roadhog", "Sigma", "Winston",
         "Wrecking Ball", "Zarya"
     ]

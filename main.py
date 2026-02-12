@@ -6,6 +6,7 @@ import os
 import msvcrt
 import choose_ow_hero
 import comparar
+import compararMapa
 import favoriteHero
 import map as map_script
 import retirarWinrate
@@ -25,16 +26,14 @@ IN_MAIN = True # Não executa nada na main quando false
 def print_main_menu():
     print(
         "Comandos disponíveis:\n"
-        "  2 -> modificar mapa analisado\n"
-        "  3 -> alterar Role/Função\n"
-        "  4 -> adicionar/remover heróis favoritos\n"
-        "  5 -> atualizar winrate dos mapas\n"
-        "  6 -> remover mapa selecionado\n"
+        "  2 -> alterar Role/Função\n"
+        "  3 -> adicionar/remover heróis favoritos\n"
+        "  4 -> atualizar winrate dos mapas\n"
     )
 
 def print_small_menu():
     print(
-        "\n[2] Mapa  [3] Role  [4] Favoritos  [5] Atualizar Winrate  [6] Remover mapa\n"
+        "\n[2] Role  [3] Favoritos  [4] Atualizar Winrate\n"
     )
 
 # Funções
@@ -44,6 +43,19 @@ def run_pipeline():
     try:
         print(">>> Capturando a tela...")
         screenshot.executar()
+
+        # Executa o OCR para detectar o mapa
+        success = compararMapa.executar()
+        
+        if success:
+            # Se detectou o mapa com sucesso, tenta retirar a winrate
+            try:
+                print("\n>>> Retirando a winrate do mapa detectado...")
+                retirarWinrate.executar()
+            except Exception as e:
+                print(f"Aviso: Não foi possível obter winrate do mapa: {e}")
+        else:
+            print("\n❌ Falha ao detectar o mapa. Tente novamente com uma screenshot melhor.")
 
         print(">>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
@@ -176,18 +188,18 @@ def input_loop():   # função em loop
             continue
 
         if cmd.endswith("2"):
-            call_and_pause_main(run_map)
-        elif cmd.endswith("3"):
             call_and_pause_main(run_role)
-        elif cmd.endswith("4"):
+        #elif cmd.endswith("2"):
+        #    call_and_pause_main(run_map)
+        elif cmd.endswith("3"):
             call_and_pause_main(run_favorite)
-        elif cmd.endswith("5"):
+        elif cmd.endswith("4"):
             print('Separando as winrates atualizadas de todos os mapas')
             call_and_pause_main(run_site)
-        elif cmd.endswith("6"):
+        #elif cmd.endswith("6"):
             # remover mapa é imediato, não precisa 'pausar' longa execução,
             # mas vamos mantê-lo sincronizado com o fluxo de pausa/remissão
-            call_and_pause_main(remove_map)
+            #all_and_pause_main(remove_map)
         elif cmd in ("exit", "quit"):
             print("Encerrando programa...")
             disable_pipeline_hotkey_hook()
@@ -222,9 +234,10 @@ if __name__ == "__main__":
     input_thread.start()
 
     print("="*50)
-    print(" PROGRAMA INICIADO")
+    print(" PROGRAMA INICIADO - OWPICK")
     print(" - Pressione TAB+1 (global) para executar o pipeline quando estiver no menu principal.")
     print(" - Use os números do menu e ENTER para rodar os outros comandos.")
+
     print("="*50)
 
     # Loop principal para manter o programa vivo
