@@ -19,7 +19,21 @@ templates_dir = Path(resource_path("heroes"))
 watch_dir = Path("print")
 perks_names = ["0perk", "1perk", "2perk", "bug"]
 output_filename = "lineup.txt"
-target_size = (42, 42)             
+target_size = (42, 42)
+
+# MAPEAMENTO: arquivo -> categoria
+FILE_TO_CATEGORY = {
+    "ally1.png": "tank",
+    "enemy1.png": "tank",
+    "ally2.png": "dps",
+    "ally3.png": "dps",
+    "enemy2.png": "dps",
+    "enemy3.png": "dps",
+    "ally4.png": "sup",
+    "ally5.png": "sup",
+    "enemy4.png": "sup",
+    "enemy5.png": "sup",
+}
 
 # Carrega uma imagem e transforma em matriz numérica.
 def load_image_gray(path, target_size=None):
@@ -34,23 +48,62 @@ def normalized_mae(a, b):
     mae = np.mean(np.abs(a - b))
     return mae / 255.0
 
-# Carrega todas as imagens de heróis da pasta heroes.
-def load_templates(templates_dir, target_size=(42,42)):
+# Carrega templates de uma subpasta específica (tank, dps ou sup)
+def load_templates_from_category(templates_dir, category, target_size=(42,42)):
+    """
+    Carrega templates de uma categoria específica.
+    
+    Args:
+        templates_dir: Path da pasta heroes
+        category: "tank", "dps" ou "sup"
+        target_size: Tamanho alvo para redimensionar
+    
+    Returns:
+        Lista de (nome, array)
+    """
+    category_dir = templates_dir / category
     templates = []
+    
+    if not category_dir.exists():
+        print(f"AVISO: Pasta de categoria não encontrada: {category_dir}")
+        return templates
+    
+    for p in sorted(category_dir.iterdir()):
+        if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".bmp"}:
+            arr = load_image_gray(p, target_size=target_size)
+            templates.append((p.stem, arr))
+    
+    return templates
+
+# Carrega todas as categorias de templates
+def load_all_templates(templates_dir, target_size=(42,42)):
+    """
+    Carrega templates de todas as categorias (tank, dps, sup).
+    
+    Returns:
+        Dict com {categoria: [(nome, array), ...]}
+    """
     if not templates_dir.exists():
         print(f"ERRO CRÍTICO: Pasta de templates não encontrada em: {templates_dir}")
         raise RuntimeError(f"Pasta de templates não existe: {templates_dir}")
     
-    for p in sorted(templates_dir.iterdir()):
-        if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".bmp"}:
-            arr = load_image_gray(p, target_size=target_size)
-            templates.append((p.stem, arr))
-            
-    if not templates:
-        raise RuntimeError(f"Nenhuma template encontrada em {templates_dir}")
-    return templates
+    templates_by_category = {}
+    
+    for category in ["tank", "dps", "sup"]:
+        templates = load_templates_from_category(templates_dir, category, target_size)
+        if templates:
+            templates_by_category[category] = templates
+            #print(f"Carregados {len(templates)} templates de {category}")
+        else:
+            print(f"AVISO: Nenhum template encontrado em {category}")
+            templates_by_category[category] = []
+    
+    if not any(templates_by_category.values()):
+        raise RuntimeError(f"Nenhuma template encontrada em nenhuma categoria")
+    
+    return templates_by_category
 
-# NOVA FUNÇÃO: Template matching com busca vertical
+# Template matching com busca vertical
 def find_best_match_with_sliding(img_arr, templates, template_height=42):
     """
     Procura a melhor correspondência usando sliding window vertical.
@@ -69,9 +122,9 @@ def find_best_match_with_sliding(img_arr, templates, template_height=42):
     img_height = img_arr.shape[0]
     img_width = img_arr.shape[1]
     
-    # Se a imagem tem exatamente o tamanho do template, usa o método antigo
+    # Se a imagem tem exatamente o tamanho do template, usa o método simples
     if img_height == template_height:
-        return find_best_match_old(img_arr, templates)
+        return find_best_match_simple(img_arr, templates)
     
     # Caso contrário, faz sliding window vertical
     for name, tpl in templates:
@@ -101,8 +154,8 @@ def find_best_match_with_sliding(img_arr, templates, template_height=42):
     
     return best_name, best_score
 
-# Método antigo (mantido como fallback)
-def find_best_match_old(img_arr, templates):
+# Método simples (quando imagem tem mesmo tamanho do template)
+def find_best_match_simple(img_arr, templates):
     best_name = None
     best_score = 1.0
     for name, tpl in templates:
@@ -116,8 +169,19 @@ def find_best_match_old(img_arr, templates):
             best_name = name
     return best_name, best_score
 
-# Analisa todas as imagens recortadas
-def process_folder(folder_path: Path, templates, target_size=(42,42)):
+# Analisa todas as imagens recortadas COM CATEGORIAS
+def process_folder(folder_path: Path, templates_by_category, target_size=(42,42)):
+    """
+    Processa pasta comparando cada imagem apenas com templates da sua categoria.
+    
+    Args:
+        folder_path: Path da pasta (ex: print/0perk)
+        templates_by_category: Dict {categoria: [(nome, array), ...]}
+        target_size: Tamanho alvo
+    
+    Returns:
+        Lista de (input_filename, matched_name, score)
+    """
     folder_path.mkdir(parents=True, exist_ok=True)
     files = [p for p in folder_path.iterdir() if p.suffix.lower() in {".png", ".jpg", ".jpeg", ".bmp"}]
     files = sorted(files, key=lambda x: x.stat().st_mtime)
@@ -125,6 +189,22 @@ def process_folder(folder_path: Path, templates, target_size=(42,42)):
     results = []
     for p in files: 
         time.sleep(0.02)
+        
+        # Determinar categoria baseado no nome do arquivo
+        category = FILE_TO_CATEGORY.get(p.name)
+        
+        if category is None:
+            # Arquivo não mapeado, pular
+            #print(f"Pulando {p.name} (não mapeado para categoria)")
+            continue
+        
+        # Pegar templates da categoria
+        templates = templates_by_category.get(category, [])
+        
+        if not templates:
+            print(f"AVISO: Nenhum template para categoria {category} (arquivo {p.name})")
+            continue
+        
         try:
             # Carregar imagem SEM redimensionar (pode ser maior que 42x42)
             img = load_image_gray(p, target_size=None)
@@ -132,7 +212,7 @@ def process_folder(folder_path: Path, templates, target_size=(42,42)):
             print(f"Falha ao abrir {p}: {e}  -> pulando")
             continue
         
-        # Usar a nova função com sliding window
+        # Comparar apenas com templates da categoria correta
         best_name, best_score = find_best_match_with_sliding(img, templates, template_height=target_size[1])
         results.append((p.name, best_name, best_score))
         
@@ -141,7 +221,7 @@ def process_folder(folder_path: Path, templates, target_size=(42,42)):
 # main
 def executar():
     try:
-        templates = load_templates(templates_dir, target_size=target_size)
+        templates_by_category = load_all_templates(templates_dir, target_size=target_size)
     except RuntimeError as e:
         print(e)
         return
@@ -155,7 +235,7 @@ def executar():
             folder_stats.append({"path": ppath, "results": [], "avg_score": math.inf})
             continue
 
-        results = process_folder(ppath, templates, target_size=target_size)
+        results = process_folder(ppath, templates_by_category, target_size=target_size)
         if results:
             scores = [r[2] for r in results]
             avg = float(np.mean(scores)) if scores else math.inf
@@ -181,7 +261,7 @@ def executar():
         for input_filename, matched_name, score in best_results:
             f.write(f"{matched_name}\n")
 
-    print(f"Melhor pasta: {best_path} (avg_score={best['avg_score']:.4f}).")
+    #print(f"Melhor pasta: {best_path} (avg_score={best['avg_score']:.4f}).")
 
 if __name__ == "__main__":
     executar()

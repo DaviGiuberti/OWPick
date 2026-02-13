@@ -195,6 +195,8 @@ def normalize_text(text):
     text = text.replace("ç", "c").replace("Ç", "C")
     # Substitui espaços por hífens
     text = text.replace(" ", "-")
+
+    text = text.lower()
     
     return text
 
@@ -256,6 +258,10 @@ def find_best_match(extracted_text):
     all_map_names = MAPS.copy()
     all_map_names.extend(TRANSLATIONS.keys())
     
+    # Cria versões lowercase para matching case-insensitive
+    map_names_lower = [name.lower() for name in all_map_names]
+    map_names_dict = {name.lower(): name for name in all_map_names}
+    
     # Extrai todos os candidatos possíveis do texto
     candidates = extract_map_candidates(extracted_text)
     
@@ -267,16 +273,20 @@ def find_best_match(extracted_text):
         if not candidate:
             continue
         
-        # Busca o melhor match usando fuzzy matching
+        # Converte candidato para lowercase
+        candidate_lower = candidate.lower()
+        
+        # Busca o melhor match usando fuzzy matching (case-insensitive)
         result = process.extractOne(
-            candidate,
-            all_map_names,
+            candidate_lower,
+            map_names_lower,
             scorer=fuzz.ratio,
             score_cutoff=55  # Reduzido para 55% para pegar mais matches
         )
         
         if result and result[1] > best_score:
-            best_match = result[0]
+            # Recupera o nome original do mapa
+            best_match = map_names_dict[result[0]]
             best_score = result[1]
     
     # Se não encontrou com ratio, tenta partial_ratio (substring matching)
@@ -285,15 +295,17 @@ def find_best_match(extracted_text):
             if not candidate:
                 continue
             
+            candidate_lower = candidate.lower()
+            
             result = process.extractOne(
-                candidate,
-                all_map_names,
+                candidate_lower,
+                map_names_lower,
                 scorer=fuzz.partial_ratio,
                 score_cutoff=70  # Partial ratio precisa ser mais alto
             )
             
             if result and result[1] > best_score:
-                best_match = result[0]
+                best_match = map_names_dict[result[0]]
                 best_score = result[1]
     
     # Se encontrou um match
@@ -326,8 +338,8 @@ def save_map_name(map_name, output_path="map.txt"):
         with open(output_path, 'w', encoding='utf-8') as f:
             f.write(normalized_name)
         
-        print(f"✓ Mapa detectado: {map_name}")
-        print(f"✓ Salvo como: {normalized_name}")
+        print(f"Mapa detectado: {map_name}")
+        #print(f"✓ Salvo como: {normalized_name}")
         
         return normalized_name
         
@@ -361,11 +373,11 @@ def executar():
         return False
     
     # Mostra o texto extraído
-    print(f"Texto extraído da imagem:")
-    print("-" * 50)
-    print(extracted_text)
-    print("-" * 50)
-    print()
+    #print(f"Texto extraído da imagem:")
+    #print("-" * 50)
+    #print(extracted_text)
+    #print("-" * 50)
+    #print()
     
     # Encontra o melhor match
     map_name, confidence = find_best_match(extracted_text)

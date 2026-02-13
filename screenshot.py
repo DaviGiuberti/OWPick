@@ -12,7 +12,7 @@ def executar():
     BASE_W, BASE_H = 1280, 720
 
     # MODIFICAÇÃO: Adicionar margem vertical para busca
-    VERTICAL_BUFFER = 9  # pixels de margem acima e abaixo
+    VERTICAL_BUFFER = 8  # pixels de margem acima e abaixo
 
     captures_template = [
         {'top':137, 'width':41, 'height':41, 'name':'ally1.png'},
@@ -30,9 +30,8 @@ def executar():
     # pastas + valor de left correspondentes (valores para 1280x720)
     perks = [
         ('0perk', 207),
-        ('1perk', 203),
-        ('2perk', 182),
-        ('bug', 197),
+        ('1perk', 196),
+        ('2perk', 175),
     ]
 
     # --- Ler role a partir de Roles.txt (mesmo diretório do script) ---
@@ -121,8 +120,8 @@ def executar():
 
             # MODIFICAÇÃO: Adicionar buffer vertical
             # Recortar área maior para permitir busca vertical
-            top_with_buffer = c['top'] - VERTICAL_BUFFER
-            height_with_buffer = c['height'] + (2 * VERTICAL_BUFFER)
+            top_with_buffer = c['top'] - (VERTICAL_BUFFER * scale_y)
+            height_with_buffer = c['height'] + (2 * VERTICAL_BUFFER * scale_y)
 
             left, top, right, bottom = scale_and_clamp(
                 left_base, top_with_buffer, c['width'], height_with_buffer, full_w, full_h
