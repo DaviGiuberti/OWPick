@@ -1,4 +1,4 @@
-('D:\\DAVI\\Projeto\\Overwatch\\build\\overwatch\\OWPICK.pkg',
+('D:\\DAVI\\Projeto\\Overwatch\\build\\overwatch\\OWPick.pkg',
  {'BINARY': True,
   'DATA': True,
   'EXECUTABLE': True,

@@ -135,7 +135,7 @@ def executar():
     map_dir = os.path.join(outdir, "map")
     os.makedirs(map_dir, exist_ok=True)
     
-    map_base = {'left': 982, 'top': 19, 'width': 184, 'height': 26}
+    map_base = {'left': 983, 'top': 8, 'width': 174, 'height': 41}
     m_left, m_top, m_right, m_bottom = scale_and_clamp(
         map_base['left'], map_base['top'], map_base['width'], map_base['height'], full_w, full_h
     )

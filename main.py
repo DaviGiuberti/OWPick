@@ -234,7 +234,7 @@ if __name__ == "__main__":
     input_thread.start()
 
     print("="*50)
-    print(" PROGRAMA INICIADO - OWPICK")
+    print(" PROGRAMA INICIADO - OWPick")
     print(" - Pressione TAB+1 (global) para executar o pipeline quando estiver no menu principal.")
     print(" - Use os números do menu e ENTER para rodar os outros comandos.")
 

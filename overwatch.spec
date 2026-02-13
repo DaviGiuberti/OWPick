@@ -248,7 +248,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='OWPICK',
+    name='OWPick',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
