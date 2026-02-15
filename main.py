@@ -20,6 +20,7 @@ WINRATE_FILE = "winrate.xlsx"
 
 
 IN_MAIN = True # Não executa nada na main quando false
+WITH_MAP = True
 
 # Menus
 
@@ -29,12 +30,16 @@ def print_main_menu():
         "  2 -> alterar Role/Função\n"
         "  3 -> adicionar/remover heróis favoritos\n"
         "  4 -> atualizar winrate dos mapas\n"
+        "  5 -> Remover pontos dos mapas no TAB+1\n"
     )
 
 def print_small_menu():
+    opcao_5 = "Sem Mapas na pontuação" if WITH_MAP else "Com Mapas na pontuação"
+    
     print(
-        "\n[2] Role  [3] Favoritos  [4] Atualizar Winrate\n"
+        f"\n[2] Role  [3] Favoritos  [4] Atualizar Winrate  [5] {opcao_5}"
     )
+
 
 # Funções
 
@@ -44,18 +49,21 @@ def run_pipeline():
         print(">>> Capturando a tela...")
         screenshot.executar()
 
-        # Executa o OCR para detectar o mapa
-        success = compararMapa.executar()
-        
-        if success:
-            # Se detectou o mapa com sucesso, tenta retirar a winrate
-            try:
-                print("\n>>> Retirando a winrate do mapa detectado...")
-                retirarWinrate.executar()
-            except Exception as e:
-                print(f"Aviso: Não foi possível obter winrate do mapa: {e}")
+        if WITH_MAP:
+            # Executa o OCR para detectar o mapa
+            success = compararMapa.executar()
+            
+            if success:
+                # Se detectou o mapa com sucesso, tenta retirar a winrate
+                try:
+                    print("\n>>> Retirando a winrate do mapa detectado...")
+                    retirarWinrate.executar()
+                except Exception as e:
+                    print(f"Aviso: Não foi possível obter winrate do mapa: {e}")
+            else:
+                print("\nFalha ao detectar o mapa. Tente novamente")
         else:
-            print("\n❌ Falha ao detectar o mapa. Tente novamente com uma screenshot melhor.")
+            remove_map()
 
         print(">>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
@@ -196,6 +204,11 @@ def input_loop():   # função em loop
         elif cmd.endswith("4"):
             print('Separando as winrates atualizadas de todos os mapas')
             call_and_pause_main(run_site)
+        elif cmd.endswith("5"):
+            if WITH_MAP:
+                WITH_MAP = False
+            else:
+                WITH_MAP = True
         #elif cmd.endswith("6"):
             # remover mapa é imediato, não precisa 'pausar' longa execução,
             # mas vamos mantê-lo sincronizado com o fluxo de pausa/remissão
