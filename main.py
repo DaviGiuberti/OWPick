@@ -30,10 +30,11 @@ def print_main_menu():
         "  2 -> alterar Role/Função\n"
         "  3 -> adicionar/remover heróis favoritos\n"
         "  4 -> atualizar winrate dos mapas\n"
-        "  5 -> Remover pontos dos mapas no TAB+1\n"
+        "  5 -> remover pontos dos mapas no TAB+1\n"
     )
 
 def print_small_menu():
+    global WITH_MAP
     opcao_5 = "Sem Mapas na pontuação" if WITH_MAP else "Com Mapas na pontuação"
     
     print(
@@ -45,6 +46,7 @@ def print_small_menu():
 
 def run_pipeline():
     """ Executa o fluxo principal: Print -> Comparar -> Escolher Herói """
+    global WITH_MAP
     try:
         print(">>> Capturando a tela...")
         screenshot.executar()
@@ -62,8 +64,6 @@ def run_pipeline():
                     print(f"Aviso: Não foi possível obter winrate do mapa: {e}")
             else:
                 print("\nFalha ao detectar o mapa. Tente novamente")
-        else:
-            remove_map()
 
         print(">>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
@@ -183,6 +183,7 @@ def call_and_pause_main(func, *args, **kwargs):
         print_small_menu() # Volta menu
 
 def input_loop():   # função em loop
+    global WITH_MAP
     print_main_menu()
 
     while True:
@@ -207,6 +208,7 @@ def input_loop():   # função em loop
         elif cmd.endswith("5"):
             if WITH_MAP:
                 WITH_MAP = False
+                remove_map()
             else:
                 WITH_MAP = True
         #elif cmd.endswith("6"):
