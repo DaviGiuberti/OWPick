@@ -120,8 +120,8 @@ def executar():
 
             # MODIFICAÇÃO: Adicionar buffer vertical
             # Recortar área maior para permitir busca vertical
-            top_with_buffer = c['top'] - (VERTICAL_BUFFER * scale_y)
-            height_with_buffer = c['height'] + (2 * VERTICAL_BUFFER * scale_y)
+            top_with_buffer = c['top'] - (VERTICAL_BUFFER)
+            height_with_buffer = c['height'] + (2 * VERTICAL_BUFFER)
 
             left, top, right, bottom = scale_and_clamp(
                 left_base, top_with_buffer, c['width'], height_with_buffer, full_w, full_h
@@ -131,15 +131,26 @@ def executar():
             crop.save(out_path)
             saved_count += 1
 
-    # --- Recorte da pasta MAP (sem modificação) ---
+# --- Recorte da pasta MAP ---
     map_dir = os.path.join(outdir, "map")
     os.makedirs(map_dir, exist_ok=True)
-    
-    map_base = {'left': 983, 'top': 8, 'width': 174, 'height': 41}
-    m_left, m_top, m_right, m_bottom = scale_and_clamp(
-        map_base['left'], map_base['top'], map_base['width'], map_base['height'], full_w, full_h
-    )
-    
+
+    # Coordenadas do map por resolução base
+    if full_w >= 2560 and full_h >= 1440:
+        # 2k: coordenadas nativas, sem escalar
+        m_left, m_top, m_right, m_bottom = (
+            2032,
+            21,
+            2032 + 362,
+            21 + 82,
+        )
+    else:
+        # 720p (ou qualquer outra): usa escala normal
+        map_base = {'left': 983, 'top': 8, 'width': 174, 'height': 41}
+        m_left, m_top, m_right, m_bottom = scale_and_clamp(
+            map_base['left'], map_base['top'], map_base['width'], map_base['height'], full_w, full_h
+        )
+
     map_crop = full_img.crop((m_left, m_top, m_right, m_bottom))
     map_crop.save(os.path.join(map_dir, "map.png"))
 
