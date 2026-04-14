@@ -31,7 +31,7 @@ def executar():
     perks = [
         ('0perk', 207),
         ('1perk', 196),
-        ('2perk', 175),
+        ('2perk', 177),
     ]
 
     # --- Ler role a partir de Roles.txt (mesmo diretório do script) ---
