@@ -3,10 +3,10 @@ import mss.tools
 import keyboard
 
 monitor = {
-    "left": 415,
-    "top": 793,
-    "width": 80,
-    "height": 80
+    "left": 461,
+    "top": 252,
+    "width": 86,
+    "height": 86
 }
 
 contador = 1  # começa no print1

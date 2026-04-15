@@ -15,23 +15,23 @@ def executar():
     VERTICAL_BUFFER = 8  # pixels de margem acima e abaixo
 
     captures_template = [
-        {'top':137, 'width':41, 'height':41, 'name':'ally1.png'},
-        {'top':178, 'width':41, 'height':41, 'name':'ally2.png'},
-        {'top':220, 'width':41, 'height':41, 'name':'ally3.png'},
-        {'top':261, 'width':41, 'height':41, 'name':'ally4.png'},
-        {'top':303, 'width':41, 'height':41, 'name':'ally5.png'},
-        {'top':400, 'width':41, 'height':41, 'name':'enemy1.png'},
-        {'top':441, 'width':41, 'height':41, 'name':'enemy2.png'},
-        {'top':482, 'width':41, 'height':41, 'name':'enemy3.png'},
-        {'top':523, 'width':41, 'height':41, 'name':'enemy4.png'},
-        {'top':564, 'width':41, 'height':42, 'name':'enemy5.png'},
+        {'top':125, 'width':44, 'height':44, 'name':'ally1.png'},
+        {'top':169, 'width':44, 'height':44, 'name':'ally2.png'},
+        {'top':213, 'width':44, 'height':44, 'name':'ally3.png'},
+        {'top':257, 'width':44, 'height':44, 'name':'ally4.png'},
+        {'top':301, 'width':44, 'height':44, 'name':'ally5.png'},
+        {'top':396, 'width':44, 'height':44, 'name':'enemy1.png'},
+        {'top':440, 'width':44, 'height':44, 'name':'enemy2.png'},
+        {'top':484, 'width':44, 'height':44, 'name':'enemy3.png'},
+        {'top':528, 'width':44, 'height':44, 'name':'enemy4.png'},
+        {'top':572, 'width':44, 'height':44, 'name':'enemy5.png'},
     ]
 
     # pastas + valor de left correspondentes (valores para 1280x720)
     perks = [
-        ('0perk', 207),
-        ('1perk', 196),
-        ('2perk', 177),
+        ('0perk', 230),
+        ('1perk', 217),
+        ('2perk', 197),
     ]
 
     # --- Ler role a partir de Roles.txt (mesmo diretório do script) ---

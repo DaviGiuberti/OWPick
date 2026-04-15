@@ -79,7 +79,7 @@
  [],
  False,
  False,
- 1776066905,
+ 1776234694,
  [('run.exe',
    'C:\\Eden\\Repositorio Teste '
    'Eden\\Overwatch-Best-Picks\\.venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
