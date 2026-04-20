@@ -9,6 +9,7 @@ import comparar
 import favoriteHero
 import roles
 import screenshot
+import updater  # <-- ADICIONADO
 
 
 IN_MAIN = True # Não executa nada na main quando false
@@ -187,6 +188,13 @@ def input_loop():   # função em loop
 # Configuração Inicial
 
 if __name__ == "__main__":
+
+    # =========================================================
+    # VERIFICAÇÃO DE ATUALIZAÇÃO  –  ADICIONADO
+    # Roda antes de qualquer outra coisa.
+    # Só atualiza quando você mudar o version.json no GitHub.
+    updater.check_for_updates()
+    # =========================================================
 
     if not os.path.exists("Roles.txt"):
         run_role()

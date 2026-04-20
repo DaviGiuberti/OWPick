@@ -96,6 +96,7 @@ a = Analysis(
         # Inclui as planilhas de dados (sinergias e counters)
         ('heroes ally.xlsx', '.'),
         ('heroes enemy.xlsx', '.'),
+        ('version.txt', '.'),
         
         # ===== TESSERACT OCR COMPLETO =====
         # Inclui toda a pasta OCR com Tesseract
@@ -128,13 +129,11 @@ a = Analysis(
         # ===== SEUS MÓDULOS PYTHON =====
         'choose_ow_hero',
         'comparar',
-        'compararMapa',  # NOVO: Módulo de comparação de mapas via OCR
         'favoriteHero',
-        'map',
-        'retirarWinrate',
         'roles',
         'screenshot',
-        'site_scrapper',
+        'enemy_mult',
+        'updater', 
         
         # ===== DEPENDÊNCIAS DO PANDAS/OPENPYXL =====
         'openpyxl.cell',
