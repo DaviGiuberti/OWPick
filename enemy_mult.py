@@ -124,10 +124,8 @@ def executar(hero: str) -> float:
 
     # Remove o próprio hero da lista de aliados (caso apareça)
     allies = [a for a in allies_raw if a != hero]
-
-    print(f"Hero avaliado : {hero}")
-    print(f"Enemies ([:4]): {', '.join(enemies)}")
-    print(f"Allies  ([4:9] sem o hero): {', '.join(allies)}\n")
+    #print(f"Enemies ([:4]): {', '.join(enemies)}")
+    #print(f"Allies  ([4:9] sem o hero): {', '.join(allies)}\n")
 
     # Lê as planilhas
     try:
@@ -146,14 +144,15 @@ def executar(hero: str) -> float:
         enemies=enemies
     )
 
-    print(f"enemy_score : {score_data['enemy_score']:.2f}")
-    print(f"ally_score  : {score_data['ally_score']:.2f}")
-    print(f"total       : {score_data['total']:.2f}")
+    #print(f"enemy_score : {score_data['enemy_score']:.2f}")
+    #print(f"ally_score  : {score_data['ally_score']:.2f}")
+    #print(f"total       : {score_data['total']:.2f}")
 
     if score_data["total"] >= 0.0:
-        mult = score_data["total"] * 0.5
+        mult = (score_data["total"] / 4) + 1
     else:
         mult = 1 - 0.125 * abs(score_data["total"])
 
+    print(f"Heroi inimigo avaliado : {hero} -> Mult: {mult:.2f}")
 
     return mult
