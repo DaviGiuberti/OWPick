@@ -18,7 +18,7 @@ def resource_path(relative_path):
 
 templates_base_dir = Path(resource_path("heroes"))
 watch_dir = Path("print")
-perks_names = ["0perk", "1perk", "2perk", "bug"]
+perks_names = ["0perk", "1perk", "2perk"]
 output_filename = "lineup.txt"
 
 KNOWN_RESOLUTIONS = {
@@ -177,8 +177,8 @@ def find_best_match_sliding(img_arr: np.ndarray,
         img_resized = cv2.resize(img_arr, (crop_w, window_height),
                                  interpolation=cv2.INTER_NEAREST)
         name, score = _best_against_templates(img_resized, templates)
-        print(f"  [sliding] sem janela (img menor que template) -> "
-              f"match='{name}'  score={score:.4f}")
+       # print(f"  [sliding] sem janela (img menor que template) -> "
+             # f"match='{name}'  score={score:.4f}")
         return name, score
 
     best_name   = None
@@ -195,9 +195,9 @@ def find_best_match_sliding(img_arr: np.ndarray,
                 best_name   = name
                 best_offset = offset
 
-    print(f"  [sliding] match='{best_name}'  score={best_score:.4f}  "
-          f"offset={best_offset}  (janela {best_offset}:{best_offset + window_height}  "
-          f"de {img_h}px  |  {max_offset + 1} posições testadas)")
+    # print(f"  [sliding] match='{best_name}'  score={best_score:.4f}  "
+          #f"offset={best_offset}  (janela {best_offset}:{best_offset + window_height}  "
+          #f"de {img_h}px  |  {max_offset + 1} posições testadas)")
 
     return best_name, best_score
 
@@ -262,8 +262,8 @@ def executar():
     crop_size, window_height = compute_dims(scale)
     template_size = (crop_size[0], window_height)   # (crop_w, window_h)
 
-    print(f"crop_size={crop_size}  window_height={window_height}  "
-          f"template_size={template_size}")
+    #print(f"crop_size={crop_size}  window_height={window_height}  "
+          #f"template_size={template_size}")
 
     # 2. Escolher subpasta de templates pela resolução detectada nas prints
     resolution  = detect_screenshot_resolution(watch_dir, perks_names)
