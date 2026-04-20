@@ -2,6 +2,7 @@ import os
 import sys
 from typing import List, Dict, Tuple, Optional
 import pandas as pd
+from enemy_mult import executar
 
 # --------------------------
 # Utilitários
@@ -71,6 +72,39 @@ def read_heroes_enemy_data(filepath: str = "heroes enemy.xlsx") -> pd.DataFrame:
     return pd.read_excel(final_path, sheet_name=0, header=0)
 
 # --------------------------
+# Leitura do arquivo de prioridade e cálculo dos multiplicadores
+# --------------------------
+def read_priority_mode() -> bool:
+    """
+    Retorna True se 'prioritize.txt' existir e contiver exatamente '1'.
+    Caso contrário, retorna False.
+    """
+    prioritize_file = "prioritize.txt"
+    if not os.path.exists(prioritize_file):
+        return False
+    with open(prioritize_file, "r", encoding="utf-8") as f:
+        content = f.read().strip()
+    return content == "1"
+
+
+def build_enemy_multipliers(enemies: List[str], priority_mode: bool) -> Dict[str, float]:
+    """
+    Executa executar(enemy) uma única vez por enemy se priority_mode for True,
+    salvando o resultado em um dicionário. Caso contrário, todos os
+    multiplicadores são 1.
+    """
+    multipliers: Dict[str, float] = {}
+    for enemy in enemies:
+        if priority_mode:
+            try:
+                multipliers[enemy] = float(executar(enemy))
+            except Exception:
+                multipliers[enemy] = 1.0
+        else:
+            multipliers[enemy] = 1.0
+    return multipliers
+
+# --------------------------
 # Cálculo de pontuação por herói
 # --------------------------
 def calculate_hero_score(
@@ -78,12 +112,16 @@ def calculate_hero_score(
     ally_df: pd.DataFrame,
     enemy_df: pd.DataFrame,
     allies: List[str],
-    enemies: List[str]
+    enemies: List[str],
+    enemy_multipliers: Dict[str, float]
 ) -> Dict[str, float]:
     """
     Calcula a pontuação de um herói jogável incluindo apenas:
-      - enemy_score (matchups contra inimigos)
+      - enemy_score (matchups contra inimigos * multiplicador do enemy)
       - ally_score  (matchups com aliados * 0.65)
+
+    O multiplicador de cada enemy é 1 por padrão, ou o valor retornado por
+    executar(enemy) quando o modo de prioridade está ativo.
     """
     enemy_score = 0.0
     hero_row_enemy = enemy_df[enemy_df.iloc[:, 0] == hero_name]
@@ -93,7 +131,8 @@ def calculate_hero_score(
                 value = hero_row_enemy[enemy].values[0]
                 if pd.notna(value):
                     try:
-                        enemy_score += float(value)
+                        multiplier = enemy_multipliers.get(enemy, 1.0)
+                        enemy_score += float(value) * multiplier
                     except Exception:
                         pass
 
@@ -164,6 +203,12 @@ def run_hero_ranking():
         print(f"ERRO CRÍTICO: Não foi possível ler as planilhas de dados: {e}")
         return
 
+    # Verifica o modo de prioridade e calcula os multiplicadores uma única vez
+    priority_mode = read_priority_mode()
+    if priority_mode:
+        print("Modo de prioridade ATIVO: multiplicadores de enemy calculados via executar().\n")
+    enemy_multipliers = build_enemy_multipliers(enemies, priority_mode)
+
     rankings: List[Dict[str, float]] = []
     for hero in playable_heroes:
         score_data = calculate_hero_score(
@@ -171,7 +216,8 @@ def run_hero_ranking():
             ally_df,
             enemy_df,
             allies,
-            enemies
+            enemies,
+            enemy_multipliers
         )
         rankings.append(score_data)
 
