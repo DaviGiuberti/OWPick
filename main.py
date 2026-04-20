@@ -6,21 +6,12 @@ import os
 import msvcrt
 import choose_ow_hero
 import comparar
-import compararMapa
 import favoriteHero
-import map as map_script
-import retirarWinrate
 import roles
 import screenshot
-import site_scrapper
-
-
-MAP_FILE = "map.txt"
-WINRATE_FILE = "winrate.xlsx"
 
 
 IN_MAIN = True # Não executa nada na main quando false
-WITH_MAP = True
 
 # Menus
 
@@ -29,16 +20,11 @@ def print_main_menu():
         "Comandos disponíveis:\n"
         "  2 -> alterar Role/Função\n"
         "  3 -> adicionar/remover heróis favoritos\n"
-        "  4 -> atualizar winrate dos mapas\n"
-        "  5 -> remover pontos dos mapas no TAB+1\n"
     )
 
 def print_small_menu():
-    global WITH_MAP
-    opcao_5 = "Sem Mapas na pontuação" if WITH_MAP else "Com Mapas na pontuação"
-    
     print(
-        f"\n[2] Role  [3] Favoritos  [4] Atualizar Winrate  [5] {opcao_5}"
+        "\n[2] Role  [3] Favoritos"
     )
 
 
@@ -46,24 +32,9 @@ def print_small_menu():
 
 def run_pipeline():
     """ Executa o fluxo principal: Print -> Comparar -> Escolher Herói """
-    global WITH_MAP
     try:
         print(">>> Capturando a tela...")
         screenshot.executar()
-
-        if WITH_MAP:
-            # Executa o OCR para detectar o mapa
-            success = compararMapa.executar()
-            
-            if success:
-                # Se detectou o mapa com sucesso, tenta retirar a winrate
-                try:
-                    print("\n>>> Retirando a winrate do mapa detectado...")
-                    retirarWinrate.executar()
-                except Exception as e:
-                    print(f"Aviso: Não foi possível obter winrate do mapa: {e}")
-            else:
-                print("\nFalha ao detectar o mapa. Tente novamente")
 
         print(">>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
@@ -79,24 +50,6 @@ def run_pipeline():
         # Ao terminar, exibe o menu resumido (não altera estado IN_MAIN)
         print_small_menu()
 
-def run_site():
-    try:
-        print(">>> Baixando a winrate de cada herói por mapa")
-        site_scrapper.executar()
-    except Exception as e:
-        print(f"Erro no site_scrapper.py: {e}")
-
-def run_map():
-    try:
-        map_script.executar()
-    except Exception as e:
-        print(f"Erro no mapa: {e}")
-    try:
-        print(">>> Retirando a winrate do mapa...")
-        retirarWinrate.executar()
-    except RuntimeError as e:
-        print("")
-
 def run_role():
     try:
         print(">>> Qual a Role que está jogando?")
@@ -111,17 +64,6 @@ def run_favorite():
         favoriteHero.executar()
     except Exception as e:
         print(f"Erro em favoritos: {e}")
-
-def remove_map():
-    if os.path.exists(MAP_FILE) and os.path.exists(WINRATE_FILE):
-        try:
-            os.remove(MAP_FILE)
-            os.remove(WINRATE_FILE)
-            print("mapa removido com sucesso.")
-        except Exception as e:
-            print(f"Erro ao remover arquivo: {e}")
-    else:
-        print("Nenhum mapa encontrado para remover.")
 
 
 # Função para não travar o teclado nem o input enquanto outro comando roda.
@@ -183,7 +125,6 @@ def call_and_pause_main(func, *args, **kwargs):
         print_small_menu() # Volta menu
 
 def input_loop():   # função em loop
-    global WITH_MAP
     print_main_menu()
 
     while True:
@@ -198,23 +139,8 @@ def input_loop():   # função em loop
 
         if cmd.endswith("2"):
             call_and_pause_main(run_role)
-        #elif cmd.endswith("2"):
-        #    call_and_pause_main(run_map)
         elif cmd.endswith("3"):
             call_and_pause_main(run_favorite)
-        elif cmd.endswith("4"):
-            print('Separando as winrates atualizadas de todos os mapas')
-            call_and_pause_main(run_site)
-        elif cmd.endswith("5"):
-            if WITH_MAP:
-                WITH_MAP = False
-                remove_map()
-            else:
-                WITH_MAP = True
-        #elif cmd.endswith("6"):
-            # remover mapa é imediato, não precisa 'pausar' longa execução,
-            # mas vamos mantê-lo sincronizado com o fluxo de pausa/remissão
-            #all_and_pause_main(remove_map)
         elif cmd in ("exit", "quit"):
             print("Encerrando programa...")
             disable_pipeline_hotkey_hook()
@@ -234,12 +160,7 @@ if __name__ == "__main__":
     if not os.path.exists("Roles.txt"):
         run_role()
     if not os.path.exists("ALL.txt"):
-        if not os.path.isdir("winratemaps"):
-            print("\nApós escolher os personagens favoritos, o programa irá atualizar as winrates no site do Overwatch\n")
         run_favorite()
-    if not os.path.isdir("winratemaps"):
-        print('Baixando as winrates atualizadas de todos os mapas')
-        run_site()
 
     # Inicialmente estamos no menu principal
     IN_MAIN = True
