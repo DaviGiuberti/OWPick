@@ -12,6 +12,8 @@ Como funciona:
 Como lançar uma atualização (você, desenvolvedor):
   1. Incremente a versão em 'version.txt' antes de buildar (ex: "1.1.0" -> "1.2.0")
   2. Gere o novo executável com PyInstaller normalmente
+       (certifique-se de incluir o version.txt no build:
+        --add-data "version.txt;." no comando, ou via .spec)
   3. Compacte a pasta dist/OWPick inteira num .zip chamado 'OWPick_v1.2.0.zip'
   4. Suba o .zip em algum lugar acessível (ex: GitHub Releases)
   5. Atualize o 'version.json' no GitHub com a nova versão e a URL do .zip
@@ -33,26 +35,42 @@ import urllib.error
 # CONFIGURAÇÃO  –  Altere apenas estas duas constantes
 # =============================================================================
 
-# URL do version.json no seu repositório GitHub (raw)
-# Exemplo: https://raw.githubusercontent.com/SEU_USUARIO/SEU_REPO/main/version.json
 VERSION_JSON_URL = "https://raw.githubusercontent.com/DaviGiuberti/Overwatch-Best-Picks/main/version.json"
-
-# Nome do arquivo de versão local (fica na mesma pasta que OWPick.exe)
 VERSION_FILE = "version.txt"
 
 # =============================================================================
 
 
+def resource_path(relative_path: str) -> str:
+    """
+    Retorna o caminho absoluto para o arquivo, tanto em execução normal quanto
+    quando empacotado em .exe (PyInstaller).
+
+    ATENÇÃO: use esta função apenas para leitura de recursos somente-leitura
+    embutidos no pacote (ex: version.txt, ícones, assets).
+    Para arquivos que precisam persistir/ser escritos no disco (logs, configs),
+    use get_exe_dir() em vez desta função.
+    """
+    try:
+        base_path = sys._MEIPASS  # pasta temp onde o PyInstaller extrai os arquivos
+    except AttributeError:
+        base_path = os.path.abspath(".")
+    return os.path.join(base_path, relative_path)
+
+
 def get_exe_dir() -> str:
     """Retorna a pasta onde o OWPick.exe está rodando."""
-    if getattr(sys, "frozen", False):          # rodando como executável PyInstaller
+    if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
-    return os.path.dirname(os.path.abspath(__file__))  # rodando como script .py
+    return os.path.dirname(os.path.abspath(__file__))
 
 
 def get_local_version() -> str:
-    """Lê a versão local do version.txt. Retorna '0.0.0' se não encontrar."""
-    path = os.path.join(get_exe_dir(), VERSION_FILE)
+    """
+    Lê a versão embutida no pacote via resource_path (sys._MEIPASS quando frozen).
+    Retorna '0.0.0' se o arquivo não for encontrado.
+    """
+    path = resource_path(VERSION_FILE)
     try:
         with open(path, "r", encoding="utf-8") as f:
             return f.read().strip()
@@ -87,7 +105,7 @@ def _fetch_version_info() -> dict | None:
         with urllib.request.urlopen(req, timeout=6) as resp:
             return json.loads(resp.read().decode("utf-8"))
     except urllib.error.URLError:
-        return None          # sem internet ou URL errada
+        return None
     except Exception:
         return None
 
@@ -102,7 +120,7 @@ def _download_file(url: str, dest_path: str) -> bool:
                 print(f"\r    [{bar:<20}] {percent}%", end="", flush=True)
 
         urllib.request.urlretrieve(url, dest_path, reporthook=_reporthook)
-        print()  # quebra linha após progresso
+        print()
         return True
     except Exception as e:
         print(f"\n    Erro no download: {e}")
@@ -117,12 +135,12 @@ def _apply_update(download_url: str):
       3. Limpa temporários
       4. Relança o OWPick.exe
     """
-    exe_dir   = get_exe_dir()
-    exe_path  = sys.executable if getattr(sys, "frozen", False) else ""
-    tmp_dir   = tempfile.gettempdir()
-    zip_path  = os.path.join(tmp_dir, "owpick_update.zip")
-    ext_dir   = os.path.join(tmp_dir, "owpick_update_extracted")
-    bat_path  = os.path.join(tmp_dir, "owpick_update.bat")
+    exe_dir  = get_exe_dir()
+    exe_path = sys.executable if getattr(sys, "frozen", False) else ""
+    tmp_dir  = tempfile.gettempdir()
+    zip_path = os.path.join(tmp_dir, "owpick_update.zip")
+    ext_dir  = os.path.join(tmp_dir, "owpick_update_extracted")
+    bat_path = os.path.join(tmp_dir, "owpick_update.bat")
 
     # --- 1. Download ---
     print("    Baixando pacote de atualização...")
@@ -141,23 +159,15 @@ def _apply_update(download_url: str):
         print(f"    Erro ao extrair: {e}")
         return
 
-    # O .zip deve conter uma pasta 'OWPick' na raiz (mesma estrutura do dist/)
-    # Ex.: OWPick/OWPick.exe  e  OWPick/_internal/...
     source_dir = os.path.join(ext_dir, "OWPick")
     if not os.path.isdir(source_dir):
-        # Fallback: talvez o zip não tenha subpasta
         source_dir = ext_dir
 
     # --- 3. Cria .bat para substituição pós-saída ---
-    # Usamos robocopy pois ele substitui arquivos em uso com mais segurança.
-    # /E  = subpastas incluindo vazias
-    # /IS = substitui mesmo arquivos iguais
-    # /IT = substitui arquivos com atributos diferentes
-    # /IM = substitui arquivos com timestamp diferente
     bat_lines = [
         "@echo off",
         "echo [OWPick Updater] Aguardando encerramento do programa...",
-        f'timeout /t 3 /nobreak >nul',
+        "timeout /t 3 /nobreak >nul",
         "echo [OWPick Updater] Aplicando atualizacao...",
         f'robocopy "{source_dir}" "{exe_dir}" /E /IS /IT /IM /NFL /NDL /NJH /NJS >nul',
         "echo [OWPick Updater] Limpando temporarios...",
@@ -165,11 +175,11 @@ def _apply_update(download_url: str):
         f'del /F /Q "{zip_path}" 2>nul',
         "echo [OWPick Updater] Atualizacao concluida! Reiniciando...",
         f'start "" "{exe_path}"' if exe_path else "echo (Relancamento manual necessario)",
-        'del "%~f0"',   # o .bat se apaga ao final
+        'del "%~f0"',
     ]
 
     try:
-        with open(bat_path, "w", encoding="cp1252") as f:   # cp1252 para cmd.exe no Windows
+        with open(bat_path, "w", encoding="cp1252") as f:
             f.write("\r\n".join(bat_lines))
     except Exception as e:
         print(f"    Erro ao criar script de atualização: {e}")
