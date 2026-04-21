@@ -21,7 +21,7 @@ def print_main_menu():
         "Comandos disponíveis:\n"
         "  2 -> alterar Role/Função\n"
         "  3 -> adicionar/remover heróis favoritos\n"
-        "  4 -> (Teste)) adicionar/remover prioridade para os inimigos mais counters\n"
+        "  4 -> (teste) adicionar/remover prioridade para os inimigos mais counters\n"
     )
 
 def print_small_menu():
