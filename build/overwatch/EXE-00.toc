@@ -68,7 +68,7 @@
  [],
  False,
  False,
- 1777013662,
+ 1777014975,
  [('run.exe',
    'D:\\DAVI\\Projetos\\Overwatch-Best-Picks\\.venv\\Lib\\site-packages\\PyInstaller\\bootloader\\Windows-64bit-intel\\run.exe',
    'EXECUTABLE')],
