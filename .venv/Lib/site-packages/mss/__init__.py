@@ -1,19 +1,19 @@
+# This module is maintained by Mickaël Schoentgen <contact@tiger-222.fr>.
+#
+# You can always get the latest version of this module at:
+#     https://github.com/BoboTiG/python-mss
+# If that URL should fail, try contacting the author.
 """An ultra fast cross-platform multiple screenshots module in pure python
 using ctypes.
-
-This module is maintained by Mickaël Schoentgen <contact@tiger-222.fr>.
-
-You can always get the latest version of this module at:
-    https://github.com/BoboTiG/python-mss
-If that URL should fail, try contacting the author.
 """
 
+from mss.base import MSS, ScreenShot
 from mss.exception import ScreenShotError
 from mss.factory import mss
 
-__version__ = "10.1.0"
+__version__ = "10.2.0"
 __author__ = "Mickaël Schoentgen"
-__date__ = "2013-2025"
+__date__ = "2013-2026"
 __copyright__ = f"""
 Copyright (c) {__date__}, {__author__}
 
@@ -24,4 +24,4 @@ and that both that copyright notice and this permission notice appear
 in supporting documentation or portions thereof, including
 modifications, that you make.
 """
-__all__ = ("ScreenShotError", "mss")
+__all__ = ("MSS", "ScreenShot", "ScreenShotError", "mss")

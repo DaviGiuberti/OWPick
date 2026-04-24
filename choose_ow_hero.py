@@ -206,7 +206,7 @@ def run_hero_ranking():
     # Verifica o modo de prioridade e calcula os multiplicadores uma única vez
     priority_mode = read_priority_mode()
     if priority_mode:
-        print("Modo de prioridade ATIVO: multiplicadores de enemy calculados via executar().\n")
+        print("Modo de prioridade ATIVO: multiplicadores de enemy calculados.\n")
     enemy_multipliers = build_enemy_multipliers(enemies, priority_mode)
 
     rankings: List[Dict[str, float]] = []
