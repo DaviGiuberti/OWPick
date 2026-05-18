@@ -31,6 +31,7 @@ def executar():
     perks = [
         ('0perk', 230),
         ('1perk', 217),
+        ('bug', 212),
         ('2perk', 197),
     ]
 

@@ -18,7 +18,7 @@ def resource_path(relative_path):
 
 templates_base_dir = Path(resource_path("heroes"))
 watch_dir = Path("print")
-perks_names = ["0perk", "1perk", "2perk"]
+perks_names = ["0perk", "1perk", "2perk", "bug"]
 output_filename = "lineup.txt"
 
 KNOWN_RESOLUTIONS = {
