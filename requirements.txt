@@ -1,0 +1,15 @@
+# Runtime — usadas diretamente pelo código
+keyboard==0.13.5
+mss==10.2.0
+Pillow==12.2.0
+opencv-python==4.13.0.92
+numpy==2.4.4
+pandas==3.0.2
+openpyxl==3.1.5        # backend do pandas para ler .xlsx
+pytesseract==0.3.13    # embutido no spec (uso futuro)
+
+# Build — geração do executável
+pyinstaller==6.20.0
+
+# Utilitário de dev (resolucao.py)
+PyAutoGUI==0.9.54
