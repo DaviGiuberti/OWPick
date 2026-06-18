@@ -6,7 +6,7 @@ import os
 HEROES = {
     "DPS": [
         "Anran", "Ashe", "Bastion", "Cassidy", "Echo", "Emre", "Freja", "Genji", "Hanzo",
-        "Junkrat", "Mei", "Pharah", "Reaper", "Sierra", "Sojourn", "Soldier 76",
+        "Junkrat", "Mei", "Pharah", "Reaper", "Shion","Sierra", "Sojourn", "Soldier 76",
         "Sombra", "Symmetra", "Torbjörn", "Tracer", "Vendetta", "Venture",
         "Widowmaker"
     ],

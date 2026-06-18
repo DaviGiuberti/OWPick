@@ -1,0 +1,38 @@
+# Overwatch 2 – Mapas Competitivos (até Neon Junction)
+# Exclui: 2CP (Assault) e Clash
+
+# ── CONTROL ───────────────────────────────────────────
+Antarctic Peninsula
+Busan
+Ilios
+Lijiang Tower
+Nepal
+Oasis
+Samoa
+# ── ESCORT ────────────────────────────────────────────
+Circuit Royal
+Dorado
+Havana
+Junkertown
+Rialto
+Route 66
+Shambali Monastery
+Watchpoint: Gibraltar
+# ── HYBRID ────────────────────────────────────────────
+Blizzard World
+Eichenwalde
+Hollywood
+King's Row
+Midtown
+Neon Junction
+Numbani
+Paraíso
+# ── PUSH ──────────────────────────────────────────────
+Colosseo
+Esperança
+New Queen Street
+Runasapi
+# ── FLASHPOINT ────────────────────────────────────────
+New Junk City
+Suravasa
+
