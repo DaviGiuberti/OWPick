@@ -8,11 +8,11 @@ Ferramenta de recomendação automática de heróis para **Overwatch 2**. O prog
 
 - **Captura automática** da tela de seleção com hotkey global (`TAB+1`)
 - **Identificação de heróis** por comparação de imagem (template matching) — sem OCR, sem login
-- **Suporte a múltiplas resoluções**: 720p e 2K, com escalonamento automático
+- **Suporte a múltiplas resoluções**: 720p, 1080p e 2K, com interpolação/escalonamento automático
 - **Ranking de heróis** ordenado por pontuação combinada de counter + sinergia
 - **Gerenciamento de favoritos**: configure quais heróis você joga em cada função
 - **Seleção de Role**: DPS, Suporte, Tank ou Fila Aberta
-- **Modo Priorizar Counters** (experimental): amplifica a importância de inimigos difíceis
+- **Threat Weighting integrado**: amplifica automaticamente inimigos difíceis e fortes no mapa atual
 - **Auto-atualização**: verifica e aplica novas versões automaticamente via GitHub Releases
 
 ---
@@ -106,6 +106,8 @@ O programa irá:
 ```
 >>> Capturando a tela...
 >>> Comparando os prints com os heróis do Overwatch...
+>>> Identificando o mapa atual...
+[map.py] Mapa identificado: 'Route 66' (score=100.0)
 >>> Executando escolha de herói...
 
 Role selecionada: DPS
@@ -113,15 +115,24 @@ Heróis disponíveis: Tracer, Genji, Sojourn, Cassidy
 
 Aliados: Ana, Reinhardt, Mercy, Zenyatta
 Inimigos: Roadhog, Genji, Pharah, Moira, Orisa
+Mapa atual: Route 66
 
-=================================================================
-RANK   | HERO               |    ENEMY |     ALLY |    TOTAL
-=================================================================
-1      | Cassidy            |    12.50 |     5.85 |    18.35
-2      | Sojourn            |    10.20 |     7.15 |    17.35
-3      | Tracer             |     8.00 |     6.50 |    14.50
-4      | Genji              |     7.30 |     4.55 |    11.85
------------------------------------------------------------------
+--- Ranking de Ameaças Inimigas ---
+  1º Pharah              Ameaça: 1.85
+  2º Roadhog             Ameaça: 1.60
+  3º Genji               Ameaça: 1.40
+  4º Orisa               Ameaça: 1.20
+  5º Moira               Ameaça: 1.10
+------------------------------------
+
+==========================================================================
+RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
+==========================================================================
+1     | Cassidy            |    0.80 |    12.50 |   5.85 |    19.15
+2     | Sojourn            |    1.20 |    10.20 |   7.15 |    18.55
+3     | Tracer             |    0.50 |     8.00 |   6.50 |    15.00
+4     | Genji              |   -0.30 |     7.30 |   4.55 |    11.55
+--------------------------------------------------------------------------
 ```
 
 ### Comandos do Menu
@@ -130,7 +141,6 @@ RANK   | HERO               |    ENEMY |     ALLY |    TOTAL
 |---|---|
 | `2` + ENTER | Alterar Role/Função |
 | `3` + ENTER | Adicionar/remover heróis favoritos |
-| `4` + ENTER | Ativar/desativar modo "Priorizar Counters" |
 | `exit` + ENTER | Encerrar o programa |
 
 ---
@@ -139,10 +149,10 @@ RANK   | HERO               |    ENEMY |     ALLY |    TOTAL
 
 A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.1.0`
+**Versão atual**: `1.1.1`
 
 Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.1.0.zip`
+1. Baixe o arquivo `OWPick_v1.1.1.zip`
 2. Extraia em qualquer pasta
 3. Execute `OWPick.exe`
 4. Nenhuma instalação adicional é necessária — o Tesseract OCR já está embutido
@@ -178,14 +188,18 @@ O sistema opera em um **pipeline de 3 etapas** acionado por hotkey:
    │
    ▼
 screenshot.py          ← Captura a tela e recorta os retratos dos heróis
-   │  print/{perk}/ally1..5.png, enemy1..5.png
+   │  print/{perk}/ally1..5.png, enemy1..5.png, print/full.png
    ▼
 comparar.py            ← Template matching com sliding window (MAE)
    │  lineup.txt (4 aliados + 5 inimigos)
    ▼
-choose_ow_hero.py      ← Calcula score de cada herói favorito e exibe ranking
+map.py                 ← OCR + fuzzy match → current_map.txt
+   │  current_map.txt (nome do mapa ou "UNKNOWN")
+   ▼
+choose_ow_hero.py      ← MetaStrength + Threat Weighting + Sinergia → ranking
         │
-        └── enemy_mult.py  (opcional, quando "Priorizar Counters" ativo)
+        ├── [Ranking de Ameaças Inimigas]  (exibido no terminal)
+        └── [Ranking de Heróis Recomendados]
 ```
 
 O menu e os hotkeys rodam em **threads separadas**, permitindo que o pipeline seja executado sem bloquear a interface.

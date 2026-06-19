@@ -47,6 +47,11 @@ def _configure_tesseract() -> bool:
         return False
     if os.path.exists(_TESSERACT_EXE):
         pytesseract.pytesseract.tesseract_cmd = _TESSERACT_EXE
+    # Aponta o Tesseract para a pasta tessdata embutida via variável de
+    # ambiente (TESSDATA_PREFIX). Isso evita passar --tessdata-dir no config,
+    # que corrompe caminhos com espaços/aspas e quebra o carregamento do idioma.
+    if os.path.isdir(_TESSDATA_DIR):
+        os.environ["TESSDATA_PREFIX"] = _TESSDATA_DIR
     return True
 
 
@@ -72,7 +77,7 @@ def extract_text_from_region(img_path: str, region: Tuple[int, int, int, int]) -
         img = ImageOps.autocontrast(img)
         w, h = img.size
         img = img.resize((max(1, w * 2), max(1, h * 2)), Image.LANCZOS)
-        config = f'--oem 3 --psm 7 --tessdata-dir "{_TESSDATA_DIR}"'
+        config = "--oem 3 --psm 7"
         return pytesseract.image_to_string(img, lang="eng", config=config).strip()
     except Exception as e:  # noqa: BLE001
         print(f"[map.py] AVISO: falha no OCR: {e}")

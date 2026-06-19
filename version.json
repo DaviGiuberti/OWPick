@@ -1,5 +1,5 @@
 {
-    "version": "1.1.0",
-    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.0/OWPick_v1.1.0.zip",
-    "notas": "MetaStrength por mapa, threat weighting, identificacao automatica de mapa (map.py/OCR), utils.py como fonte unica de herois e mapas, suporte a 1080p por escala, config.json, correcao de typos e adicao de Shion."
+    "version": "1.1.1",
+    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.1/OWPick_v1.1.1.zip",
+    "notas": "Threat weighting agora comportamento padrao (sempre ativo, sem opcao de ligar/desligar). Threat Weighting considera MetaStrength do inimigo no mapa atual (formula: w_e = max(0.1, 1 + lambda*counters + mu*meta_mapa)). Exibicao de ranking de ameacas inimigas no terminal antes da recomendacao. Remocao do menu opcao 4 e da funcao toggle_prioritize_file. Versao anterior (v1.1.0): MetaStrength por mapa, suporte a 1080p, utils.py como fonte unica, correcao OCR tessdata, normalizacao D.Va/Soldier76, cache de planilhas."
 }

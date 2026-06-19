@@ -22,12 +22,11 @@ def print_main_menu():
         "Comandos disponíveis:\n"
         "  2 -> alterar Role/Função\n"
         "  3 -> adicionar/remover heróis favoritos\n"
-        "  4 -> (teste) adicionar/remover prioridade para os inimigos mais counters\n"
     )
 
 def print_small_menu():
     print(
-        "\n[2] Role  [3] Favoritos  [4] (Teste) Priorizar Counters\n"
+        "\n[2] Role  [3] Favoritos\n"
     )
 
 
@@ -73,35 +72,6 @@ def run_favorite():
         favoriteHero.executar()
     except Exception as e:
         print(f"Erro em favoritos: {e}")
-
-def toggle_prioritize_file():
-    filename = "prioritize.txt"
-
-    # Leitura
-    try:
-        with open(filename, "r", encoding="utf-8") as file:
-            content = file.read().strip()
-    except FileNotFoundError:
-        content = None
-
-    # Define novo valor
-    if content == "0":
-        new_content = "1"
-        msg = "Prioridade para counters ativada"
-    elif content is None:
-        new_content = "1"
-        msg = "Prioridade para counters ativada (arquivo criado)"
-    else:
-        new_content = "0"
-        msg = "Prioridade para counters desativada"
-
-    # Escrita
-    try:
-        with open(filename, "w", encoding="utf-8") as file:
-            file.write(new_content)
-        print(msg)
-    except Exception as e:
-        print(f"Erro ao escrever no arquivo: {e}")
 
 # Função para não travar o teclado nem o input enquanto outro comando roda.
 def spawn_in_thread(func, *args, **kwargs):
@@ -178,8 +148,6 @@ def input_loop():   # função em loop
             call_and_pause_main(run_role)
         elif cmd.endswith("3"):
             call_and_pause_main(run_favorite)
-        elif cmd.endswith("4"):
-            call_and_pause_main(toggle_prioritize_file)
         elif cmd in ("exit", "quit"):
             print("Encerrando programa...")
             disable_pipeline_hotkey_hook()

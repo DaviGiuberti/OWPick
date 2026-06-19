@@ -1,5 +1,5 @@
 """
-choose_ow_hero.py — Scoring e ranking de heróis (modelo OWPick v2).
+choose_ow_hero.py — Scoring e ranking de heróis (modelo OWPick v1.1.1).
 
 Score final de cada herói candidato h:
 
@@ -8,9 +8,10 @@ Score final de cada herói candidato h:
 onde:
     m_scaled(h, k) = MetaStrength do herói no mapa atual k (z-score do winrate
                      ajustado por shrinkage, escalado por α)
-    T_ctr(h)       = Σ_e  w_e · C(h, e)              (counter com threat weighting)
-    w_e            = max(0.1, 1 + λ · Σ_a C(e, a))   (peso de ameaça do inimigo e)
-    T_syn(h)       = Σ_a  Y(h, a) · β_syn            (sinergia, diagonal ignorada)
+    T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
+    w_e            = max(0.1, 1 + λ · Σ_a C(e,a) + μ · m(e,k)) (peso de ameaça do inimigo e,
+                     inclui desempenho do inimigo no mapa atual)
+    T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
 
 Heróis já presentes no time aliado são EXCLUÍDOS do ranking (regra rígida,
 substitui o antigo hack do -11 na diagonal de sinergia).
@@ -38,7 +39,8 @@ KAPPA_BASE = 100.0   # pseudo-contagem base do shrinkage
 EPS = 0.001          # mínimo para evitar divisão por zero na pickrate
 MMAX = 3.0           # limite (clamp) do z-score em desvios-padrão
 ALPHA = 1.0          # escala do MetaStrength
-LAMBDA = 0.25        # intensidade do threat weighting
+LAMBDA = 0.25        # intensidade do threat weighting (componente counter)
+MU_THREAT = 0.3      # intensidade do threat weighting (componente MetaStrength do inimigo no mapa)
 BETA_META = 1.0      # peso do MetaStrength no score
 BETA_CTR = 1.0       # peso do counter term no score
 BETA_SYN = 0.65      # peso da sinergia (mantido do modelo anterior)
@@ -182,23 +184,51 @@ def load_meta_strength(mapa_atual: str,
 def compute_threat_weights(enemies: List[str],
                            enemy_matrix: Dict[str, Dict[str, float]],
                            allies: List[str],
+                           meta_strength: Optional[Dict[str, float]] = None,
                            lam: float = LAMBDA,
+                           mu: float = MU_THREAT,
                            w_min: float = W_MIN) -> Dict[str, float]:
     """
-    Para cada inimigo e: w_e = max(w_min, 1 + λ · Σ_a C(e, a)).
-    C(e, a) = quanto o inimigo e countera o aliado a.
+    Para cada inimigo e:
+        w_e = max(w_min, 1 + λ · Σ_a C(e,a) + μ · m(e,k))
+
+    C(e,a)  = quanto o inimigo e countera o aliado a.
+    m(e,k)  = MetaStrength do inimigo e no mapa atual k (0.0 se desconhecido).
+    λ       = intensidade do componente counter.
+    μ       = intensidade do componente mapa (força do inimigo no mapa atual).
+
     Retorna {nome_normalizado_do_inimigo: w_e}.
     """
     allies_norm = [normalize_hero_name(a) for a in allies if a]
+    meta = meta_strength or {}
     weights: Dict[str, float] = {}
     for enemy in enemies:
         if not enemy:
             continue
         en = normalize_hero_name(enemy)
         row = enemy_matrix.get(en, {})
-        threat_sum = sum(row.get(a, 0.0) for a in allies_norm)
-        weights[en] = max(w_min, 1.0 + lam * threat_sum)
+        counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
+        map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
+        weights[en] = max(w_min, 1.0 + lam * counter_sum + mu * map_bonus)
     return weights
+
+
+def print_threat_ranking(enemies: List[str],
+                         threat_weights: Dict[str, float]) -> None:
+    """Exibe no terminal o ranking de ameaça dos heróis inimigos (maior → menor)."""
+    if not enemies:
+        return
+    sorted_enemies = sorted(
+        [(e, threat_weights.get(normalize_hero_name(e), W_MIN)) for e in enemies if e],
+        key=lambda x: x[1],
+        reverse=True,
+    )
+    print("\n--- Ranking de Ameaças Inimigas ---")
+    ordinals = ["1º", "2º", "3º", "4º", "5º"]
+    for i, (name, score) in enumerate(sorted_enemies):
+        ord_str = ordinals[i] if i < len(ordinals) else f"{i+1}º"
+        print(f"  {ord_str} {name:<18} Ameaça: {score:.2f}")
+    print("-" * 36)
 
 
 # ---------------------------------------------------------------------------
@@ -255,9 +285,9 @@ def calculate_hero_score(hero_name: str,
 def print_ranking(rankings: List[Dict[str, float]]) -> None:
     sorted_rankings = sorted(rankings, key=lambda x: x["total"], reverse=True)
 
-    print("=" * 74)
-    print(f"{'RANK':<5} | {'HERO':<18} | {'META':>7} | {'CTR':>8} | {'SYN':>7} | {'TOTAL':>8}")
-    print("=" * 74)
+    print("=" * 86)
+    print(f"{'RANK':<5} | {'HERO':<18} | {'MAP META':>7} | {'COUNTER':>8} | {'SYNERGY':>7} | {'TOTAL':>8}")
+    print("=" * 86)
     for rank, data in enumerate(sorted_rankings, start=1):
         print(
             f"{rank:<5} | "
@@ -267,7 +297,7 @@ def print_ranking(rankings: List[Dict[str, float]]) -> None:
             f"{data['synergy_score']:>7.2f} | "
             f"{data['total']:>8.2f}"
         )
-    print("-" * 74)
+    print("-" * 86)
 
 
 # ---------------------------------------------------------------------------
@@ -306,8 +336,11 @@ def run_hero_ranking():
     if not meta_strength:
         print("MetaStrength indisponível para este mapa — termo tratado como 0.\n")
 
-    # Threat weighting por inimigo (substitui o multiplicador (total/4)+1).
-    threat_weights = compute_threat_weights(enemies, enemy_matrix, allies)
+    # Threat weighting por inimigo — incorpora counters E desempenho no mapa atual.
+    threat_weights = compute_threat_weights(enemies, enemy_matrix, allies, meta_strength)
+
+    # Exibe o ranking de ameaças antes da recomendação.
+    print_threat_ranking(enemies, threat_weights)
 
     # Heróis já no time aliado são excluídos do ranking (regra rígida).
     allies_norm = {normalize_hero_name(a) for a in allies if a}
