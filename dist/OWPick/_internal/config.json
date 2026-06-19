@@ -1,0 +1,10 @@
+{
+  "2k": {
+    "map_region": { "left": 2104, "top": 38, "width": 269, "height": 50 },
+    "base_resolution": { "width": 2560, "height": 1440 }
+  },
+  "720p": {
+    "map_region": { "left": 890, "top": 17, "width": 113, "height": 21 },
+    "base_resolution": { "width": 1280, "height": 720 }
+  }
+}
