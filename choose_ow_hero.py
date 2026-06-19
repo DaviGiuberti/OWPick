@@ -1,26 +1,53 @@
+"""
+choose_ow_hero.py — Scoring e ranking de heróis (modelo OWPick v2).
+
+Score final de cada herói candidato h:
+
+    S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
+
+onde:
+    m_scaled(h, k) = MetaStrength do herói no mapa atual k (z-score do winrate
+                     ajustado por shrinkage, escalado por α)
+    T_ctr(h)       = Σ_e  w_e · C(h, e)              (counter com threat weighting)
+    w_e            = max(0.1, 1 + λ · Σ_a C(e, a))   (peso de ameaça do inimigo e)
+    T_syn(h)       = Σ_a  Y(h, a) · β_syn            (sinergia, diagonal ignorada)
+
+Heróis já presentes no time aliado são EXCLUÍDOS do ranking (regra rígida,
+substitui o antigo hack do -11 na diagonal de sinergia).
+
+As planilhas são lidas uma única vez e convertidas em dicionários com chaves
+normalizadas (utils.normalize_hero_name), o que torna o scoring tolerante às
+diferenças de nomenclatura entre planilhas/templates ("DVa", "Soldier 76") e
+heroes_roles.json/stats_inputs.csv ("D.Va", "Soldier: 76").
+"""
+
 import os
-import sys
-from typing import List, Dict, Tuple, Optional
+from typing import Dict, List, Optional, Tuple
+
+import numpy as np
 import pandas as pd
-from enemy_mult import executar
 
-# --------------------------
-# Utilitários
-# --------------------------
-def resource_path(relative_path: str) -> str:
-    """
-    Retorna o caminho absoluto para o arquivo, tanto em execução normal quanto
-    quando empacotado em .exe (PyInstaller).
-    """
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+import utils
+from utils import resource_path, normalize_hero_name  # noqa: F401 (compat)
 
-# --------------------------
-# Leitura de arquivos de entrada
-# --------------------------
+
+# ---------------------------------------------------------------------------
+# Parâmetros do modelo (ver §3.5 da especificação)
+# ---------------------------------------------------------------------------
+KAPPA_BASE = 100.0   # pseudo-contagem base do shrinkage
+EPS = 0.001          # mínimo para evitar divisão por zero na pickrate
+MMAX = 3.0           # limite (clamp) do z-score em desvios-padrão
+ALPHA = 1.0          # escala do MetaStrength
+LAMBDA = 0.25        # intensidade do threat weighting
+BETA_META = 1.0      # peso do MetaStrength no score
+BETA_CTR = 1.0       # peso do counter term no score
+BETA_SYN = 0.65      # peso da sinergia (mantido do modelo anterior)
+W_MIN = 0.1          # piso do peso de ameaça (w_e não fica negativo)
+
+
+# ---------------------------------------------------------------------------
+# Leitura de arquivos de entrada (gerados em runtime, no diretório de trabalho)
+# ---------------------------------------------------------------------------
 def read_role() -> Optional[str]:
     role_file = "Roles.txt"
     if not os.path.exists(role_file):
@@ -53,132 +80,199 @@ def read_playable_heroes(role: str) -> List[str]:
 
 
 def read_lineup(filepath: str = "lineup.txt") -> Tuple[List[str], List[str]]:
+    """Lê lineup.txt: linhas [:4] = aliados; linhas [4:9] = inimigos."""
     if not os.path.exists(filepath):
         raise FileNotFoundError(filepath)
     with open(filepath, "r", encoding="utf-8") as f:
         lines = [line.strip() for line in f.readlines()]
-    allies = lines[:4]
-    enemies = lines[4:9]
+    allies = [a for a in lines[:4] if a]
+    enemies = [e for e in lines[4:9] if e]
     return allies, enemies
 
 
-def read_heroes_ally_data(filepath: str = "heroes ally.xlsx") -> pd.DataFrame:
-    final_path = resource_path(filepath)
-    return pd.read_excel(final_path, sheet_name=0, header=0)
+def read_current_map(filepath: str = "current_map.txt") -> str:
+    """Lê current_map.txt (gerado por map.py). 'UNKNOWN' se ausente/vazio."""
+    if not os.path.exists(filepath):
+        return "UNKNOWN"
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            mapa = f.read().strip()
+        return mapa or "UNKNOWN"
+    except Exception:  # noqa: BLE001
+        return "UNKNOWN"
 
 
-def read_heroes_enemy_data(filepath: str = "heroes enemy.xlsx") -> pd.DataFrame:
-    final_path = resource_path(filepath)
-    return pd.read_excel(final_path, sheet_name=0, header=0)
-
-# --------------------------
-# Leitura do arquivo de prioridade e cálculo dos multiplicadores
-# --------------------------
-def read_priority_mode() -> bool:
+# ---------------------------------------------------------------------------
+# MetaStrength m(h, k) — força do herói no mapa atual
+# ---------------------------------------------------------------------------
+def load_meta_strength(mapa_atual: str,
+                       kappa_base: float = KAPPA_BASE,
+                       eps: float = EPS,
+                       mmax: float = MMAX,
+                       alpha: float = ALPHA) -> Dict[str, float]:
     """
-    Retorna True se 'prioritize.txt' existir e contiver exatamente '1'.
-    Caso contrário, retorna False.
+    Lê stats_inputs.csv e retorna {nome_normalizado: MetaStrength} para o mapa
+    atual. Heróis sem dados (ou mapa desconhecido) resultam em ausência da
+    chave -> MetaStrength tratado como 0.0 no scoring.
+
+    Adaptação importante: o stats_inputs.csv gerado por coletar_stats.py NÃO
+    possui a coluna 'games' prevista na especificação, e winrate/pickrate estão
+    em percentual. Usa-se a pickrate (em fração) como proxy de amostra ('g') e o
+    κ_eff por pickrate relativa conforme §3.2. O z-score final é invariante à
+    unidade (percentual vs. fração), pois normaliza pelo desvio-padrão do mapa.
     """
-    prioritize_file = "prioritize.txt"
-    if not os.path.exists(prioritize_file):
-        return False
-    with open(prioritize_file, "r", encoding="utf-8") as f:
-        content = f.read().strip()
-    return content == "1"
+    result: Dict[str, float] = {}
+    if not mapa_atual or mapa_atual == "UNKNOWN":
+        return result
+
+    try:
+        df = utils.read_stats_inputs()  # cacheado (lido uma única vez)
+    except Exception as e:  # noqa: BLE001
+        print(f"[meta] AVISO: não foi possível ler stats_inputs.csv: {e}")
+        return result
+
+    df_map = df[df["map"] == mapa_atual].copy()
+    if df_map.empty:
+        # Fallback: comparação tolerante a acentuação/capitalização.
+        target = normalize_hero_name(mapa_atual)
+        mask = df["map"].apply(lambda m: normalize_hero_name(str(m)) == target)
+        df_map = df[mask].copy()
+    if df_map.empty:
+        print(f"[meta] Mapa '{mapa_atual}' sem dados em stats_inputs.csv.")
+        return result
+
+    df_map["winrate"] = pd.to_numeric(df_map["winrate"], errors="coerce")
+    df_map["pickrate"] = pd.to_numeric(df_map["pickrate"], errors="coerce")
+    valid = df_map.dropna(subset=["winrate"])
+    if valid.empty:
+        return result
+
+    wr_bar = float(valid["winrate"].mean())
+    pr_neutral = utils.get_role_neutral_pickrates()
+
+    wr_adj: Dict[str, float] = {}
+    for _, row in valid.iterrows():
+        hero = row["hero"]
+        role = row.get("role")
+        wr = float(row["winrate"])
+        pr_pct = row["pickrate"]
+        pr = (float(pr_pct) / 100.0) if pd.notna(pr_pct) else eps
+        pr = max(pr, eps)
+
+        prn = pr_neutral.get(role)
+        kappa = kappa_base * (prn / pr) if prn is not None else kappa_base
+
+        g = pr  # pickrate (fração) como proxy de amostra (sem coluna 'games')
+        wr_adj[normalize_hero_name(hero)] = (g * wr + kappa * wr_bar) / (g + kappa)
+
+    values = np.array(list(wr_adj.values()), dtype=float)
+    sigma = float(values.std())
+    if sigma == 0.0 or np.isnan(sigma):
+        return {hero: 0.0 for hero in wr_adj}
+
+    for hero, adj in wr_adj.items():
+        z = (adj - wr_bar) / sigma
+        result[hero] = alpha * float(np.clip(z, -mmax, mmax))
+    return result
 
 
-def build_enemy_multipliers(enemies: List[str], priority_mode: bool) -> Dict[str, float]:
+# ---------------------------------------------------------------------------
+# Threat weighting — peso de ameaça de cada inimigo
+# ---------------------------------------------------------------------------
+def compute_threat_weights(enemies: List[str],
+                           enemy_matrix: Dict[str, Dict[str, float]],
+                           allies: List[str],
+                           lam: float = LAMBDA,
+                           w_min: float = W_MIN) -> Dict[str, float]:
     """
-    Executa executar(enemy) uma única vez por enemy se priority_mode for True,
-    salvando o resultado em um dicionário. Caso contrário, todos os
-    multiplicadores são 1.
+    Para cada inimigo e: w_e = max(w_min, 1 + λ · Σ_a C(e, a)).
+    C(e, a) = quanto o inimigo e countera o aliado a.
+    Retorna {nome_normalizado_do_inimigo: w_e}.
     """
-    multipliers: Dict[str, float] = {}
+    allies_norm = [normalize_hero_name(a) for a in allies if a]
+    weights: Dict[str, float] = {}
     for enemy in enemies:
-        if priority_mode:
-            try:
-                multipliers[enemy] = float(executar(enemy))
-            except Exception:
-                multipliers[enemy] = 1.0
-        else:
-            multipliers[enemy] = 1.0
-    return multipliers
+        if not enemy:
+            continue
+        en = normalize_hero_name(enemy)
+        row = enemy_matrix.get(en, {})
+        threat_sum = sum(row.get(a, 0.0) for a in allies_norm)
+        weights[en] = max(w_min, 1.0 + lam * threat_sum)
+    return weights
 
-# --------------------------
-# Cálculo de pontuação por herói
-# --------------------------
-def calculate_hero_score(
-    hero_name: str,
-    ally_df: pd.DataFrame,
-    enemy_df: pd.DataFrame,
-    allies: List[str],
-    enemies: List[str],
-    enemy_multipliers: Dict[str, float]
-) -> Dict[str, float]:
-    """
-    Calcula a pontuação de um herói jogável incluindo apenas:
-      - enemy_score (matchups contra inimigos * multiplicador do enemy)
-      - ally_score  (matchups com aliados * 0.65)
 
-    O multiplicador de cada enemy é 1 por padrão, ou o valor retornado por
-    executar(enemy) quando o modo de prioridade está ativo.
-    """
-    enemy_score = 0.0
-    hero_row_enemy = enemy_df[enemy_df.iloc[:, 0] == hero_name]
-    if not hero_row_enemy.empty:
-        for enemy in enemies:
-            if enemy in enemy_df.columns:
-                value = hero_row_enemy[enemy].values[0]
-                if pd.notna(value):
-                    try:
-                        multiplier = enemy_multipliers.get(enemy, 1.0)
-                        enemy_score += float(value) * multiplier
-                    except Exception:
-                        pass
+# ---------------------------------------------------------------------------
+# Score de um herói candidato
+# ---------------------------------------------------------------------------
+def calculate_hero_score(hero_name: str,
+                         ally_matrix: Dict[str, Dict[str, float]],
+                         enemy_matrix: Dict[str, Dict[str, float]],
+                         allies: List[str],
+                         enemies: List[str],
+                         threat_weights: Dict[str, float],
+                         meta_strength: Dict[str, float]) -> Dict[str, float]:
+    hn = normalize_hero_name(hero_name)
 
-    ally_score = 0.0
-    hero_row_ally = ally_df[ally_df.iloc[:, 0] == hero_name]
-    if not hero_row_ally.empty:
-        for ally in allies:
-            if ally in ally_df.columns:
-                value = hero_row_ally[ally].values[0]
-                if pd.notna(value):
-                    try:
-                        ally_score += float(value) * 0.65
-                    except Exception:
-                        pass
+    # --- counter term (com threat weighting) ---
+    enemy_row = enemy_matrix.get(hn, {})
+    counter_score = 0.0
+    for enemy in enemies:
+        if not enemy:
+            continue
+        en = normalize_hero_name(enemy)
+        if en in enemy_row:
+            counter_score += threat_weights.get(en, 1.0) * enemy_row[en]
 
-    total_score = enemy_score + ally_score
+    # --- synergy term (diagonal ignorada) ---
+    ally_row = ally_matrix.get(hn, {})
+    synergy_score = 0.0
+    for ally in allies:
+        if not ally:
+            continue
+        an = normalize_hero_name(ally)
+        if an == hn:
+            continue  # diagonal: remove o antigo hack do -11
+        if an in ally_row:
+            synergy_score += ally_row[an] * BETA_SYN
+
+    # --- meta term ---
+    meta_score = meta_strength.get(hn, 0.0)
+
+    total = BETA_META * meta_score + BETA_CTR * counter_score + synergy_score
 
     return {
         "hero": hero_name,
-        "enemy_score": enemy_score,
-        "ally_score": ally_score,
-        "total": total_score
+        "meta_score": meta_score,
+        "counter_score": counter_score,
+        "synergy_score": synergy_score,
+        "total": total,
     }
 
-# --------------------------
+
+# ---------------------------------------------------------------------------
 # Impressão do ranking
-# --------------------------
+# ---------------------------------------------------------------------------
 def print_ranking(rankings: List[Dict[str, float]]) -> None:
     sorted_rankings = sorted(rankings, key=lambda x: x["total"], reverse=True)
 
-    print("=" * 65)
-    print(f"{'RANK':<6} | {'HERO':<18} | {'ENEMY':>8} | {'ALLY':>8} | {'TOTAL':>8}")
-    print("=" * 65)
-    for rank, hero_data in enumerate(sorted_rankings, start=1):
+    print("=" * 74)
+    print(f"{'RANK':<5} | {'HERO':<18} | {'META':>7} | {'CTR':>8} | {'SYN':>7} | {'TOTAL':>8}")
+    print("=" * 74)
+    for rank, data in enumerate(sorted_rankings, start=1):
         print(
-            f"{rank:<6} | "
-            f"{hero_data['hero']:<18} | "
-            f"{hero_data['enemy_score']:>8.2f} | "
-            f"{hero_data['ally_score']:>8.2f} | "
-            f"{hero_data['total']:>8.2f}"
+            f"{rank:<5} | "
+            f"{data['hero']:<18} | "
+            f"{data['meta_score']:>7.2f} | "
+            f"{data['counter_score']:>8.2f} | "
+            f"{data['synergy_score']:>7.2f} | "
+            f"{data['total']:>8.2f}"
         )
-    print("-" * 65)
+    print("-" * 74)
 
-# --------------------------
+
+# ---------------------------------------------------------------------------
 # Fluxo principal
-# --------------------------
+# ---------------------------------------------------------------------------
 def run_hero_ranking():
     role = read_role()
     if role is None:
@@ -191,35 +285,52 @@ def run_hero_ranking():
     try:
         allies, enemies = read_lineup()
         print(f"Aliados: {', '.join(allies)}")
-        print(f"Inimigos: {', '.join(enemies)}\n")
+        print(f"Inimigos: {', '.join(enemies)}")
     except FileNotFoundError:
         print("Arquivo 'lineup.txt' não encontrado. Rode a análise de imagem (TAB+1) primeiro.")
         return
 
+    mapa_atual = read_current_map()
+    print(f"Mapa atual: {mapa_atual}\n")
+
     try:
-        ally_df = read_heroes_ally_data()
-        enemy_df = read_heroes_enemy_data()
+        # Matrizes normalizadas, lidas/convertidas uma única vez (cache em utils).
+        ally_matrix = utils.get_ally_matrix()
+        enemy_matrix = utils.get_enemy_matrix()
     except FileNotFoundError as e:
         print(f"ERRO CRÍTICO: Não foi possível ler as planilhas de dados: {e}")
         return
 
-    # Verifica o modo de prioridade e calcula os multiplicadores uma única vez
-    priority_mode = read_priority_mode()
-    if priority_mode:
-        print("Modo de prioridade ATIVO: multiplicadores de enemy calculados.\n")
-    enemy_multipliers = build_enemy_multipliers(enemies, priority_mode)
+    # MetaStrength do mapa atual (vazio se UNKNOWN ou sem dados).
+    meta_strength = load_meta_strength(mapa_atual)
+    if not meta_strength:
+        print("MetaStrength indisponível para este mapa — termo tratado como 0.\n")
+
+    # Threat weighting por inimigo (substitui o multiplicador (total/4)+1).
+    threat_weights = compute_threat_weights(enemies, enemy_matrix, allies)
+
+    # Heróis já no time aliado são excluídos do ranking (regra rígida).
+    allies_norm = {normalize_hero_name(a) for a in allies if a}
 
     rankings: List[Dict[str, float]] = []
+    excluded: List[str] = []
     for hero in playable_heroes:
-        score_data = calculate_hero_score(
-            hero,
-            ally_df,
-            enemy_df,
-            allies,
-            enemies,
-            enemy_multipliers
+        if normalize_hero_name(hero) in allies_norm:
+            excluded.append(hero)
+            continue
+        rankings.append(
+            calculate_hero_score(
+                hero, ally_matrix, enemy_matrix,
+                allies, enemies, threat_weights, meta_strength,
+            )
         )
-        rankings.append(score_data)
+
+    if excluded:
+        print(f"Excluídos (já no time aliado): {', '.join(excluded)}\n")
+
+    if not rankings:
+        print("Nenhum herói candidato disponível para ranquear.")
+        return
 
     print_ranking(rankings)
 

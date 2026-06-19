@@ -1,15 +1,17 @@
 # Runtime — usadas diretamente pelo código
-keyboard==0.13.5
-mss==10.2.0
-Pillow==12.2.0
-opencv-python==4.13.0.92
-numpy==2.4.4
-pandas==3.0.2
-openpyxl==3.1.5        # backend do pandas para ler .xlsx
-pytesseract==0.3.13    # embutido no spec (uso futuro)
+mss>=10.2.0
+Pillow>=12.2.0
+opencv-python>=4.13.0
+numpy>=2.4.0
+pandas>=2.0.0
+openpyxl>=3.1.5        # backend do pandas para ler .xlsx
+keyboard>=0.13.5
+rapidfuzz>=3.14.5      # fuzzy match do nome do mapa (map.py)
+unidecode>=1.4.0
+pytesseract>=0.3.13    # OCR do nome do mapa (map.py) — Tesseract embutido em ocr/
 
 # Build — geração do executável
-pyinstaller==6.20.0
+PyInstaller>=6.20.0
 
-# Utilitário de dev (resolucao.py)
-PyAutoGUI==0.9.54
+# Utilitário de dev (resolucao.py) — não exigido em runtime
+PyAutoGUI>=0.9.54

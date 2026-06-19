@@ -7,13 +7,8 @@ import cv2
 import numpy as np
 from PIL import Image
 
-
-def resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except Exception:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
+import utils
+from utils import resource_path
 
 
 templates_base_dir = Path(resource_path("heroes"))
@@ -21,12 +16,10 @@ watch_dir = Path("print")
 perks_names = ["0perk", "1perk", "2perk", "bug"]
 output_filename = "lineup.txt"
 
-KNOWN_RESOLUTIONS = {
-    "720p": (1280, 720),
-    "2k":   (2560, 1440),
-}
-
-BASE_RESOLUTION   = (1280, 720)  # resolução de referência
+# Resolução: constantes centralizadas em utils (720p / 2k; 1080p e outras
+# resolvidas por escala). KNOWN_RESOLUTIONS aqui = pastas de templates.
+KNOWN_RESOLUTIONS = utils.KNOWN_RESOLUTIONS
+BASE_RESOLUTION   = utils.BASE_RESOLUTION  # resolução de referência (720p)
 BASE_CROP_SIZE    = (42, 57)     # (largura, altura) do crop de entrada em 720p
 BASE_WINDOW_HEIGHT = 42          # altura da janela/template em 720p
 
@@ -48,21 +41,29 @@ FILE_TO_CATEGORY = {
 # Resolução / escala
 # ---------------------------------------------------------------------------
 
-def get_scale_from_full(watch_dir: Path, base_resolution=BASE_RESOLUTION) -> float:
-    """Lê full.png e retorna o fator de escala em relação à resolução base."""
+def get_full_resolution(watch_dir: Path):
+    """Lê full.png e retorna (w, h), ou None se indisponível."""
     full_path = watch_dir / "full.png"
     if not full_path.exists():
-        print(f"AVISO: {full_path} não encontrado; usando escala 1.0 (720p)")
-        return 1.0
+        return None
     try:
         with Image.open(full_path) as img:
-            w, h = img.size
-        scale = w / base_resolution[0]
-        print(f"full.png detectado: {w}x{h} -> escala {scale:.4f}")
-        return scale
+            return img.size
     except Exception as e:
-        print(f"AVISO: falha ao ler {full_path}: {e}; usando escala 1.0")
+        print(f"AVISO: falha ao ler {full_path}: {e}")
+        return None
+
+
+def get_scale_from_full(watch_dir: Path, base_resolution=BASE_RESOLUTION) -> float:
+    """Lê full.png e retorna o fator de escala em relação à resolução base."""
+    res = get_full_resolution(watch_dir)
+    if res is None:
+        print(f"AVISO: print/full.png não encontrado; usando escala 1.0 (720p)")
         return 1.0
+    w, h = res
+    scale = w / base_resolution[0]
+    print(f"full.png detectado: {w}x{h} -> escala {scale:.4f}")
+    return scale
 
 
 def compute_dims(scale: float,
@@ -266,9 +267,19 @@ def executar():
           #f"template_size={template_size}")
 
     # 2. Escolher subpasta de templates pela resolução detectada nas prints
-    resolution  = detect_screenshot_resolution(watch_dir, perks_names)
-    res_folder  = find_nearest_resolution_folder(resolution, KNOWN_RESOLUTIONS)
+    # Seleciona a pasta de templates pela resolução REAL da tela (full.png),
+    # via lógica centralizada em utils. Para 1080p (equidistante de 720p e 2k)
+    # a regra de desempate escolhe 2k, e os templates são redimensionados pela
+    # escala calculada acima — sem necessidade de uma pasta 1080p dedicada.
+    full_res = get_full_resolution(watch_dir)
+    if full_res is not None:
+        res_folder = utils.nearest_resolution_key(full_res[0], full_res[1])
+    else:
+        res_folder = find_nearest_resolution_folder(
+            detect_screenshot_resolution(watch_dir, perks_names), KNOWN_RESOLUTIONS
+        )
     templates_dir = templates_base_dir / res_folder
+    print(f"Pasta de templates: {res_folder}")
 
     try:
         templates_by_category = load_all_templates(templates_dir, template_size)

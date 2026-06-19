@@ -2,6 +2,47 @@
 
 ---
 
+## Atualização — OWPick v2 (versão 1.1.0)
+
+Esta seção resume as mudanças implementadas conforme `OWPick-v2-especificacao-tecnica.md`. As seções seguintes do documento descrevem o sistema base; onde houver divergência, **vale esta seção v2**.
+
+**Novos módulos / arquivos:**
+
+- `utils.py` — utilitário comum e **FONTE ÚNICA de dados de heróis e mapas** (constantes `HEROES_ROLES` e `MAPS_DATA` embutidas). Centraliza `resource_path()`, leitura/cache das planilhas, normalização de nomes (`normalize_hero_name`), coordenadas de captura (`config.json`) e a **matemática de resolução** (720p/1080p/2K e outras, por escala/interpolação). Não lê mais `heroes_roles.json` nem `maps.txt`.
+- `map.py` — identificação automática do mapa. Recorta a região do nome do mapa em `print/full.png`, roda OCR (Tesseract embutido em `ocr/`) e faz fuzzy match (`rapidfuzz`) contra `utils.get_map_names()`. Grava o resultado em `current_map.txt`.
+- `config.json` — coordenadas de captura por resolução (`map_region` + `base_resolution`). Usado como âncoras para escala/interpolação de qualquer resolução (inclui 1080p).
+- `stats_inputs.csv` — winrate/pickrate por mapa, base do MetaStrength. Gerado por `coletar_stats.py`. Lido em runtime com cache.
+- `coletar_stats.py` — **scraper externo** (Playwright) que coleta winrate/pickrate por mapa em owtics.gg e gera `stats_inputs.csv`, usando `utils` como fonte de heróis e mapas. Roda offline (ferramenta de dados).
+
+> `heroes_roles.json` e `maps.txt` permanecem no repositório como referência, mas **não são mais lidos pelo programa** — a fonte de verdade é `utils.py`.
+
+**Modelo de scoring (v2):**
+
+```
+S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
+
+m_scaled(h,k) = α · clamp( (wr_adj(h,k) - wr̄(k)) / σ(k), -Mmax, +Mmax )   (MetaStrength)
+T_ctr(h)      = Σ_e  w_e · C(h, e)            (counter com threat weighting)
+w_e           = max(0.1, 1 + λ · Σ_a C(e, a)) (peso de ameaça do inimigo e)
+T_syn(h)      = Σ_a  Y(h, a) · β_syn          (sinergia; diagonal h==a ignorada)
+```
+
+Parâmetros iniciais: `κ_base=100`, `ε=0.001`, `Mmax=3.0`, `α=1.0`, `λ=0.25`, `β_meta=1.0`, `β_ctr=1.0`, `β_syn=0.65`. Heróis já presentes no time aliado são **excluídos** do ranking (regra rígida — substitui o antigo hack `-11` da diagonal de sinergia).
+
+**Mudanças de comportamento:**
+
+- O *threat weighting* foi promovido a modelo base (não mais opcional). O antigo multiplicador `(total/4)+1` e o fluxo `prioritize.txt`/`enemy_mult.executar()` no scoring foram substituídos pelo cálculo de `w_e` interno em `choose_ow_hero.py`. `enemy_mult.py` foi mantido apenas como utilitário de diagnóstico.
+- O pipeline agora roda `map.executar()` entre `comparar` e `choose_ow_hero` (em `main.py`).
+- As planilhas e o `stats_inputs.csv` são lidos **uma única vez** (cache `lru_cache` em `utils`) e convertidos em dicionários normalizados, eliminando releituras de disco entre execuções do pipeline.
+- Nomes de herói são normalizados no scoring, tornando-o tolerante a `D.Va`/`DVa` e `Soldier: 76`/`Soldier 76`.
+- **Suporte a 1080p (e qualquer resolução):** a lógica de resolução foi centralizada em `utils` (`nearest_resolution_key`, `resolution_scale`, `get_scaled_map_region`). 720p e 2K são âncoras; resoluções intermediárias (1080p) têm a região do mapa **interpolada** entre as âncoras, e os templates são redimensionados pela escala — sem tabelas independentes por resolução.
+- `overwatch.spec`: `selenium` removido; `pytesseract`/`ocr/` mantidos (usados por `map.py`); `config.json` e `stats_inputs.csv` e módulos (`utils`, `map`) no bundle. `heroes_roles.json`/`maps.txt` **não** são mais empacotados (dados embutidos em `utils.py`).
+- Typos de template corrigidos: `Illarri.png → Illari.png`, `Rroadhog.png → Roadhog.png`. `Shion` adicionado.
+
+**Arquivos novos gerados em runtime:** `current_map.txt` (mapa identificado na última captura).
+
+---
+
 ## Visão Geral
 
 ### Objetivo do Projeto
@@ -32,17 +73,24 @@ Overwatch-Best-Picks/
 ├── main.py                  # Ponto de entrada — menu e hotkeys
 ├── screenshot.py            # Captura de tela e recorte de retratos
 ├── comparar.py              # Template matching para identificar heróis
+├── map.py                   # [v2] OCR + fuzzy match do nome do mapa
 ├── choose_ow_hero.py        # Cálculo e exibição do ranking de heróis
-├── enemy_mult.py            # Calcula multiplicador por herói inimigo
+├── enemy_mult.py            # [v2] Utilitário de threat weight (fora do pipeline)
 ├── favoriteHero.py          # CRUD de heróis favoritos
 ├── roles.py                 # Seleção e persistência de função (role)
 ├── updater.py               # Sistema de auto-update
+├── utils.py                 # [v2] Utilitários comuns (resource_path, planilhas, nomes)
+├── coletar_stats.py         # [v2] Scraper externo → stats_inputs.csv + maps.txt
 │
 ├── heroscreenshot.py        # [Utilitário legado, não usado no pipeline]
 ├── resolucao.py             # [Utilitário de seleção de coordenadas de tela]
 │
 ├── heroes ally.xlsx         # Planilha de sinergia entre heróis
 ├── heroes enemy.xlsx        # Planilha de counters entre heróis
+├── heroes_roles.json        # [ref] Não lido em runtime (dados embutidos em utils.py)
+├── maps.txt                 # [ref] Não lido em runtime (dados embutidos em utils.py)
+├── config.json              # [v2] Coordenadas de captura por resolução (âncoras)
+├── stats_inputs.csv         # [v2] Winrate/pickrate por mapa (MetaStrength)
 ├── version.txt              # Versão atual do executável
 ├── version.json             # Versão remota para verificação de update
 ├── overwatch.spec           # Spec do PyInstaller para gerar o .exe
@@ -72,8 +120,9 @@ ALL.txt           # Lista de todos os heróis favoritos
 DPS.txt           # Favoritos DPS
 SUP.txt           # Favoritos Suporte
 TANK.txt          # Favoritos Tank
-prioritize.txt    # Flag de priorização ("0" ou "1")
+prioritize.txt    # Flag de priorização ("0" ou "1") — legado; não afeta o scoring v2
 lineup.txt        # Heróis identificados na última captura (9 linhas)
+current_map.txt   # [v2] Mapa identificado na última captura
 print/            # Recortes de tela temporários
 ```
 
@@ -84,11 +133,14 @@ print/            # Recortes de tela temporários
 | **Orquestrador** | `main.py` | Menu, hotkeys, threading, inicialização |
 | **Captura** | `screenshot.py` | Screen capture via MSS, recorte de retratos |
 | **Identificação** | `comparar.py` | Template matching com OpenCV/NumPy/Pillow |
-| **Ranking** | `choose_ow_hero.py` | Leitura das planilhas, scoring e output |
-| **Multiplicador** | `enemy_mult.py` | Score do inimigo como multiplicador |
+| **Mapa** | `map.py` | [v2] OCR + fuzzy match do nome do mapa → `current_map.txt` |
+| **Ranking** | `choose_ow_hero.py` | Scoring (MetaStrength + threat weighting + sinergia) e output |
+| **Threat weight** | `enemy_mult.py` | [v2] Utilitário de threat weight (não chamado no pipeline) |
 | **Favoritos** | `favoriteHero.py` | Lista de heróis jogáveis do usuário |
 | **Role** | `roles.py` | Função do jogador na partida |
 | **Updater** | `updater.py` | Auto-update via GitHub |
+| **Utilitários** | `utils.py` | [v2] `resource_path`, planilhas, normalização de nomes, config |
+| **Dados (offline)** | `coletar_stats.py` | [v2] Scraper que gera `stats_inputs.csv` + `maps.txt` |
 
 ### Relação entre os Módulos
 
@@ -322,14 +374,15 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 | `print_ranking(rankings)` | Exibe a tabela ordenada por `total` no console |
 | `run_hero_ranking()` | Orquestra toda a sequência de leitura, cálculo e exibição |
 
-**Fórmula de Pontuação**:
+**Fórmula de Pontuação (v2)** — ver a seção "Atualização — OWPick v2":
 ```
-enemy_score = Σ( enemies_df[hero][enemy] × multiplier[enemy] )
-ally_score  = Σ( ally_df[hero][ally] × 0.65 )
-total       = enemy_score + ally_score
+S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
+T_ctr(h) = Σ_e  w_e · C(h, e)        com  w_e = max(0.1, 1 + λ·Σ_a C(e, a))
+T_syn(h) = Σ_a  Y(h, a) · 0.65       (diagonal h==a ignorada)
+m_scaled(h, k) = MetaStrength do herói no mapa atual (z-score do winrate ajustado)
 ```
 
-**Interação**: Lê `Roles.txt`, `{role}.txt`, `lineup.txt`, `heroes ally.xlsx`, `heroes enemy.xlsx`, `prioritize.txt`. Chama `enemy_mult.executar()`.
+**Interação (v2)**: Lê `Roles.txt`, `{role}.txt`, `lineup.txt`, `current_map.txt`, `heroes ally.xlsx`, `heroes enemy.xlsx`, `stats_inputs.csv`, `heroes_roles.json`. O threat weighting é calculado internamente (não chama mais `enemy_mult.executar()` no scoring).
 
 ---
 
@@ -354,15 +407,13 @@ total       = enemy_score + ally_score
 | `calculate_hero_score(hero, ally_df, enemy_df, allies, enemies)` | Calcula score do herói inimigo |
 | `executar(hero)` | Função exportada: retorna o multiplicador float para o herói passado |
 
-**Fórmula do Multiplicador**:
+**Fórmula (v2 — threat weighting)**:
 ```python
-if total >= 0:
-    mult = (total / 4) + 1
-else:
-    mult = 1 - 0.125 * abs(total)
+w_e = max(0.1, 1 + λ * Σ_a C(e, a))   # λ = 0.25; a ∈ aliados do jogador
 ```
+O antigo multiplicador `(total/4)+1` foi substituído pelo threat weighting.
 
-**Interação**: Chamado por `choose_ow_hero.build_enemy_multipliers()`. Lê `lineup.txt` e as planilhas.
+**Interação (v2)**: Não é mais chamado por `choose_ow_hero` (o threat weighting é interno). Mantido como utilitário de diagnóstico; aceita a matriz de counters pré-carregada para evitar releitura de disco.
 
 ---
 

@@ -2,24 +2,10 @@ from difflib import get_close_matches
 import unicodedata
 import os
 
-# Lista completa de heróis do Overwatch organizados por função
-HEROES = {
-    "DPS": [
-        "Anran", "Ashe", "Bastion", "Cassidy", "Echo", "Emre", "Freja", "Genji", "Hanzo",
-        "Junkrat", "Mei", "Pharah", "Reaper", "Shion","Sierra", "Sojourn", "Soldier 76",
-        "Sombra", "Symmetra", "Torbjörn", "Tracer", "Vendetta", "Venture",
-        "Widowmaker"
-    ],
-    "SUP": [
-        "Ana", "Baptiste", "Brigitte", "Illari", "Jetpack Cat", "Juno", "Kiriko",
-        "Lifeweaver", "Lúcio", "Mercy", "Mizuki", "Moira", "Wuyang", "Zenyatta"
-    ],
-    "TANK": [
-        "DVa", "Domina", "Doomfist", "Hazard", "Junker Queen", "Mauga", "Orisa",
-        "Ramattra", "Reinhardt", "Roadhog", "Sigma", "Winston",
-        "Wrecking Ball", "Zarya"
-    ]
-}
+import utils
+
+# Fonte única de heróis: utils (constante embutida HEROES_ROLES).
+HEROES = utils.load_heroes_roles()
 
 FAVORITES_FILE = "ALL.txt"  # Agora ALL.txt é o arquivo de favoritos
 

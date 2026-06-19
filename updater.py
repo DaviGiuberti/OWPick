@@ -30,6 +30,8 @@ import subprocess
 import urllib.request
 import urllib.error
 
+from utils import resource_path  # função compartilhada (antes duplicada aqui)
+
 
 # =============================================================================
 # CONFIGURAÇÃO  –  Altere apenas estas duas constantes
@@ -39,23 +41,6 @@ VERSION_JSON_URL = "https://raw.githubusercontent.com/DaviGiuberti/Overwatch-Bes
 VERSION_FILE = "version.txt"
 
 # =============================================================================
-
-
-def resource_path(relative_path: str) -> str:
-    """
-    Retorna o caminho absoluto para o arquivo, tanto em execução normal quanto
-    quando empacotado em .exe (PyInstaller).
-
-    ATENÇÃO: use esta função apenas para leitura de recursos somente-leitura
-    embutidos no pacote (ex: version.txt, ícones, assets).
-    Para arquivos que precisam persistir/ser escritos no disco (logs, configs),
-    use get_exe_dir() em vez desta função.
-    """
-    try:
-        base_path = sys._MEIPASS  # pasta temp onde o PyInstaller extrai os arquivos
-    except AttributeError:
-        base_path = os.path.abspath(".")
-    return os.path.join(base_path, relative_path)
 
 
 def get_exe_dir() -> str:

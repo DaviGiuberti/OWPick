@@ -3,6 +3,8 @@ import mss
 import os
 from PIL import Image
 
+import utils
+
 
 def executar():
     outdir = os.path.expanduser("print")
@@ -131,29 +133,6 @@ def executar():
             out_path = os.path.join(perk_dir, c['name'])
             crop.save(out_path)
             saved_count += 1
-
-# --- Recorte da pasta MAP ---
-    map_dir = os.path.join(outdir, "map")
-    os.makedirs(map_dir, exist_ok=True)
-
-    # Coordenadas do map por resolução base
-    if full_w >= 2560 and full_h >= 1440:
-        # 2k: coordenadas nativas, sem escalar
-        m_left, m_top, m_right, m_bottom = (
-            2032,
-            21,
-            2032 + 362,
-            21 + 82,
-        )
-    else:
-        # 720p (ou qualquer outra): usa escala normal
-        map_base = {'left': 983, 'top': 8, 'width': 174, 'height': 41}
-        m_left, m_top, m_right, m_bottom = scale_and_clamp(
-            map_base['left'], map_base['top'], map_base['width'], map_base['height'], full_w, full_h
-        )
-
-    map_crop = full_img.crop((m_left, m_top, m_right, m_bottom))
-    map_crop.save(os.path.join(map_dir, "map.png"))
 
 if __name__ == "__main__":
     executar()

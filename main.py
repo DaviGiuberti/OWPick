@@ -10,6 +10,7 @@ import favoriteHero
 import roles
 import screenshot
 import updater  # <-- ADICIONADO
+import map as map_module  # identificação automática do mapa (OCR)
 
 
 IN_MAIN = True # Não executa nada na main quando false
@@ -40,6 +41,12 @@ def run_pipeline():
 
         print(">>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
+
+        print(">>> Identificando o mapa atual...")
+        try:
+            map_module.executar()
+        except Exception as e:
+            print(f"Aviso: falha ao identificar o mapa (seguindo sem MetaStrength): {e}")
 
         print(">>> Executando escolha de herói...")
         choose_ow_hero.run_hero_ranking()

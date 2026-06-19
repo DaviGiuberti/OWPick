@@ -92,16 +92,22 @@ a = Analysis(
         # ===== ARQUIVOS DO PROJETO =====
         # Inclui a pasta com templates de imagens dos heróis
         ('heroes', 'heroes'),
-        
+
         # Inclui as planilhas de dados (sinergias e counters)
         ('heroes ally.xlsx', '.'),
         ('heroes enemy.xlsx', '.'),
         ('version.txt', '.'),
-        
+
+        # ===== ARQUIVOS DE DADOS/CONFIG DA v2 =====
+        # Heróis e mapas são embutidos em utils.py (não há mais dependência de
+        # heroes_roles.json / maps.txt em runtime).
+        ('config.json', '.'),         # coordenadas de captura por resolução
+        ('stats_inputs.csv', '.'),    # winrate/pickrate por mapa (MetaStrength)
+
         # ===== TESSERACT OCR COMPLETO =====
         # Inclui toda a pasta OCR com Tesseract
         ('ocr', 'ocr'),
-        
+
         # Se você tiver ChromeDriver, descomente a linha abaixo:
         # ('chromedriver.exe', '.'),
     ],
@@ -113,11 +119,8 @@ a = Analysis(
         'numpy',
         'PIL',
         'PIL.Image',
+        'PIL.ImageOps',
         'mss',
-        'selenium',
-        'selenium.webdriver',
-        'selenium.webdriver.chrome',
-        'selenium.webdriver.chrome.options',
         'unidecode',
         'rapidfuzz',
         'rapidfuzz.process',
@@ -125,7 +128,7 @@ a = Analysis(
         'rapidfuzz.distance',
         'pytesseract',
         'keyboard',
-        
+
         # ===== SEUS MÓDULOS PYTHON =====
         'choose_ow_hero',
         'comparar',
@@ -133,7 +136,9 @@ a = Analysis(
         'roles',
         'screenshot',
         'enemy_mult',
-        'updater', 
+        'updater',
+        'utils',
+        'map',
         
         # ===== DEPENDÊNCIAS DO PANDAS/OPENPYXL =====
         'openpyxl.cell',
@@ -161,15 +166,7 @@ a = Analysis(
         'mss.windows',
         'mss.linux',
         'mss.darwin',
-        
-        # ===== DEPENDÊNCIAS DO SELENIUM =====
-        'selenium.webdriver.common',
-        'selenium.webdriver.common.by',
-        'selenium.webdriver.common.keys',
-        'selenium.webdriver.support',
-        'selenium.webdriver.support.ui',
-        'selenium.webdriver.support.expected_conditions',
-        
+
         # ===== DEPENDÊNCIAS DO PYTESSERACT =====
         'pytesseract.pytesseract',
         

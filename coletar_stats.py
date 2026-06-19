@@ -28,7 +28,6 @@ Notas:
 from __future__ import annotations
 
 import csv
-import json
 import logging
 import re
 import sys
@@ -37,6 +36,8 @@ import random
 import unicodedata
 from pathlib import Path
 from typing import Optional
+
+import utils  # fonte única de heróis e mapas
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Logging
@@ -63,89 +64,21 @@ TIMEOUT   = 40_000   # ms para page.goto
 READY_SELECTOR = "span.flex-1.truncate"
 READY_TIMEOUT  = 20_000  # ms
 
-HEROES_JSON = Path(__file__).parent / "heroes_roles.json"
+# ─────────────────────────────────────────────────────────────────────────────
+#  Heróis e mapas — fonte única: utils.py
+# ─────────────────────────────────────────────────────────────────────────────
+PATCH = "Season 3 · 2026 (Reign of Talon: Into the Tiger's Den)"
 
-# ─────────────────────────────────────────────────────────────────────────────
-#  Heróis (fallback embutido; sobrescrito por heroes_roles.json se existir)
-# ─────────────────────────────────────────────────────────────────────────────
-HEROES_DEFAULT: dict = {
-    "version": "1.8",
-    "patch": "Season 3 · 2026 (Reign of Talon: Into the Tiger's Den)",
-    "heroes": {
-        "DPS": [
-            "Anran", "Ashe", "Bastion", "Cassidy", "Echo", "Emre",
-            "Freja", "Genji", "Hanzo", "Junkrat", "Mei", "Pharah",
-            "Reaper", "Shion", "Sierra", "Sojourn", "Soldier: 76",
-            "Sombra", "Symmetra", "Torbjörn", "Tracer", "Vendetta",
-            "Venture", "Widowmaker",
-        ],
-        "TANK": [
-            "D.Va", "Domina", "Doomfist", "Hazard", "Junker Queen",
-            "Mauga", "Orisa", "Ramattra", "Reinhardt", "Roadhog",
-            "Sigma", "Winston", "Wrecking Ball", "Zarya",
-        ],
-        "SUP": [
-            "Ana", "Baptiste", "Brigitte", "Illari", "Jetpack Cat",
-            "Juno", "Kiriko", "Lifeweaver", "Lúcio", "Mercy",
-            "Mizuki", "Moira", "Wuyang", "Zenyatta",
-        ],
-    },
-}
-
-# ─────────────────────────────────────────────────────────────────────────────
-#  Mapas competitivos até Neon Junction — (nome, slug, modo)
-#  Exclui: 2CP (Assault) e Clash
-# ─────────────────────────────────────────────────────────────────────────────
-MAPS: list[tuple[str, str, str]] = [
-    # CONTROL
-    ("Antarctic Peninsula", "antarctic-peninsula", "Control"),
-    ("Busan",               "busan",               "Control"),
-    ("Ilios",               "ilios",               "Control"),
-    ("Lijiang Tower",       "lijiang-tower",       "Control"),
-    ("Nepal",               "nepal",               "Control"),
-    ("Oasis",               "oasis",               "Control"),
-    ("Samoa",               "samoa",               "Control"),
-    # ESCORT
-    ("Circuit Royal",         "circuit-royal",        "Escort"),
-    ("Dorado",                "dorado",               "Escort"),
-    ("Havana",                "havana",               "Escort"),
-    ("Junkertown",            "junkertown",           "Escort"),
-    ("Rialto",                "rialto",               "Escort"),
-    ("Route 66",              "route-66",             "Escort"),
-    ("Shambali Monastery",    "shambali-monastery",   "Escort"),
-    ("Watchpoint: Gibraltar", "watchpoint-gibraltar", "Escort"),
-    # HYBRID
-    ("Blizzard World", "blizzard-world", "Hybrid"),
-    ("Eichenwalde",    "eichenwalde",    "Hybrid"),
-    ("Hollywood",      "hollywood",      "Hybrid"),
-    ("King's Row",     "kings-row",      "Hybrid"),
-    ("Midtown",        "midtown",        "Hybrid"),
-    ("Numbani",        "numbani",        "Hybrid"),
-    ("Paraíso",        "paraiso",        "Hybrid"),
-    # PUSH
-    ("Colosseo",         "colosseo",         "Push"),
-    ("Esperança",        "esperanca",        "Push"),
-    ("New Queen Street", "new-queen-street", "Push"),
-    ("Runasapi",         "runasapi",         "Push"),
-    # FLASHPOINT
-    ("New Junk City", "new-junk-city", "Flashpoint"),
-    ("Suravasa",      "suravasa",      "Flashpoint"),
-    # RECENTE — pode não estar no site ainda
-    ("Neon Junction", "neon-junction", "Escort"),
-]
+# Mapas competitivos (nome, slug, modo) — vêm de utils.
+MAPS: list[tuple[str, str, str]] = utils.MAPS_DATA
 
 # ─────────────────────────────────────────────────────────────────────────────
 #  Utilitários
 # ─────────────────────────────────────────────────────────────────────────────
 
 def load_heroes() -> dict:
-    if HEROES_JSON.exists():
-        with open(HEROES_JSON, encoding="utf-8") as f:
-            data = json.load(f)
-        log.info(f"heroes_roles.json carregado (patch: {data.get('patch','?')})")
-        return data
-    log.warning("heroes_roles.json não encontrado → usando lista embutida.")
-    return HEROES_DEFAULT
+    """Heróis a partir de utils (fonte única)."""
+    return {"version": "1.1.0", "patch": PATCH, "heroes": utils.load_heroes_roles()}
 
 
 def hero_role_map(data: dict) -> dict[str, str]:

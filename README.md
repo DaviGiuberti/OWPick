@@ -139,10 +139,10 @@ RANK   | HERO               |    ENEMY |     ALLY |    TOTAL
 
 A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.0.6`
+**Versão atual**: `1.1.0`
 
 Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.0.6.zip`
+1. Baixe o arquivo `OWPick_v1.1.0.zip`
 2. Extraia em qualquer pasta
 3. Execute `OWPick.exe`
 4. Nenhuma instalação adicional é necessária — o Tesseract OCR já está embutido
