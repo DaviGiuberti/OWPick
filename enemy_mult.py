@@ -10,9 +10,14 @@ Mudanças em relação à versão anterior:
   - Usa utils.resource_path / utils.read_heroes_* (sem duplicação).
   - Aceita a matriz de counters pré-carregada (evita reler a planilha do disco).
   - Substitui o multiplicador hardcoded (total/4)+1 pelo threat weighting:
-        w_e = max(W_MIN, 1 + λ · Σ_a C(e, a))
+        w_e = softplus(1 + λ · Σ_a C(e, a)) = ln(1 + e^raw)
   - Nomes de variáveis explícitos sobre a perspectiva invertida do lineup.
+
+A partir do OWPick v1.1.2 o peso usa softplus (sempre > 0, monotônico) em vez
+do antigo piso max(W_MIN, ...), em sincronia com choose_ow_hero.py.
 """
+
+import numpy as np
 
 from typing import Dict, List, Optional
 
@@ -21,7 +26,12 @@ from utils import normalize_hero_name
 
 # Estes valores espelham os de choose_ow_hero.py — mantenha-os em sincronia.
 LAMBDA = 0.25   # intensidade do threat weighting
-W_MIN = 0.1     # piso do peso de ameaça
+W_MIN = 0.1     # (inerte) compat; softplus garante positividade
+
+
+def _softplus(x: float) -> float:
+    """Softplus numericamente estável: ln(1 + e^x) == logaddexp(0, x)."""
+    return float(np.logaddexp(0.0, x))
 
 
 def read_lineup(filepath: str = "lineup.txt"):
@@ -53,13 +63,16 @@ def calculate_threat_weight(hero: str,
                             lam: float = LAMBDA,
                             w_min: float = W_MIN) -> float:
     """
-    w_e = max(w_min, 1 + λ · Σ_a C(hero, a)), a ∈ opponents_of_enemy.
+    w_e = softplus(1 + λ · Σ_a C(hero, a)), a ∈ opponents_of_enemy.
     C(hero, a) = quanto o herói inimigo countera o aliado a do jogador.
+
+    O `w_min` é inerte (mantido por compat de assinatura): softplus já é > 0.
     """
+    del w_min  # inerte: softplus garante positividade
     hn = normalize_hero_name(hero)
     row = enemy_matrix.get(hn, {})
     threat_sum = sum(row.get(normalize_hero_name(a), 0.0) for a in opponents_of_enemy)
-    return max(w_min, 1.0 + lam * threat_sum)
+    return _softplus(1.0 + lam * threat_sum)
 
 
 def executar(hero: str,

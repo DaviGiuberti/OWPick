@@ -1,5 +1,5 @@
 {
-    "version": "1.1.1",
-    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.1/OWPick_v1.1.1.zip",
-    "notas": "Threat weighting agora comportamento padrao (sempre ativo, sem opcao de ligar/desligar). Threat Weighting considera MetaStrength do inimigo no mapa atual (formula: w_e = max(0.1, 1 + lambda*counters + mu*meta_mapa)). Exibicao de ranking de ameacas inimigas no terminal antes da recomendacao. Remocao do menu opcao 4 e da funcao toggle_prioritize_file. Versao anterior (v1.1.0): MetaStrength por mapa, suporte a 1080p, utils.py como fonte unica, correcao OCR tessdata, normalizacao D.Va/Soldier76, cache de planilhas."
+    "version": "1.1.2",
+    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.2/OWPick_v1.1.2.zip",
+    "notas": "Correcao do modelo de scoring (Meta Strength e Threat Weighting). Meta Strength agora usa estatisticas por role (DPS/TANK/SUP), sigma da winrate bruta e confianca via pickrate (conf = pr/(pr+k0)), com escala final ALPHA = 2.25 - corrige mistura de roles, sigma encolhido e o antigo kappa que encolhia ~99% da winrate observada. Threat Weighting agora usa softplus (w_e = ln(1 + e^raw)) no lugar do piso, preservando a ordenacao das ameacas baixas em vez de cravar todas no piso. Removidos o shrinkage antigo e a constante KAPPA_BASE."
 }

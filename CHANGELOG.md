@@ -4,6 +4,42 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.1.2] — 2026-06-20
+
+### Correção do Meta Strength
+
+- **Estatísticas por role:** `wr̄` e `σ` agora são calculados dentro de cada função
+  (DPS/TANK/SUP), não mais de forma global. **Motivo:** comparar um DPS com a média
+  global (puxada por tanks/supports) gerava z-score incorreto. (Ex. Shambali:
+  wr̄ DPS = 51.03, TANK = 49.47, SUP = 50.10.)
+- **Sigma da winrate bruta** (não dos valores encolhidos). **Motivo:** o `σ`
+  encolhido (≈ 0.007 no Shambali) explodia artificialmente o z-score até o clamp ±3.
+- **Confiança por pickrate:** `conf = pr / (pr + k0)`, com `k0` = pickrate neutra da
+  role. Substitui o antigo `kappa = 100 · (prn / pr)`. **Motivo:** o `kappa` antigo
+  (o fator `100` somado ao `/pr`) encolhia ~99% da winrate observada e invertia o
+  papel da pickrate.
+- **Remoção do shrinkage antigo** (`kappa`, média ponderada `(g·wr + κ·wr̄)/(g+κ)`,
+  `sigma` sobre valores encolhidos) e da constante `KAPPA_BASE`. O `eps` (EPS) passa a
+  ser apenas piso numérico da pickrate, sem papel de proxy de amostra.
+- **`ALPHA = 2.25`** (era `1.0`): escala final do Meta Strength, aplicada como
+  multiplicador de `clip(conf·z, ±Mmax)`.
+
+### Correção do Threat Weighting
+
+- **Softplus no lugar do piso:** `w_e = softplus(raw) = ln(1 + e^raw)`. **Motivo:** o
+  antigo `max(W_MIN, raw)` colapsava ameaças distintas no mesmo valor de piso
+  (ex.: Cassidy = Ana = Roadhog cravados no piso). O softplus é monotônico — `raw`
+  maior ⟹ `w_e` maior **sempre** — preservando a ordenação na faixa de ameaças baixas.
+- `W_MIN` deixa de ser o mecanismo de não-negatividade (fica inerte, mantido por
+  compatibilidade de assinatura). O fallback de exibição de um inimigo ausente passa a
+  usar o peso neutro `softplus(1) ≈ 1.313`.
+- A Meta corrigida (×2.25) flui **automaticamente** para o threat via `μ · m(e,k)`,
+  sem duplicar lógica em `compute_threat_weights`.
+- `enemy_mult.py` (utilitário de diagnóstico) sincronizado: passa a usar `softplus`
+  também, mantendo paridade com o pipeline principal.
+
+---
+
 ## [v1.1.1] — 2026-06-18
 
 ### Threat Weighting — sempre ativo e ciente do mapa

@@ -1,16 +1,20 @@
 """
-choose_ow_hero.py — Scoring e ranking de heróis (modelo OWPick v1.1.1).
+choose_ow_hero.py — Scoring e ranking de heróis (modelo OWPick v1.1.2).
 
 Score final de cada herói candidato h:
 
     S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
 
 onde:
-    m_scaled(h, k) = MetaStrength do herói no mapa atual k (z-score do winrate
-                     ajustado por shrinkage, escalado por α)
+    m_scaled(h, k) = MetaStrength do herói no mapa atual k. É o z-score da
+                     winrate BRUTA do herói DENTRO DA SUA ROLE, atenuado pela
+                     confiança vinda da pickrate (sem shrinkage), escalado por α:
+                         m(h,k) = α · clip(conf · z_role, −Mmax, +Mmax)
+                         z_role = (wr(h) − wr̄_role) / σ_role
+                         conf   = pr / (pr + k0_role),  k0_role = pickrate neutra da role
     T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
-    w_e            = max(0.1, 1 + λ · Σ_a C(e,a) + μ · m(e,k)) (peso de ameaça do inimigo e,
-                     inclui desempenho do inimigo no mapa atual)
+    w_e            = softplus(1 + λ · Σ_a C(e,a) + μ · m(e,k)) (peso de ameaça do inimigo e,
+                     inclui desempenho do inimigo no mapa atual; softplus > 0 sempre)
     T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
 
 Heróis já presentes no time aliado são EXCLUÍDOS do ranking (regra rígida,
@@ -32,19 +36,29 @@ import utils
 from utils import resource_path, normalize_hero_name  # noqa: F401 (compat)
 
 
+def _softplus(x: float) -> float:
+    """Softplus numericamente estável: ln(1 + e^x) == logaddexp(0, x).
+
+    Usa np.logaddexp para evitar overflow de e^x quando x é grande. O resultado
+    é sempre > 0 e monotônico em x, então preserva a ordenação das ameaças sem
+    precisar de um piso (W_MIN deixou de ser o mecanismo de não-negatividade).
+    """
+    return float(np.logaddexp(0.0, x))
+
+
 # ---------------------------------------------------------------------------
 # Parâmetros do modelo (ver §3.5 da especificação)
 # ---------------------------------------------------------------------------
-KAPPA_BASE = 100.0   # pseudo-contagem base do shrinkage
-EPS = 0.001          # mínimo para evitar divisão por zero na pickrate
+EPS = 0.001          # piso numérico da pickrate (NÃO é proxy de amostra)
 MMAX = 3.0           # limite (clamp) do z-score em desvios-padrão
-ALPHA = 1.0          # escala do MetaStrength
+ALPHA = 2.25         # escala FINAL do MetaStrength (multiplica conf·z já clampado)
 LAMBDA = 0.25        # intensidade do threat weighting (componente counter)
 MU_THREAT = 0.3      # intensidade do threat weighting (componente MetaStrength do inimigo no mapa)
 BETA_META = 1.0      # peso do MetaStrength no score
 BETA_CTR = 1.0       # peso do counter term no score
 BETA_SYN = 0.65      # peso da sinergia (mantido do modelo anterior)
-W_MIN = 0.1          # piso do peso de ameaça (w_e não fica negativo)
+W_MIN = 0.35         # (inerte) compat de assinatura; softplus garante w_e > 0
+NEUTRAL_WEIGHT = _softplus(1.0)  # ≈ 1.313 — peso de ameaça neutro (raw = 1)
 
 
 # ---------------------------------------------------------------------------
@@ -108,7 +122,6 @@ def read_current_map(filepath: str = "current_map.txt") -> str:
 # MetaStrength m(h, k) — força do herói no mapa atual
 # ---------------------------------------------------------------------------
 def load_meta_strength(mapa_atual: str,
-                       kappa_base: float = KAPPA_BASE,
                        eps: float = EPS,
                        mmax: float = MMAX,
                        alpha: float = ALPHA) -> Dict[str, float]:
@@ -117,11 +130,16 @@ def load_meta_strength(mapa_atual: str,
     atual. Heróis sem dados (ou mapa desconhecido) resultam em ausência da
     chave -> MetaStrength tratado como 0.0 no scoring.
 
-    Adaptação importante: o stats_inputs.csv gerado por coletar_stats.py NÃO
-    possui a coluna 'games' prevista na especificação, e winrate/pickrate estão
-    em percentual. Usa-se a pickrate (em fração) como proxy de amostra ('g') e o
-    κ_eff por pickrate relativa conforme §3.2. O z-score final é invariante à
-    unidade (percentual vs. fração), pois normaliza pelo desvio-padrão do mapa.
+    Modelo (OWPick v1.1.2): o MetaStrength é o z-score da winrate BRUTA do herói
+    DENTRO DA SUA ROLE (DPS/TANK/SUP), atenuado pela confiança vinda da pickrate:
+
+        m(h,k) = alpha · clip(conf · z_role, −mmax, +mmax)
+        z_role = (wr(h) − wr̄_role) / σ_role
+        conf   = pr / (pr + k0_role),   k0_role = pickrate neutra da role
+
+    Estatísticas por role evitam comparar um DPS com a média global (puxada por
+    tanks/supports). conf ∈ [0, 1] expressa o quanto a pickrate deixa confiar na
+    winrate: vale 0.5 quando o herói é jogado na taxa média da sua role.
     """
     result: Dict[str, float] = {}
     if not mapa_atual or mapa_atual == "UNKNOWN":
@@ -149,32 +167,38 @@ def load_meta_strength(mapa_atual: str,
     if valid.empty:
         return result
 
-    wr_bar = float(valid["winrate"].mean())
     pr_neutral = utils.get_role_neutral_pickrates()
 
-    wr_adj: Dict[str, float] = {}
+    # (1)(2) Estatísticas POR ROLE, calculadas sobre a winrate BRUTA (não encolhida).
+    #         Cada herói é comparado apenas com heróis da mesma função.
+    role_stats: Dict[str, Tuple[float, float]] = {
+        str(role): (float(grp["winrate"].mean()), float(grp["winrate"].std()))
+        for role, grp in valid.groupby("role")
+    }
+
     for _, row in valid.iterrows():
         hero = row["hero"]
         role = row.get("role")
         wr = float(row["winrate"])
         pr_pct = row["pickrate"]
         pr = (float(pr_pct) / 100.0) if pd.notna(pr_pct) else eps
-        pr = max(pr, eps)
+        pr = max(pr, eps)  # eps aqui é apenas piso numérico de pickrate (NÃO é proxy de amostra)
 
-        prn = pr_neutral.get(role)
-        kappa = kappa_base * (prn / pr) if prn is not None else kappa_base
+        wr_bar_role, sigma_role = role_stats.get(str(role), (wr, 0.0))
+        if sigma_role == 0.0 or np.isnan(sigma_role):
+            result[normalize_hero_name(hero)] = 0.0
+            continue
 
-        g = pr  # pickrate (fração) como proxy de amostra (sem coluna 'games')
-        wr_adj[normalize_hero_name(hero)] = (g * wr + kappa * wr_bar) / (g + kappa)
+        # (3) Confiança estatística vinda da pickrate. k0 = pickrate neutra da role,
+        #     então conf = 0.5 quando o herói é jogado na taxa média da sua role;
+        #     acima dela confia-se mais na winrate, abaixo menos. conf ∈ [0, 1].
+        k0 = pr_neutral.get(role, 0.10)
+        conf = pr / (pr + k0)
 
-    values = np.array(list(wr_adj.values()), dtype=float)
-    sigma = float(values.std())
-    if sigma == 0.0 or np.isnan(sigma):
-        return {hero: 0.0 for hero in wr_adj}
+        # (4) z-score da winrate BRUTA, dentro da própria role.
+        z = (wr - wr_bar_role) / sigma_role
 
-    for hero, adj in wr_adj.items():
-        z = (adj - wr_bar) / sigma
-        result[hero] = alpha * float(np.clip(z, -mmax, mmax))
+        result[normalize_hero_name(hero)] = alpha * float(np.clip(conf * z, -mmax, mmax))
     return result
 
 
@@ -190,15 +214,21 @@ def compute_threat_weights(enemies: List[str],
                            w_min: float = W_MIN) -> Dict[str, float]:
     """
     Para cada inimigo e:
-        w_e = max(w_min, 1 + λ · Σ_a C(e,a) + μ · m(e,k))
+        raw = 1 + λ · Σ_a C(e,a) + μ · m(e,k)
+        w_e = softplus(raw) = ln(1 + e^raw)
 
     C(e,a)  = quanto o inimigo e countera o aliado a.
     m(e,k)  = MetaStrength do inimigo e no mapa atual k (0.0 se desconhecido).
     λ       = intensidade do componente counter.
     μ       = intensidade do componente mapa (força do inimigo no mapa atual).
 
+    O softplus é sempre > 0 e monotônico em `raw`, então preserva a ordenação
+    das ameaças (mais counter/mais meta -> maior w_e) sem colapsar ameaças baixas
+    no piso. O parâmetro `w_min` permanece por compatibilidade, mas é inerte.
+
     Retorna {nome_normalizado_do_inimigo: w_e}.
     """
+    del w_min  # inerte: softplus garante positividade (mantido só por compat de assinatura)
     allies_norm = [normalize_hero_name(a) for a in allies if a]
     meta = meta_strength or {}
     weights: Dict[str, float] = {}
@@ -209,7 +239,8 @@ def compute_threat_weights(enemies: List[str],
         row = enemy_matrix.get(en, {})
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
-        weights[en] = max(w_min, 1.0 + lam * counter_sum + mu * map_bonus)
+        raw = 1.0 + lam * counter_sum + mu * map_bonus
+        weights[en] = _softplus(raw)
     return weights
 
 
@@ -219,7 +250,7 @@ def print_threat_ranking(enemies: List[str],
     if not enemies:
         return
     sorted_enemies = sorted(
-        [(e, threat_weights.get(normalize_hero_name(e), W_MIN)) for e in enemies if e],
+        [(e, threat_weights.get(normalize_hero_name(e), NEUTRAL_WEIGHT)) for e in enemies if e],
         key=lambda x: x[1],
         reverse=True,
     )
