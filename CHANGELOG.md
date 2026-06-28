@@ -87,7 +87,7 @@ Durante cada análise, o terminal agora exibe um ranking dos inimigos ordenado p
 
 ---
 
-## [v1.1.0] — 2026-06 (implementação OWPick v2)
+## [v1.1.0] — 2026-06 (implementação OWPick)
 
 ### utils.py — Fonte única de dados
 
@@ -104,7 +104,7 @@ Durante cada análise, o terminal agora exibe um ranking dos inimigos ordenado p
 - `TESSDATA_PREFIX` definido via variável de ambiente (fix: evita corrupção de caminho com `--tessdata-dir "..."` no config string do pytesseract)
 - Integrado ao pipeline principal em `main.py` entre `comparar` e `choose_ow_hero`
 
-### choose_ow_hero.py — Modelo de scoring v2
+### choose_ow_hero.py — Modelo de scoring
 
 - Modelo completo: `S(h) = β_meta·m(h,k) + β_ctr·T_ctr(h) + T_syn(h)`
 - `MetaStrength m(h,k)`: z-score de winrate com shrinkage bayesiano por pickrate relativa (κ_eff = κ_base · pr_neutra / pr)
