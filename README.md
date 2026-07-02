@@ -48,8 +48,9 @@ Overwatch-Best-Picks/
 ├── overwatch.spec           # Configuração do PyInstaller
 │
 ├── heroes/                  # Templates de imagem dos heróis
-│   ├── 720p/dps|sup|tank/
-│   └── 2k/dps|sup|tank/
+│   ├── 720p/dps|sup|tank/   # Retratos do lineup (TAB+1)
+│   ├── 2k/dps|sup|tank/     # Retratos do lineup (TAB+1)
+│   └── bans/                # Ícones 3D oficiais (reconhecimento de bans)
 │
 └── ocr/                     # Tesseract OCR embutido (tesseract.exe + tessdata/)
 ```
@@ -159,10 +160,10 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.1.3`
+**Versão atual**: `1.1.4`
 
 Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.1.3.zip`
+1. Baixe o arquivo `OWPick_v1.1.4.zip`
 2. Extraia em qualquer pasta
 3. Execute `OWPick.exe`
 

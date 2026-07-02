@@ -263,10 +263,11 @@ TEMPLATE_BANK_PORTRAIT_PX: Dict[str, float] = {
     "2k":   82.0,   # retrato ~82x82 na tela em 2K (templates ~82px)
 }
 
-# Tamanho-base (px, medido em 720p) do retrato capturado, por tipo de recorte.
-# É escalado pela resolução atual antes de escolher o banco (template_bank_for_resolution).
+# Tamanho-base (px, medido em 720p) do retrato do lineup (TAB+1). É escalado
+# pela resolução atual antes de escolher o banco (template_bank_for_resolution).
+# Obs.: os bans NÃO passam por esta escolha — usam o banco dedicado heroes/bans/
+# (fonte de alta resolução, serve qualquer escala; ver comparar.match_bans).
 BASE_PORTRAIT_PX = 41.0      # retrato normal (TAB+1 / lineup) em 720p (~41px; em 2K ~82px)
-BASE_BAN_PORTRAIT_PX = 31.0  # retrato dos slots de ban do competitivo em 720p (~31px; em 2K ~62px)
 
 
 def pick_template_bank(portrait_px: float,
@@ -297,9 +298,9 @@ def template_bank_for_resolution(full_w: int,
     retrato cujo tamanho em 720p é `base_portrait_px`. Escala o retrato pela
     resolução atual e delega a pick_template_bank.
 
-    Como cada TIPO de retrato (normal vs ban) tem um tamanho-base diferente,
-    dois tipos podem cair em bancos diferentes NA MESMA resolução — ex.: em 1080p
-    o retrato normal (~61.5px) usa 2k, enquanto o retrato de ban (~46.5px) usa 720p.
+    Ex.: em 1080p o retrato do lineup fica ~61.5px — mais próximo dos 82px do
+    banco 2k do que dos 41px do 720p (empate resolvido para o 2k) — então o
+    banco 2k é usado mesmo numa resolução intermediária.
     """
     return pick_template_bank(base_portrait_px * resolution_scale(full_w))
 

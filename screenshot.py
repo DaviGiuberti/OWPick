@@ -148,15 +148,14 @@ def executar():
             saved_count += 1
 
     # 3) recortar os slots de ban (uma única vez; não dependem de perk)
+    # Diferente do TAB+1, aqui NÃO há buffer vertical: o slot de ban é fixo na
+    # UI e o matching é direto (sem janela deslizante), então o recorte é o
+    # quadrado exato do retrato.
     bans_dir = os.path.join(outdir, "bans")
     os.makedirs(bans_dir, exist_ok=True)
     for b in bans_template:
-        # mesmo buffer vertical dos demais recortes, para a busca por janela deslizante
-        top_with_buffer = b['top'] - VERTICAL_BUFFER
-        height_with_buffer = b['height'] + (2 * VERTICAL_BUFFER)
-
         left, top, right, bottom = scale_and_clamp(
-            b['left'], top_with_buffer, b['width'], height_with_buffer, full_w, full_h
+            b['left'], b['top'], b['width'], b['height'], full_w, full_h
         )
         crop = full_img.crop((left, top, right, bottom))
         crop.save(os.path.join(bans_dir, b['name']))

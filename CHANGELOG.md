@@ -4,6 +4,36 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.1.4] — 2026-07-02
+
+### Correção do reconhecimento dos bans (banco de arte dedicado)
+
+- **Causa raiz:** os ícones dos slots de ban usam a **arte 3D oficial** do herói
+  (com moldura vermelha da UI), que é **diferente** dos retratos ilustrados de
+  `heroes/720p|2k` (arte da tela de seleção). O matching dos bans contra os
+  templates do lineup dava ~0/5 de acerto — nenhum ajuste de limiar resolveria.
+- **Banco dedicado `heroes/bans/`:** novo banco com o ícone 3D oficial de cada herói
+  (52 PNGs de 128px, pasta plana, mesma convenção de nomes dos demais bancos). Fonte
+  de alta resolução — um único banco serve **todas** as resoluções.
+- **Fluxo de bans separado do TAB+1:**
+  - `screenshot.py`: o recorte de ban passa a ser o quadrado **exato** do retrato,
+    **sem `VERTICAL_BUFFER`** (o slot de ban é fixo na UI). O TAB+1 continua com
+    buffer + janela deslizante, **inalterado**.
+  - `comparar.match_bans()` (agora só recebe `watch_dir`): matching **direto** —
+    descarta a moldura da UI (`BAN_FRAME_FRACTION`), redimensiona recorte e
+    templates para `BAN_COMPARE_SIZE` e calcula o MAE contra o banco inteiro
+    (`_best_against_templates`, um ban pode ser de qualquer role), **sem janela
+    deslizante**.
+- **Simplificações:** removidas as constantes agora sem uso `BASE_BAN_CROP_SIZE`,
+  `BASE_BAN_WINDOW_HEIGHT` (`comparar.py`) e `BASE_BAN_PORTRAIT_PX` (`utils.py`). Os
+  bans não usam mais a escolha de banco por tamanho de retrato — que permanece
+  válida e ativa apenas para o lineup.
+- **Validação (captura real 2K, 5 bans):** 5/5 corretos com MAE 0.048–0.077; 2º
+  colocado ≥ 0.17; regiões sem ban ≥ 0.13 — separação ampla em relação ao limiar
+  `BAN_MATCH_MAX_SCORE = 0.12`.
+
+---
+
 ## [v1.1.3] — 2026-07-02
 
 ### Suporte aos bans do Competitivo

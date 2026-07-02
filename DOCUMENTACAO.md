@@ -12,10 +12,10 @@ OWPick é uma ferramenta desktop para jogadores de **Overwatch** que automatiza 
 
 - Captura automática da tela de seleção de heróis via hotkey global (`TAB+1`)
 - Identificação de heróis por template matching com janela deslizante (MAE normalizado)
-- **Suporte aos bans do modo Competitivo**: identifica os heróis banidos nos 5 slots de ban e os remove automaticamente do ranking (mesmo tratamento dos heróis já presentes no time)
+- **Suporte aos bans do modo Competitivo**: identifica os heróis banidos nos 5 slots de ban e os remove automaticamente do ranking (mesmo tratamento dos heróis já presentes no time). Os bans usam um banco de templates dedicado (`heroes/bans/`, ícones 3D oficiais — arte diferente dos retratos do lineup) e matching direto, sem janela deslizante
 - Identificação automática do mapa via OCR (Tesseract embutido) + fuzzy match
 - Suporte a múltiplas resoluções de tela: 720p e 2K com escalonamento automático; resoluções intermediárias (1080p) interpoladas
-- **Escolha automática do banco de templates pelo TAMANHO do retrato** (não pela resolução da tela): retratos maiores usam o banco 2K (maior qualidade), menores usam 720p — inclusive escolhendo bancos diferentes para o lineup e para os bans na mesma resolução
+- **Escolha automática do banco de templates do lineup pelo TAMANHO do retrato** (não pela resolução da tela): retratos maiores usam o banco 2K (maior qualidade), menores usam 720p
 - Cálculo de pontuação baseado em:
   - **MetaStrength** (`m_scaled`): desempenho estatístico do herói no mapa atual (z-score da winrate **bruta por role**, atenuado pela confiança da pickrate)
   - **Counter score** (`T_ctr`): quão bem o herói countera os inimigos, com ponderação por ameaça
@@ -65,10 +65,12 @@ Overwatch-Best-Picks/
 │   │   ├── dps/             # Retratos de DPS em 720p
 │   │   ├── sup/             # Retratos de Suporte em 720p
 │   │   └── tank/            # Retratos de Tank em 720p
-│   └── 2k/
-│       ├── dps/             # Retratos de DPS em 2K
-│       ├── sup/             # Retratos de Suporte em 2K
-│       └── tank/            # Retratos de Tank em 2K
+│   ├── 2k/
+│   │   ├── dps/             # Retratos de DPS em 2K
+│   │   ├── sup/             # Retratos de Suporte em 2K
+│   │   └── tank/            # Retratos de Tank em 2K
+│   └── bans/                # Ícones 3D oficiais (128px, pasta plana) — banco
+│                            # dedicado dos bans; serve todas as resoluções
 │
 ├── ocr/                     # Tesseract OCR embutido (binários + tessdata)
 │   ├── tesseract.exe
@@ -161,17 +163,19 @@ screenshot.executar()
   - Para cada variação de perk (0perk, 1perk, bug, 2perk):
       - Recorta ally1..ally5 e enemy1..enemy5 nas coordenadas escaladas
       - Salva em print/{perk}/ally1.png .. enemy5.png
-  - Recorta os 5 slots de ban (uma única vez; independentes de perk)
+  - Recorta os 5 slots de ban (uma única vez; independentes de perk;
+    recorte EXATO do retrato, sem buffer vertical)
       - Salva em print/bans/ban1.png .. ban5.png
         ↓
 comparar.executar()
   - Lê resolução de print/full.png e calcula a escala
   - Escolhe o banco de templates do LINEUP pelo tamanho do retrato normal na
     resolução atual (utils.template_bank_for_resolution) → heroes/720p/ ou heroes/2k/
-  - Bans: escolhe o banco pelo tamanho do retrato de BAN (pode diferir do lineup),
-    compara cada print/bans/ban{n}.png contra TODOS os templates (tank+dps+sup) e,
-    se o melhor MAE ≤ BAN_MATCH_MAX_SCORE, registra o herói banido; senão o slot
-    é tratado como vazio. Escreve os banidos em bans.txt (sempre refresca)
+  - Bans: matching DIRETO contra o banco dedicado heroes/bans/ (ícones 3D
+    oficiais): descarta a moldura vermelha da UI, redimensiona recorte e
+    templates para BAN_COMPARE_SIZE e calcula o MAE (sem janela deslizante).
+    Se o melhor MAE ≤ BAN_MATCH_MAX_SCORE, registra o herói banido; senão o
+    slot é tratado como vazio. Escreve os banidos em bans.txt (sempre refresca)
   - Carrega templates (dps, sup, tank) do banco do lineup em escala de cinza
   - Para cada pasta perk:
       - Desliza janela de altura window_height verticalmente sobre cada recorte
@@ -319,7 +323,7 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 - As 4 variações de perk representam diferentes estados visuais da UI do Overwatch (0, 1 ou 2 habilidades selecionadas, mais uma variante de bug visual)
 - Para cada perk, recorta 10 posições (ally1..5, enemy1..5) com buffer vertical de 8px acima e abaixo
 - Pula o arquivo correspondente à role do jogador (ex: DPS pula `ally2.png`)
-- Recorta os 5 slots de ban (`bans_template`) **uma única vez** em `print/bans/`, com o mesmo `VERTICAL_BUFFER` e reutilizando a mesma função `scale_and_clamp`. Nem todo modo tem bans — slots vazios são descartados adiante, no matching de `comparar.py`
+- Recorta os 5 slots de ban (`bans_template`) **uma única vez** em `print/bans/`, reutilizando `scale_and_clamp`, porém **sem buffer vertical** — diferente do TAB+1, o slot de ban é fixo na UI e o matching é direto, então o recorte é o quadrado exato do retrato (ex.: 62×61 em 2K). Nem todo modo tem bans — slots vazios são descartados adiante, no matching de `comparar.py`
 
 **Produz**: arquivos em `print/{perk}/` e `print/bans/`, lidos por `comparar.py`.
 
@@ -334,9 +338,11 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 - `BASE_CROP_SIZE = (42, 57)` — tamanho base do recorte (lineup) em 720p
 - `BASE_WINDOW_HEIGHT = 42` — altura da janela deslizante (lineup) em 720p
 - `FILE_TO_CATEGORY`: mapeia nome de arquivo para categoria (`dps`, `sup`, `tank`)
-- `BASE_BAN_CROP_SIZE = (31, 31)` / `BASE_BAN_WINDOW_HEIGHT = 31` — tamanho base do recorte/janela de ban em 720p
-- `BANS_DIR_NAME = "bans"` / `BANS_OUTPUT_FILENAME = "bans.txt"` — subpasta de entrada e arquivo de saída dos bans
-- `BAN_MATCH_MAX_SCORE = 0.12` — **limiar de confiança do ban** (MAE normalizado): recorte com melhor MAE acima disso é slot vazio. **Único ponto de ajuste**; o matching imprime o score de cada slot no console para calibração com capturas reais
+- `BANS_DIR_NAME = "bans"` / `BANS_OUTPUT_FILENAME = "bans.txt"` — subpasta de entrada (`print/bans/`) e arquivo de saída dos bans
+- `BAN_TEMPLATES_DIR_NAME = "bans"` — subpasta de `heroes/` com o banco dedicado de ícones de ban
+- `BAN_COMPARE_SIZE = (48, 48)` — tamanho comum de comparação (recorte e templates são redimensionados para ele)
+- `BAN_FRAME_FRACTION = 0.05` — fração de cada borda do recorte descartada (moldura vermelha da UI de ban)
+- `BAN_MATCH_MAX_SCORE = 0.12` — **limiar de confiança do ban** (MAE normalizado): recorte com melhor MAE acima disso é slot vazio. **Único ponto de ajuste.** Calibrado em captura real 2K: herói correto marca 0.04–0.08 e o melhor match de um slot sem ban fica ≥ 0.15; o matching imprime o score de cada slot no console para conferência
 
 **Principais Funções**:
 
@@ -355,7 +361,9 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 | `find_best_match_sliding(img, templates, window_h, crop_w)` | Matching com janela deslizante vertical |
 | `_best_against_templates(window, templates)` | Compara uma janela contra todos os templates |
 | `process_folder(folder_path, templates, crop_size, window_h)` | Processa todos os arquivos em uma pasta perk |
-| `match_bans(watch_dir, full_res, scale)` | Identifica os heróis banidos nos 5 slots de ban (ver abaixo) |
+| `load_ban_templates(templates_dir, size)` | Carrega o banco dedicado `heroes/bans/` (pasta plana, LANCZOS) |
+| `_prepare_ban_crop(path)` | Descarta a moldura da UI e redimensiona o recorte para `BAN_COMPARE_SIZE` |
+| `match_bans(watch_dir)` | Identifica os heróis banidos nos 5 slots de ban (ver abaixo) |
 
 **Algoritmo de Matching (lineup)**:
 1. Lê a resolução de `print/full.png` e calcula a escala
@@ -368,11 +376,25 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 8. Escreve 9 nomes em `lineup.txt` (linhas 0–3: aliados, linhas 4–8: inimigos)
 
 **Algoritmo de Matching (bans)** — `match_bans()`:
-1. Seleciona o banco pelo **tamanho do retrato de ban** na resolução atual (pode diferir do banco do lineup — ex.: em 1080p o lineup usa 2K e os bans usam 720p)
-2. Carrega **todos** os templates (tank+dps+sup) do banco, no tamanho de ban, e os combina em uma única lista (um ban pode ser de qualquer role)
-3. Para cada `print/bans/ban{n}.png`, reutiliza `find_best_match_sliding` contra a lista combinada
+
+Os ícones de ban usam uma **arte diferente** dos retratos do lineup: são os ícones
+3D oficiais do herói (com moldura vermelha da UI), enquanto `heroes/720p|2k`
+contêm os retratos ilustrados da tela de seleção. Por isso os bans têm um banco
+dedicado, `heroes/bans/` (um `.png` de 128px por herói, pasta plana, mesma
+convenção de nomes dos bancos existentes), que serve **todas** as resoluções.
+
+O fluxo é deliberadamente **separado do TAB+1** — sem buffer vertical e sem
+janela deslizante, pois o slot de ban é fixo na UI:
+
+1. Carrega o banco `heroes/bans/` inteiro redimensionado para `BAN_COMPARE_SIZE` (um ban pode ser de qualquer role; downscale com LANCZOS)
+2. Para cada `print/bans/ban{n}.png` (recorte exato do retrato): descarta `BAN_FRAME_FRACTION` de cada borda (moldura vermelha) e redimensiona para `BAN_COMPARE_SIZE`
+3. Compara diretamente contra todos os templates (`_best_against_templates`, MAE normalizado) e pega o menor MAE
 4. Se o melhor MAE ≤ `BAN_MATCH_MAX_SCORE`, o herói é considerado banido; caso contrário o slot é tratado como **vazio** e ignorado
 5. Escreve os banidos (sem repetições) em `bans.txt`. O arquivo é **sempre reescrito** (mesmo vazio), evitando que bans de uma captura anterior "vazem" para a análise atual
+
+Validação (captura real 2K com 5 bans): 5/5 corretos com MAE 0.048–0.077; o
+segundo colocado de cada slot fica ≥ 0.17 e regiões sem ban ficam ≥ 0.13 —
+separação ampla em relação ao limiar de 0.12.
 
 ---
 
@@ -501,23 +523,25 @@ do retrato** que será comparado na resolução atual. Constantes:
 
 - `TEMPLATE_BANK_PORTRAIT_PX = {"720p": 41, "2k": 82}` — tamanho representativo (px) do retrato de cada banco
 - `BASE_PORTRAIT_PX = 41` — tamanho-base (720p) do retrato normal do lineup (em 2K ≈ 82px)
-- `BASE_BAN_PORTRAIT_PX = 31` — tamanho-base (720p) do retrato de ban (em 2K ≈ 62px)
 
 `pick_template_bank` escolhe o banco de tamanho representativo mais próximo, com
 empate resolvido para o banco maior (2K, maior qualidade). O limiar entre bancos é
 o ponto médio dos tamanhos representativos (≈ 61,5px para 41/82) — **regra genérica,
-sem `if` por resolução**. Como cada tipo de retrato tem um tamanho-base diferente,
-lineup e bans podem cair em bancos diferentes na mesma resolução:
+sem `if` por resolução**:
 
-| Resolução | Retrato normal | Banco (lineup) | Retrato de ban | Banco (bans) |
-|---|---|---|---|---|
-| 720p  | ~41px  | 720p | ~31px  | 720p |
-| 1080p | ~61,5px | **2k** | ~46,5px | **720p** |
-| 2K    | ~82px  | 2k   | ~62px  | 2k   |
+| Resolução | Retrato do lineup | Banco (lineup) |
+|---|---|---|
+| 720p  | ~41px   | 720p |
+| 1080p | ~61,5px | **2k** |
+| 2K    | ~82px   | 2k |
 
 Os templates do banco escolhido são então redimensionados pela escala da resolução
 atual (`compute_dims` em `comparar.py`), sem necessidade de uma pasta dedicada por
 resolução.
+
+**Obs.:** os **bans não passam por esta escolha** — usam o banco dedicado
+`heroes/bans/` (fonte de 128px, redimensionada para `BAN_COMPARE_SIZE` em
+qualquer resolução; ver `comparar.match_bans`).
 
 **Configuração**:
 - `load_capture_config()`: lê `config.json` com âncoras de captura por resolução
@@ -665,7 +689,9 @@ w_e = softplus(1 + λ · Σ_a C(e, a))   # λ = 0.25; a ∈ aliados do jogador
 
 ### Templates de Imagem
 
-Os templates estão organizados em `heroes/{resolucao}/{role}/` onde `resolucao` é `720p` ou `2k`. Cada arquivo é uma imagem `.png` do retrato do herói extraída da tela de seleção do Overwatch 2.
+Os templates do **lineup** estão organizados em `heroes/{resolucao}/{role}/` onde `resolucao` é `720p` ou `2k`. Cada arquivo é uma imagem `.png` do retrato ilustrado do herói extraída da tela de seleção do Overwatch 2.
+
+Os templates dos **bans** ficam em `heroes/bans/` (pasta plana, sem divisão por role ou resolução): um `.png` de 128×128 por herói com o **ícone 3D oficial** — a mesma arte exibida nos slots de ban da UI, que é diferente do retrato ilustrado do lineup. Os nomes de arquivo seguem a mesma convenção dos bancos existentes (`DVa.png`, `Soldier 76.png`, `Lúcio.png`, ...).
 
 ---
 
@@ -720,6 +746,7 @@ O Tesseract está embutido no repositório e no executável. Não é necessário
 
 ### Adição de Novos Heróis
 
-Para adicionar um novo herói ao sistema, é necessário atualizar pelo menos dois lugares:
+Para adicionar um novo herói ao sistema, é necessário atualizar pelo menos três lugares:
 1. A constante `HEROES_ROLES` em `utils.py` (fonte de verdade para nome e role)
-2. A pasta `heroes/` com os templates de imagem nas resoluções suportadas (`720p` e `2k`)
+2. A pasta `heroes/` com os templates de imagem do lineup nas resoluções suportadas (`720p` e `2k`)
+3. A pasta `heroes/bans/` com o ícone 3D oficial do herói (para o reconhecimento de bans)
