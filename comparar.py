@@ -36,6 +36,23 @@ FILE_TO_CATEGORY = {
     "enemy5.png": "sup",
 }
 
+# --- Bans do competitivo -----------------------------------------------------
+# Recortes quadrados no topo da tela (5 slots), gerados por screenshot.py em
+# print/bans/. Tamanho-base em 720p; escalado pela resolução atual como os demais.
+BASE_BAN_CROP_SIZE     = (31, 31)   # (largura, altura) do recorte de ban em 720p
+BASE_BAN_WINDOW_HEIGHT = 31         # altura da janela deslizante do ban em 720p
+BANS_DIR_NAME          = "bans"     # subpasta de print/ com os recortes de ban
+BANS_OUTPUT_FILENAME   = "bans.txt" # saída lida por choose_ow_hero.py
+
+# Limiar de confiança do matching de ban (MAE normalizado, 0-1). ÚNICO ponto de
+# ajuste: um recorte cujo melhor MAE for MAIOR que isto é considerado slot VAZIO
+# (sem herói banido) e ignorado. Menor = mais rígido (evita falso positivo em
+# slot vazio, mas pode perder um ban mal-alinhado); maior = mais permissivo.
+# Referência: um match idêntico marca ~0.00 e um slot claramente vazio fica bem
+# acima deste valor. O matching imprime o score de CADA slot no console — use
+# esses números em capturas reais (com e sem bans) para calibrar este limiar.
+BAN_MATCH_MAX_SCORE = 0.12
+
 
 # ---------------------------------------------------------------------------
 # Resolução / escala
@@ -254,6 +271,74 @@ def process_folder(folder_path: Path, templates_by_category,
 
 
 # ---------------------------------------------------------------------------
+# Bans do competitivo
+# ---------------------------------------------------------------------------
+
+def match_bans(watch_dir: Path, full_res, scale: float) -> list:
+    """
+    Detecta os heróis banidos nos 5 slots de ban do competitivo.
+
+    Cada slot é recortado por screenshot.py em print/bans/ban{1..5}.png. Como um
+    ban pode ser de QUALQUER role, cada recorte é comparado contra TODOS os
+    templates (tank+dps+sup) do banco escolhido pelo TAMANHO do retrato de ban na
+    resolução atual — que pode ser diferente do banco usado no lineup. Reutiliza
+    o mesmo matching por janela deslizante (find_best_match_sliding).
+
+    Se o melhor MAE de um slot ficar acima de BAN_MATCH_MAX_SCORE, o slot é
+    considerado vazio (sem herói banido) e ignorado.
+
+    Retorna a lista de heróis banidos (sem repetições, na ordem dos slots).
+    """
+    ban_dir = watch_dir / BANS_DIR_NAME
+    if not ban_dir.exists():
+        return []
+
+    # Banco escolhido pelo tamanho do retrato de ban (lógica centralizada em utils).
+    if full_res is not None:
+        ban_folder = utils.template_bank_for_resolution(full_res[0], utils.BASE_BAN_PORTRAIT_PX)
+    else:
+        ban_folder = "720p"
+    templates_dir = templates_base_dir / ban_folder
+
+    (ban_crop_w, _ban_crop_h), ban_window_h = compute_dims(
+        scale, base_crop=BASE_BAN_CROP_SIZE, base_window_h=BASE_BAN_WINDOW_HEIGHT
+    )
+    ban_template_size = (ban_crop_w, ban_window_h)
+
+    try:
+        templates_by_category = load_all_templates(templates_dir, ban_template_size)
+    except RuntimeError as e:
+        print(f"AVISO: bans sem templates ({e}).")
+        return []
+    all_templates = [t for cat in templates_by_category.values() for t in cat]
+
+    print(f"Bans: banco '{ban_folder}', limiar MAE <= {BAN_MATCH_MAX_SCORE:.2f}")
+
+    banned: list = []
+    seen: set = set()
+    for i in range(1, 6):
+        p = ban_dir / f"ban{i}.png"
+        if not p.exists():
+            continue
+        try:
+            img = load_image_gray(p, target_size=None)
+        except Exception as e:  # noqa: BLE001
+            print(f"  ban{i}: falha ao abrir ({e}) -> pulando")
+            continue
+
+        name, score = find_best_match_sliding(img, all_templates, ban_window_h, ban_crop_w)
+        if name is not None and score <= BAN_MATCH_MAX_SCORE:
+            norm = utils.normalize_hero_name(name)
+            if norm not in seen:
+                seen.add(norm)
+                banned.append(name)
+            print(f"  ban{i}: {name} (score={score:.4f}) [BANIDO]")
+        else:
+            print(f"  ban{i}: vazio (melhor='{name}', score={score:.4f})")
+    return banned
+
+
+# ---------------------------------------------------------------------------
 # Ponto de entrada
 # ---------------------------------------------------------------------------
 
@@ -266,20 +351,37 @@ def executar():
     #print(f"crop_size={crop_size}  window_height={window_height}  "
           #f"template_size={template_size}")
 
-    # 2. Escolher subpasta de templates pela resolução detectada nas prints
-    # Seleciona a pasta de templates pela resolução REAL da tela (full.png),
-    # via lógica centralizada em utils. Para 1080p (equidistante de 720p e 2k)
-    # a regra de desempate escolhe 2k, e os templates são redimensionados pela
-    # escala calculada acima — sem necessidade de uma pasta 1080p dedicada.
+    # 2. Escolher subpasta de templates pelo TAMANHO do retrato na resolução atual
+    # (lógica centralizada em utils.template_bank_for_resolution). O retrato normal
+    # tem base ~41px em 720p; escalado pela resolução real de full.png, o banco é
+    # o de tamanho representativo mais próximo. Para 1080p (~61.5px) o desempate
+    # escolhe 2k (maior qualidade); os templates são então redimensionados pela
+    # escala calculada acima — sem necessidade de uma pasta dedicada por resolução.
     full_res = get_full_resolution(watch_dir)
     if full_res is not None:
-        res_folder = utils.nearest_resolution_key(full_res[0], full_res[1])
+        res_folder = utils.template_bank_for_resolution(full_res[0], utils.BASE_PORTRAIT_PX)
     else:
         res_folder = find_nearest_resolution_folder(
             detect_screenshot_resolution(watch_dir, perks_names), KNOWN_RESOLUTIONS
         )
     templates_dir = templates_base_dir / res_folder
-    print(f"Pasta de templates: {res_folder}")
+    print(f"Pasta de templates (lineup): {res_folder}")
+
+    # 2b. Bans do competitivo — detectados e persistidos ANTES do lineup, para
+    # sempre refrescar bans.txt (evita usar bans obsoletos de uma captura
+    # anterior) independentemente do resultado do matching do lineup.
+    try:
+        banned = match_bans(watch_dir, full_res, scale)
+    except Exception as e:  # noqa: BLE001
+        print(f"AVISO: falha ao processar bans: {e}")
+        banned = []
+    (Path.cwd() / BANS_OUTPUT_FILENAME).write_text(
+        "".join(f"{h}\n" for h in banned), encoding="utf-8"
+    )
+    if banned:
+        print(f"Bans detectados: {', '.join(banned)}")
+    else:
+        print("Nenhum ban detectado (modo sem bans ou slots vazios).")
 
     try:
         templates_by_category = load_all_templates(templates_dir, template_size)

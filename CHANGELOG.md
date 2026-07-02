@@ -4,6 +4,48 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.1.3] — 2026-07-02
+
+### Suporte aos bans do Competitivo
+
+- **Novo:** o pipeline identifica os heróis banidos nos até 5 slots de ban da parte
+  superior da tela e os remove automaticamente do ranking, com o **mesmo tratamento
+  de indisponibilidade** dos heróis já presentes no time aliado.
+- `screenshot.py`: novos recortes `bans_template` (5 slots) salvos em `print/bans/`.
+  As coordenadas foram convertidas da referência 2K (÷2) para a base 1280×720,
+  reutilizando `scale_and_clamp` e o `VERTICAL_BUFFER` já existentes. Cada slot tem
+  seu próprio `left` (independente das variações de perk) e é capturado uma única vez.
+- `comparar.py`: nova função `match_bans()` compara cada slot contra **todos** os
+  templates (tank+dps+sup) — um ban pode ser de qualquer role — reutilizando
+  `find_best_match_sliding`. Um slot cujo melhor MAE fique acima de
+  `BAN_MATCH_MAX_SCORE` é considerado **vazio** e ignorado (modos sem bans / slots
+  não preenchidos). Resultado gravado em `bans.txt` (sempre reescrito).
+- `choose_ow_hero.py`: novo `read_bans()`; os banidos entram na regra rígida de
+  exclusão junto com os aliados. Relata "Excluídos (banidos)" separadamente.
+- **Limiar configurável:** `BAN_MATCH_MAX_SCORE` (MAE normalizado) é o único ponto de
+  ajuste. O matching imprime o score de cada slot no console para calibração a partir
+  de capturas reais. Padrão inicial: `0.12`.
+
+### Escolha do banco de templates pelo tamanho do retrato
+
+- **Antes:** o banco (`720p`/`2k`) era escolhido pela distância de resolução da tela
+  (`nearest_resolution_key`).
+- **Agora:** a escolha é pelo **tamanho do retrato** que será comparado na resolução
+  atual (`utils.pick_template_bank` / `template_bank_for_resolution`). Regra genérica,
+  sem `if` por resolução: escolhe o banco de tamanho representativo mais próximo, com
+  empate para o banco maior (2K, maior qualidade). O limiar é o ponto médio dos
+  tamanhos representativos (≈ 61,5px para 41/82).
+- Como cada tipo de retrato tem tamanho-base próprio (`BASE_PORTRAIT_PX = 41`,
+  `BASE_BAN_PORTRAIT_PX = 31`), lineup e bans podem usar bancos diferentes na mesma
+  resolução — ex.: em **1080p** o lineup usa **2K** (~61,5px) e os bans usam **720p**
+  (~46,5px). Toda a regra de resolução permanece centralizada em `utils.py`.
+
+### Melhorias de dados (planilha de counters)
+
+- Ajustes nos counters de **Kiriko**, **Illari** e **Wuyang** em `heroes enemy.xlsx`.
+
+---
+
 ## [v1.1.2] — 2026-06-20
 
 ### Correção do Meta Strength

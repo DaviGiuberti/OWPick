@@ -17,7 +17,8 @@ onde:
                      inclui desempenho do inimigo no mapa atual; softplus > 0 sempre)
     T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
 
-Heróis já presentes no time aliado são EXCLUÍDOS do ranking (regra rígida,
+Heróis já presentes no time aliado E heróis banidos no competitivo (bans.txt)
+são EXCLUÍDOS do ranking (regra rígida, mesmo tratamento de indisponibilidade;
 substitui o antigo hack do -11 na diagonal de sinergia).
 
 As planilhas são lidas uma única vez e convertidas em dicionários com chaves
@@ -104,6 +105,21 @@ def read_lineup(filepath: str = "lineup.txt") -> Tuple[List[str], List[str]]:
     allies = [a for a in lines[:4] if a]
     enemies = [e for e in lines[4:9] if e]
     return allies, enemies
+
+
+def read_bans(filepath: str = "bans.txt") -> List[str]:
+    """Lê bans.txt (gerado por comparar.py). Lista vazia se ausente/vazio.
+
+    Cada linha é um herói banido no competitivo. Modos sem bans (ou slots
+    vazios) produzem arquivo vazio -> nenhuma exclusão por ban.
+    """
+    if not os.path.exists(filepath):
+        return []
+    try:
+        with open(filepath, "r", encoding="utf-8") as f:
+            return [line.strip() for line in f if line.strip()]
+    except Exception:  # noqa: BLE001
+        return []
 
 
 def read_current_map(filepath: str = "current_map.txt") -> str:
@@ -351,6 +367,10 @@ def run_hero_ranking():
         print("Arquivo 'lineup.txt' não encontrado. Rode a análise de imagem (TAB+1) primeiro.")
         return
 
+    banned = read_bans()
+    if banned:
+        print(f"Banidos: {', '.join(banned)}")
+
     mapa_atual = read_current_map()
     print(f"Mapa atual: {mapa_atual}\n")
 
@@ -373,14 +393,22 @@ def run_hero_ranking():
     # Exibe o ranking de ameaças antes da recomendação.
     print_threat_ranking(enemies, threat_weights)
 
-    # Heróis já no time aliado são excluídos do ranking (regra rígida).
+    # Heróis já no time aliado OU banidos são excluídos do ranking (regra rígida).
+    # Bans do competitivo recebem exatamente o mesmo tratamento de indisponível
+    # que os aliados já presentes no time.
     allies_norm = {normalize_hero_name(a) for a in allies if a}
+    banned_norm = {normalize_hero_name(b) for b in banned if b}
 
     rankings: List[Dict[str, float]] = []
-    excluded: List[str] = []
+    excluded_ally: List[str] = []
+    excluded_ban: List[str] = []
     for hero in playable_heroes:
-        if normalize_hero_name(hero) in allies_norm:
-            excluded.append(hero)
+        hn = normalize_hero_name(hero)
+        if hn in allies_norm:
+            excluded_ally.append(hero)
+            continue
+        if hn in banned_norm:
+            excluded_ban.append(hero)
             continue
         rankings.append(
             calculate_hero_score(
@@ -389,8 +417,10 @@ def run_hero_ranking():
             )
         )
 
-    if excluded:
-        print(f"Excluídos (já no time aliado): {', '.join(excluded)}\n")
+    if excluded_ally:
+        print(f"Excluídos (já no time aliado): {', '.join(excluded_ally)}\n")
+    if excluded_ban:
+        print(f"Excluídos (banidos): {', '.join(excluded_ban)}\n")
 
     if not rankings:
         print("Nenhum herói candidato disponível para ranquear.")

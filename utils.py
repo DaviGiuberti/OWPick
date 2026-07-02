@@ -254,6 +254,57 @@ def nearest_resolution_key(full_w: int, full_h: int,
 
 
 # ---------------------------------------------------------------------------
+# Escolha do banco de templates pelo TAMANHO do retrato (não pela resolução)
+# ---------------------------------------------------------------------------
+# Tamanho representativo (px) do retrato de cada banco de templates, medido na
+# tela do jogo. É a régua usada para escolher o banco por proximidade de tamanho.
+TEMPLATE_BANK_PORTRAIT_PX: Dict[str, float] = {
+    "720p": 41.0,   # retrato ~41x41 na tela em 720p (templates ~41px)
+    "2k":   82.0,   # retrato ~82x82 na tela em 2K (templates ~82px)
+}
+
+# Tamanho-base (px, medido em 720p) do retrato capturado, por tipo de recorte.
+# É escalado pela resolução atual antes de escolher o banco (template_bank_for_resolution).
+BASE_PORTRAIT_PX = 41.0      # retrato normal (TAB+1 / lineup) em 720p (~41px; em 2K ~82px)
+BASE_BAN_PORTRAIT_PX = 31.0  # retrato dos slots de ban do competitivo em 720p (~31px; em 2K ~62px)
+
+
+def pick_template_bank(portrait_px: float,
+                       bank_sizes: Optional[Dict[str, float]] = None) -> str:
+    """
+    Escolhe o banco de templates cujo retrato representativo é o mais PRÓXIMO em
+    tamanho de `portrait_px` (o tamanho, em px, do retrato que será comparado na
+    resolução atual). Em caso de empate, prefere o banco de MAIOR resolução
+    (mais qualidade), coerente com o desempate de nearest_resolution_key.
+
+    Regra genérica, sem ifs por resolução: o limiar entre dois bancos é o ponto
+    médio dos seus tamanhos representativos (≈61.5px para 41/82). Retratos
+    menores usam 720p e maiores usam 2k, independentemente da resolução da tela.
+    """
+    bank_sizes = bank_sizes or TEMPLATE_BANK_PORTRAIT_PX
+    best_key, best_metric = None, None
+    for key, size in bank_sizes.items():
+        metric = (abs(portrait_px - size), -size)  # empate -> maior tamanho (2k)
+        if best_metric is None or metric < best_metric:
+            best_metric, best_key = metric, key
+    return best_key
+
+
+def template_bank_for_resolution(full_w: int,
+                                 base_portrait_px: float = BASE_PORTRAIT_PX) -> str:
+    """
+    Banco de templates recomendado para a resolução atual (`full_w`), para um
+    retrato cujo tamanho em 720p é `base_portrait_px`. Escala o retrato pela
+    resolução atual e delega a pick_template_bank.
+
+    Como cada TIPO de retrato (normal vs ban) tem um tamanho-base diferente,
+    dois tipos podem cair em bancos diferentes NA MESMA resolução — ex.: em 1080p
+    o retrato normal (~61.5px) usa 2k, enquanto o retrato de ban (~46.5px) usa 720p.
+    """
+    return pick_template_bank(base_portrait_px * resolution_scale(full_w))
+
+
+# ---------------------------------------------------------------------------
 # Configuração de captura (config.json) — região do mapa por resolução
 # ---------------------------------------------------------------------------
 CONFIG_FILE = "config.json"

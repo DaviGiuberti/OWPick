@@ -1,5 +1,5 @@
 {
-    "version": "1.1.2",
-    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.2/OWPick_v1.1.2.zip",
-    "notas": "Correcao do modelo de scoring (Meta Strength e Threat Weighting). Meta Strength agora usa estatisticas por role (DPS/TANK/SUP), sigma da winrate bruta e confianca via pickrate (conf = pr/(pr+k0)), com escala final ALPHA = 2.25 - corrige mistura de roles, sigma encolhido e o antigo kappa que encolhia ~99% da winrate observada. Threat Weighting agora usa softplus (w_e = ln(1 + e^raw)) no lugar do piso, preservando a ordenacao das ameacas baixas em vez de cravar todas no piso. Removidos o shrinkage antigo e a constante KAPPA_BASE."
+    "version": "1.1.3",
+    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.3/OWPick_v1.1.3.zip",
+    "notas": "Suporte aos bans do Competitivo: os herois banidos nos 5 slots de ban sao identificados automaticamente e removidos do ranking (tratados como indisponiveis, igual aos herois ja presentes no seu time). Escolha automatica do banco de templates (720p/2k) pelo TAMANHO do retrato na resolucao atual, e nao mais pela resolucao da tela - lineup e bans podem usar bancos diferentes na mesma resolucao (ex.: em 1080p o lineup usa 2k e os bans usam 720p), sempre preferindo o banco de maior qualidade no empate. Limiar do matching de ban configuravel (BAN_MATCH_MAX_SCORE), com score de cada slot impresso no console para calibracao. Melhorias nos counters da Kiriko, da Illari e do Wuyang."
 }

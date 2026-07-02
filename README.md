@@ -8,8 +8,9 @@ Ferramenta de recomendação automática de heróis para **Overwatch**. O progra
 
 - **Captura automática** da tela de seleção com hotkey global (`TAB+1`)
 - **Identificação de heróis** por template matching (janela deslizante com MAE normalizado)
+- **Suporte aos bans do Competitivo**: heróis banidos são identificados e removidos automaticamente do ranking (tratados como indisponíveis, igual aos heróis já no seu time)
 - **Identificação automática do mapa** via OCR (Tesseract embutido) + fuzzy matching
-- **Suporte a múltiplas resoluções**: 720p, 1080p e 2K, com escalonamento automático
+- **Suporte a múltiplas resoluções**: 720p, 1080p e 2K, com escalonamento automático e escolha inteligente do banco de templates pelo tamanho do retrato
 - **Ranking de heróis** ordenado por pontuação combinada de MetaStrength + counter + sinergia
 - **Threat Weighting integrado**: amplifica automaticamente inimigos perigosos e fortes no mapa atual
 - **Ranking de ameaças inimigas**: exibido antes do ranking de heróis, ordenado por periculosidade
@@ -106,9 +107,9 @@ TAB + 1
 
 O programa irá:
 1. Capturar a tela automaticamente
-2. Identificar os heróis aliados e inimigos
+2. Identificar os heróis aliados e inimigos (e os banidos, no Competitivo)
 3. Identificar o mapa atual
-4. Calcular e exibir o ranking no console
+4. Calcular e exibir o ranking no console (heróis banidos são omitidos)
 
 ### Exemplo de Saída
 
@@ -158,10 +159,10 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.1.2`
+**Versão atual**: `1.1.3`
 
 Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.1.2.zip`
+1. Baixe o arquivo `OWPick_v1.1.3.zip`
 2. Extraia em qualquer pasta
 3. Execute `OWPick.exe`
 
@@ -177,11 +178,11 @@ O sistema opera em um **pipeline de 4 etapas** acionado por hotkey:
 [TAB+1]
    │
    ▼
-screenshot.py      ← Captura a tela e recorta os retratos (4 variações de perk)
-   │  print/{perk}/ally1..5.png, enemy1..5.png, print/full.png
+screenshot.py      ← Captura a tela e recorta os retratos (4 perks) + 5 slots de ban
+   │  print/{perk}/ally1..5.png, enemy1..5.png, print/bans/ban1..5.png, print/full.png
    ▼
 comparar.py        ← Template matching com sliding window (MAE normalizado)
-   │  lineup.txt (4 aliados + 5 inimigos)
+   │  lineup.txt (4 aliados + 5 inimigos) + bans.txt (0-5 banidos)
    ▼
 map.py             ← OCR (Tesseract) + fuzzy match → nome do mapa
    │  current_map.txt

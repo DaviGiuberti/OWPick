@@ -37,6 +37,19 @@ def executar():
         ('2perk', 197),
     ]
 
+    # --- Slots de ban do competitivo (parte superior da tela) ---
+    # Coordenadas convertidas da referência 2K (÷2) para a base 1280x720, para
+    # reutilizar o mesmo escalonamento (scale_x/scale_y) dos demais recortes.
+    # Cada slot tem seu próprio 'left' (independente das variações de perk) e é
+    # capturado UMA única vez. Slots vazios são descartados depois, no matching.
+    bans_template = [
+        {'left': 270.5, 'top': 14.0, 'width': 31.0, 'height': 30.5, 'name': 'ban1.png'},
+        {'left': 311.5, 'top': 13.5, 'width': 32.0, 'height': 31.5, 'name': 'ban2.png'},
+        {'left': 353.5, 'top': 13.5, 'width': 31.5, 'height': 31.5, 'name': 'ban3.png'},
+        {'left': 395.0, 'top': 13.5, 'width': 31.5, 'height': 31.0, 'name': 'ban4.png'},
+        {'left': 437.0, 'top': 13.5, 'width': 31.5, 'height': 31.0, 'name': 'ban5.png'},
+    ]
+
     # --- Ler role a partir de Roles.txt (mesmo diretório do script) ---
     def read_role():
         role_path = "Roles.txt"
@@ -133,6 +146,20 @@ def executar():
             out_path = os.path.join(perk_dir, c['name'])
             crop.save(out_path)
             saved_count += 1
+
+    # 3) recortar os slots de ban (uma única vez; não dependem de perk)
+    bans_dir = os.path.join(outdir, "bans")
+    os.makedirs(bans_dir, exist_ok=True)
+    for b in bans_template:
+        # mesmo buffer vertical dos demais recortes, para a busca por janela deslizante
+        top_with_buffer = b['top'] - VERTICAL_BUFFER
+        height_with_buffer = b['height'] + (2 * VERTICAL_BUFFER)
+
+        left, top, right, bottom = scale_and_clamp(
+            b['left'], top_with_buffer, b['width'], height_with_buffer, full_w, full_h
+        )
+        crop = full_img.crop((left, top, right, bottom))
+        crop.save(os.path.join(bans_dir, b['name']))
 
 if __name__ == "__main__":
     executar()
