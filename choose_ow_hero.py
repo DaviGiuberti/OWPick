@@ -354,7 +354,7 @@ def run_hero_ranking():
     role = read_role()
     if role is None:
         return
-    print(f"Role selecionada: {role}\n")
+    # print(f"Role selecionada: {role}\n")    
 
     playable_heroes = read_playable_heroes(role)
     print(f"Heróis disponíveis: {', '.join(playable_heroes)}\n")

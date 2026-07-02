@@ -4,6 +4,23 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.1.5] — 2026-07-02
+
+### Terminal mais limpo
+
+- Removidos os prints de diagnóstico/debug do pipeline (execução via TAB+1):
+  detecção de resolução/escala, pasta de templates escolhida, score de cada slot
+  de ban individualmente e confirmação de escrita de `lineup.txt`. O console
+  passa a exibir só o essencial em cada etapa (heróis identificados, bans, mapa
+  e o ranking final), sem alterar nenhum comportamento do reconhecimento.
+
+### Atualização de dados — Season 3
+
+- `stats_inputs.csv` atualizado com winrate/pickrate por mapa da **Season 3**,
+  fonte do MetaStrength no scoring.
+
+---
+
 ## [v1.1.4] — 2026-07-02
 
 ### Correção do reconhecimento dos bans (banco de arte dedicado)

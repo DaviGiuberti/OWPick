@@ -35,19 +35,19 @@ def print_small_menu():
 def run_pipeline():
     """ Executa o fluxo principal: Print -> Comparar -> Escolher Herói """
     try:
-        print(">>> Capturando a tela...")
+        print("\n>>> Capturando a tela...")
         screenshot.executar()
 
-        print(">>> Comparando os prints com os heróis do Overwatch...")
+        print("\n>>> Comparando os prints com os heróis do Overwatch...")
         comparar.executar()
 
-        print(">>> Identificando o mapa atual...")
+        print("\n>>> Identificando o mapa atual...")
         try:
             map_module.executar()
         except Exception as e:
             print(f"Aviso: falha ao identificar o mapa (seguindo sem MetaStrength): {e}")
 
-        print(">>> Executando escolha de herói...")
+        print("\n>>> Executando escolha de herói...")
         choose_ow_hero.run_hero_ranking()
 
     except Exception as e:
@@ -60,7 +60,7 @@ def run_pipeline():
 
 def run_role():
     try:
-        print(">>> Qual a Role que está jogando?")
+        print("\n>>> Qual a Role que está jogando?")
         roles.executar()
         print("Role atualizada.")
     except Exception as e:
@@ -68,7 +68,7 @@ def run_role():
 
 def run_favorite():
     try:
-        print(">>> Quais heróis quer adicionar ao sistema de pontuação?")
+        print("\n>>> Quais heróis quer adicionar ao sistema de pontuação?")
         favoriteHero.executar()
     except Exception as e:
         print(f"Erro em favoritos: {e}")

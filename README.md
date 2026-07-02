@@ -160,10 +160,10 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.1.4`
+**Versão atual**: `1.1.5`
 
 Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.1.4.zip`
+1. Baixe o arquivo `OWPick_v1.1.5.zip`
 2. Extraia em qualquer pasta
 3. Execute `OWPick.exe`
 

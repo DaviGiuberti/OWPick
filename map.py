@@ -153,7 +153,8 @@ def executar() -> str:
         print(f"[map.py] AVISO: não foi possível gravar {OUTPUT_FILE}: {e}")
 
     if mapa != "UNKNOWN":
-        print(f"[map.py] Mapa identificado: '{mapa}' (score={score:.1f})")
+        # print(f"[map.py] Mapa identificado: '{mapa}' (score={score:.1f})")
+        print(f"Mapa identificado")
     else:
         print("[map.py] Mapa não identificado -> UNKNOWN")
     return mapa

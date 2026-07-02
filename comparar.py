@@ -83,7 +83,7 @@ def get_scale_from_full(watch_dir: Path, base_resolution=BASE_RESOLUTION) -> flo
         return 1.0
     w, h = res
     scale = w / base_resolution[0]
-    print(f"full.png detectado: {w}x{h} -> escala {scale:.4f}")
+    # print(f"full.png detectado: {w}x{h} -> escala {scale:.4f}")
     return scale
 
 
@@ -337,8 +337,8 @@ def match_bans(watch_dir: Path) -> list:
     if not templates:
         return []
 
-    print(f"Bans: banco dedicado 'heroes/{BAN_TEMPLATES_DIR_NAME}', "
-          f"limiar MAE <= {BAN_MATCH_MAX_SCORE:.2f}")
+    #print(f"Bans: banco dedicado 'heroes/{BAN_TEMPLATES_DIR_NAME}', "
+    #      f"limiar MAE <= {BAN_MATCH_MAX_SCORE:.2f}")
 
     banned: list = []
     seen: set = set()
@@ -391,7 +391,7 @@ def executar():
             detect_screenshot_resolution(watch_dir, perks_names), KNOWN_RESOLUTIONS
         )
     templates_dir = templates_base_dir / res_folder
-    print(f"Pasta de templates (lineup): {res_folder}")
+    # print(f"Pasta de templates (lineup): {res_folder}")
 
     # 2b. Bans do competitivo — detectados e persistidos ANTES do lineup, para
     # sempre refrescar bans.txt (evita usar bans obsoletos de uma captura
@@ -444,8 +444,8 @@ def executar():
         for input_filename, matched_name, score in best["results"]:
             f.write(f"{matched_name}\n")
 
-    print(f"lineup.txt escrito em {out_file.resolve()} "
-          f"(pasta: {best['path'].name}, avg_score: {best['avg_score']:.4f})")
+    #print(f"lineup.txt escrito em {out_file.resolve()} "
+    #      f"(pasta: {best['path'].name}, avg_score: {best['avg_score']:.4f})")
 
 
 if __name__ == "__main__":

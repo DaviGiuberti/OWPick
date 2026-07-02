@@ -1,5 +1,5 @@
 {
-    "version": "1.1.4",
-    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.4/OWPick_v1.1.4.zip",
-    "notas": "Correcao do reconhecimento dos bans do Competitivo."
+    "version": "1.1.5",
+    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.5/OWPick_v1.1.5.zip",
+    "notas": "Terminal mais limpo: removidos prints de diagnostico/debug do pipeline (TAB+1), mantendo apenas as informacoes essenciais (herois identificados, bans, mapa e o ranking). Atualizacao do stats_inputs.csv com os dados da Season 3 (winrate/pickrate por mapa)."
 }
