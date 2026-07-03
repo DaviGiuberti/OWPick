@@ -358,9 +358,6 @@ def match_bans(watch_dir: Path) -> list:
             if norm not in seen:
                 seen.add(norm)
                 banned.append(name)
-            print(f"  ban{i}: {name} (score={score:.4f}) [BANIDO]")
-        else:
-            print(f"  ban{i}: vazio (melhor='{name}', score={score:.4f})")
     return banned
 
 

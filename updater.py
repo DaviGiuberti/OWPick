@@ -10,14 +10,21 @@ Como funciona:
        - Relançar o programa automaticamente
 
 Como lançar uma atualização (você, desenvolvedor):
-  1. Incremente a versão em 'version.txt' antes de buildar (ex: "1.1.0" -> "1.2.0")
-  2. Gere o novo executável com PyInstaller normalmente
-       (certifique-se de incluir o version.txt no build:
-        --add-data "version.txt;." no comando, ou via .spec)
-  3. Compacte a pasta dist/OWPick inteira num .zip chamado 'OWPick_v1.2.0.zip'
-  4. Suba o .zip em algum lugar acessível (ex: GitHub Releases)
-  5. Atualize o 'version.json' no GitHub com a nova versão e a URL do .zip
+  1. Incremente a versão em 'version.txt' (ex: "1.1.5" -> "1.1.6")
+  2. Rode 'build.bat' — ele gera, de uma vez:
+       dist/OWPick/                  (build one-folder do PyInstaller)
+       dist/OWPick_v<versao>.zip     (pacote consumido por ESTE updater)
+       dist/OWPick Installer.exe     (instalador p/ novos usuários)
+  3. Suba o .zip E o instalador na GitHub Release da nova versão
+  4. Atualize o 'version.json' no GitHub com a nova versão e a URL do .zip
      Só após esse passo os usuários verão a atualização disponível.
+
+Distribuição:
+  - NOVOS usuários instalam via 'OWPick Installer.exe' (Inno Setup), que
+    instala em %LOCALAPPDATA%\\Programs\\OWPick (per-user, sem admin).
+  - Usuários EXISTENTES atualizam por este módulo: o .zip é aplicado por
+    cima da pasta de instalação (gravável sem admin — por isso o instalador
+    é per-user; NÃO mover a instalação para Program Files).
 """
 
 import os

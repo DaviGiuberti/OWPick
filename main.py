@@ -10,6 +10,7 @@ import favoriteHero
 import roles
 import screenshot
 import updater  # <-- ADICIONADO
+import utils
 import map as map_module  # identificação automática do mapa (OCR)
 
 
@@ -163,6 +164,10 @@ def input_loop():   # função em loop
 # Configuração Inicial
 
 if __name__ == "__main__":
+
+    # Identidade do app na taskbar do Windows (AppUserModelID + ícone da
+    # janela). Precisa rodar antes de qualquer print/janela — ver utils.py.
+    utils.configure_windows_app_identity()
 
     # =========================================================
     # VERIFICAÇÃO DE ATUALIZAÇÃO  –  ADICIONADO

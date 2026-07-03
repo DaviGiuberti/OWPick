@@ -4,6 +4,43 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.1.6] — 2026-07-03
+
+### Distribuição profissional via instalador (Inno Setup)
+
+- Novos usuários passam a baixar **um único arquivo**: `OWPick Installer.exe`.
+  A pasta `_internal` do build one-folder do PyInstaller deixa de ficar exposta —
+  fica escondida dentro do diretório de instalação.
+- **Instalação per-user** em `%LOCALAPPDATA%\Programs\OWPick` (sem admin/UAC),
+  escolhida deliberadamente para manter o **auto-updater** atual funcionando:
+  o `robocopy` do update continua com permissão de escrita na instalação.
+- Novo `installer.iss` (script Inno Setup): atalhos no Menu Iniciar e na Área de
+  Trabalho (opcional), desinstalador no Windows, idiomas PT-BR/EN, versão lida
+  de `version.txt` (fonte única).
+- Novo `build.bat`: build completo em um comando — PyInstaller → zip do
+  auto-updater (`OWPick_v<versão>.zip`) → instalador (`OWPick Installer.exe`).
+- O fluxo do auto-updater **não mudou**: usuários existentes continuam
+  atualizando pelo `.zip` publicado na Release (URL em `version.json`).
+
+### Correção definitiva do ícone na barra de tarefas do Windows 11
+
+- **Causa raiz:** no Windows 11 o host de console padrão é o **Windows
+  Terminal**; a janela do app pertence ao Terminal e a barra de tarefas agrupa
+  janelas pelo **AppUserModelID (AUMID)**. Sem AUMID explícito, o OWPick herdava
+  a identidade do Terminal → ícone genérico. Além disso, `icone.ico` só tinha o
+  tamanho 256×256 (a taskbar usa 16–32px).
+- **Correções:**
+  - `utils.configure_windows_app_identity()` (chamada no início de `main.py`):
+    declara o AUMID `DaviGiuberti.OWPick` via
+    `SetCurrentProcessExplicitAppUserModelID` e aplica o ícone embutido do exe
+    à janela do console via `WM_SETICON`.
+  - Os atalhos criados pelo instalador gravam o **mesmo AUMID** — mecanismo
+    oficial pelo qual a taskbar do Win10/Win11 resolve o ícone do aplicativo.
+  - `icone.ico` regenerado como multi-tamanho (16, 20, 24, 32, 40, 48, 64,
+    128 e 256 px).
+
+---
+
 ## [v1.1.5] — 2026-07-02
 
 ### Terminal mais limpo

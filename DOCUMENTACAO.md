@@ -24,7 +24,7 @@ OWPick é uma ferramenta desktop para jogadores de **Overwatch** que automatiza 
 - Exibição do ranking de ameaças inimigas antes do ranking de heróis
 - Gerenciamento de heróis favoritos por função (DPS, Suporte, Tank, Fila Aberta)
 - Sistema de **auto-atualização** via GitHub Releases
-- Empacotamento como executável portátil (`.exe`) via PyInstaller
+- Empacotamento via PyInstaller (one-folder) e distribuição por **instalador único** (`OWPick Installer.exe`, Inno Setup) com atalhos, desinstalador e identidade correta na barra de tarefas (Win10/Win11)
 
 ---
 
@@ -55,10 +55,13 @@ Overwatch-Best-Picks/
 ├── maps.txt                 # [Referência — não lido em runtime; dados embutidos em utils.py]
 ├── config.json              # Coordenadas de captura do mapa por resolução (âncoras)
 ├── stats_inputs.csv         # Winrate/pickrate por mapa (fonte do MetaStrength)
-├── version.txt              # Versão local do executável
+├── version.txt              # Versão local do executável (fonte única de versão)
 ├── version.json             # Versão remota para verificação de update
 ├── requirements.txt         # Dependências Python
 ├── overwatch.spec           # Spec do PyInstaller para gerar o .exe
+├── installer.iss            # Script do instalador (Inno Setup 6)
+├── build.bat                # Build completo: PyInstaller → zip do updater → instalador
+├── icone.ico                # Ícone do app (multi-tamanho: 16–256px)
 │
 ├── heroes/                  # Templates de imagem dos heróis
 │   ├── 720p/
@@ -76,9 +79,12 @@ Overwatch-Best-Picks/
 │   ├── tesseract.exe
 │   └── tessdata/
 │
-├── dist/OWPick/             # Executável gerado pelo PyInstaller
-│   ├── OWPick.exe
-│   └── _internal/           # DLLs, módulos Python e assets empacotados
+├── dist/                    # Saídas do build (build.bat)
+│   ├── OWPick/              # Build one-folder do PyInstaller
+│   │   ├── OWPick.exe
+│   │   └── _internal/       # DLLs, módulos Python e assets empacotados
+│   ├── OWPick_v<versão>.zip # Pacote consumido pelo auto-updater
+│   └── OWPick Installer.exe # Instalador distribuído a novos usuários
 │
 └── .venv/                   # Ambiente virtual Python
 ```
@@ -138,16 +144,17 @@ utils.py  ←  importado por: comparar, map, choose_ow_hero, favoriteHero, scree
 
 ### Como o Sistema Inicia
 
-1. O usuário executa `OWPick.exe` (ou `python main.py`)
-2. `updater.check_for_updates()` é chamado:
+1. O usuário executa `OWPick.exe` (pelo atalho criado pelo instalador) ou `python main.py`
+2. `utils.configure_windows_app_identity()` registra o AppUserModelID e o ícone da janela (identidade na taskbar do Windows)
+3. `updater.check_for_updates()` é chamado:
    - Baixa `version.json` do GitHub
    - Compara a versão remota com `version.txt` local
    - Se houver versão nova, pergunta ao usuário se quer atualizar
-3. Se `Roles.txt` não existir → `roles.executar()` é chamado (escolha de role obrigatória)
-4. Se `ALL.txt` não existir → `favoriteHero.executar()` é chamado (configuração de favoritos)
-5. O hotkey global `TAB+1` é registrado via `keyboard.hook()`
-6. O loop de input de menu é iniciado em uma thread daemon separada
-7. O programa entra em loop principal (`while True: time.sleep(1)`)
+4. Se `Roles.txt` não existir → `roles.executar()` é chamado (escolha de role obrigatória)
+5. Se `ALL.txt` não existir → `favoriteHero.executar()` é chamado (configuração de favoritos)
+6. O hotkey global `TAB+1` é registrado via `keyboard.hook()`
+7. O loop de input de menu é iniciado em uma thread daemon separada
+8. O programa entra em loop principal (`while True: time.sleep(1)`)
 
 ### Como os Dados Fluem entre os Módulos
 
@@ -247,22 +254,58 @@ baixas em vez de achatá-las num piso.
 Heróis já presentes no time aliado **e heróis banidos no competitivo** são
 **excluídos do ranking** (regra rígida — mesmo tratamento de indisponibilidade).
 
-### Como o Executável é Gerado e Utilizado
+### Build e Distribuição
 
-O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `overwatch.spec`:
+O build completo é feito pelo **`build.bat`**, que executa três etapas em sequência (a versão é lida de `version.txt`, fonte única):
 
-1. O spec inclui no bundle:
+1. **PyInstaller** (`overwatch.spec`) → `dist/OWPick/` (one-folder). O spec inclui no bundle:
    - Todos os módulos Python do projeto
    - As planilhas `heroes ally.xlsx` e `heroes enemy.xlsx`
-   - A pasta `heroes/` (templates de imagem em 720p e 2K)
+   - A pasta `heroes/` (templates de imagem em 720p e 2K + bans)
    - A pasta `ocr/` (Tesseract OCR completo com tessdata)
    - Os arquivos `version.txt`, `config.json` e `stats_inputs.csv`
-2. O PyInstaller empacota tudo em `dist/OWPick/`:
-   - `OWPick.exe` — executável principal
-   - `_internal/` — DLLs, módulos Python compilados, assets
-3. Quando `OWPick.exe` é executado, o PyInstaller extrai os assets em `sys._MEIPASS`. A função `resource_path()` em `utils.py` resolve os caminhos corretos tanto no modo desenvolvimento quanto no executável.
-4. Para distribuição, a pasta `dist/OWPick/` inteira é compactada em um `.zip` e publicada nas GitHub Releases.
-5. O sistema de auto-update (`updater.py`) detecta a nova versão via `version.json` no GitHub e aplica a atualização com um `.bat` gerado dinamicamente (usando `robocopy`).
+2. **Zip do auto-updater** → `dist/OWPick_v<versão>.zip` (a pasta `dist/OWPick/` inteira; formato consumido pelo `updater.py`)
+3. **Inno Setup** (`installer.iss`) → `dist/OWPick Installer.exe`
+
+Quando `OWPick.exe` é executado, o PyInstaller resolve os assets em `sys._MEIPASS`. A função `resource_path()` em `utils.py` resolve os caminhos corretos tanto no modo desenvolvimento quanto no executável.
+
+**Distribuição (GitHub Releases)** — cada release publica dois artefatos:
+
+| Artefato | Público | Papel |
+|---|---|---|
+| `OWPick Installer.exe` | Novos usuários | Instalação com atalhos e desinstalador; esconde a pasta `_internal` |
+| `OWPick_v<versão>.zip` | Auto-updater | Baixado e aplicado automaticamente pelo `updater.py` (URL em `version.json`) |
+
+**Requisito de build**: Inno Setup 6 instalado (o `build.bat` procura em `%LOCALAPPDATA%\Programs\Inno Setup 6` e `%ProgramFiles(x86)%\Inno Setup 6`). Não é dependência Python — não pertence ao `requirements.txt`.
+
+### Instalador (`installer.iss`)
+
+O instalador é per-user e **deliberadamente não requer administrador**:
+
+- **Diretório de instalação**: `%LOCALAPPDATA%\Programs\OWPick` (`PrivilegesRequired=lowest`). Essencial para o auto-updater: o `robocopy` do update sobrescreve a instalação, o que exige permissão de escrita — instalar em `Program Files` quebraria o update.
+- **Atalhos** (Menu Iniciar + Área de Trabalho opcional) gravados com `AppUserModelID: "DaviGiuberti.OWPick"` — o mesmo AUMID declarado em runtime (ver abaixo). É o vínculo oficial pelo qual a taskbar resolve o ícone do app.
+- **Versão**: lida de `version.txt` em tempo de compilação (`#define` do preprocessador) — nenhuma duplicação de versão no script.
+- **AppId fixo** (GUID): novas versões do instalador atualizam a mesma instalação em vez de criar outra.
+- **Desinstalador**: registrado em "Aplicativos instalados" do Windows; remove também os arquivos gerados em runtime (`Roles.txt`, favoritos, `print/` etc.).
+- Idiomas: PT-BR e EN; ícone do instalador: `icone.ico` do projeto.
+
+### Ícone na barra de tarefas (Windows 10/11)
+
+**Problema**: com `console=True`, no Windows 11 o host de console padrão é o **Windows Terminal** — a janela pertence ao Terminal, e a taskbar agrupa janelas por **AppUserModelID (AUMID)**; sem AUMID explícito, o OWPick herdava a identidade do Terminal e exibia o ícone genérico de terminal (no Windows 10 o host `conhost` herda o ícone do exe, por isso funcionava).
+
+**Solução em três partes** (todas necessárias):
+
+1. `utils.configure_windows_app_identity()` — chamada no início de `main.py`:
+   declara o AUMID `DaviGiuberti.OWPick` (`SetCurrentProcessExplicitAppUserModelID`)
+   e aplica o ícone embutido do exe à janela do console (`WM_SETICON`).
+2. Atalhos do instalador com o **mesmo AUMID** — a taskbar resolve o ícone de
+   um AUMID a partir do atalho do Menu Iniciar correspondente.
+3. `icone.ico` multi-tamanho (16/20/24/32/40/48/64/128/256 px) — a taskbar usa
+   os tamanhos pequenos; o arquivo original só tinha 256×256.
+
+### Auto-update
+
+O sistema de auto-update (`updater.py`) detecta a nova versão via `version.json` no GitHub, baixa o `.zip` e aplica a atualização com um `.bat` gerado dinamicamente (usando `robocopy`) sobre o diretório de instalação — fluxo inalterado e compatível com a instalação per-user do instalador.
 
 ---
 
@@ -294,7 +337,7 @@ O executável `OWPick.exe` é gerado pelo **PyInstaller** a partir do arquivo `o
 | `call_and_pause_main(func)` | Pausa o estado `IN_MAIN` durante execução de subcomando |
 | `input_loop()` | Loop principal de leitura de comandos do terminal |
 
-**Interação com outros módulos**: importa e chama `choose_ow_hero`, `comparar`, `favoriteHero`, `map`, `roles`, `screenshot`, `updater`.
+**Interação com outros módulos**: importa e chama `choose_ow_hero`, `comparar`, `favoriteHero`, `map`, `roles`, `screenshot`, `updater` e `utils` (chama `utils.configure_windows_app_identity()` no startup, antes de qualquer saída em tela).
 
 ---
 
@@ -476,6 +519,13 @@ time aliado **e os banidos** (`bans.txt`) são removidos da lista de heróis jog
 - `HEROES_ROLES`: `{"DPS": [23 heróis], "TANK": [14 heróis], "SUP": [14 heróis]}`
 - `MAPS_DATA`: lista de 27 mapas com `(nome, slug, modo)`
 - `SLOTS`: `{"DPS": 2, "TANK": 1, "SUP": 2}` — slots por role por time
+
+**Identidade do app no Windows**:
+
+| Item | Descrição |
+|---|---|
+| `APP_USER_MODEL_ID` | `"DaviGiuberti.OWPick"` — deve ser idêntico ao AUMID dos atalhos em `installer.iss` |
+| `configure_windows_app_identity()` | Declara o AUMID do processo e aplica o ícone do exe à janela do console; chamada no início de `main.py` (fix do ícone na taskbar do Win11) |
 
 **Funções de dados**:
 

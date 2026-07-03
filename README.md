@@ -46,6 +46,8 @@ Overwatch-Best-Picks/
 ├── version.json             # Versão remota para update
 ├── requirements.txt         # Dependências Python
 ├── overwatch.spec           # Configuração do PyInstaller
+├── installer.iss            # Script do instalador (Inno Setup)
+├── build.bat                # Build completo: PyInstaller → zip do updater → instalador
 │
 ├── heroes/                  # Templates de imagem dos heróis
 │   ├── 720p/dps|sup|tank/   # Retratos do lineup (TAB+1)
@@ -156,18 +158,20 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 ---
 
-## Executável (sem instalação)
+## Instalador (usuário final)
 
-A versão compilada e pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
+A versão pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
 
-**Versão atual**: `1.1.5`
+**Versão atual**: `1.1.6`
 
-Para usar o executável:
-1. Baixe o arquivo `OWPick_v1.1.5.zip`
-2. Extraia em qualquer pasta
-3. Execute `OWPick.exe`
+Para instalar:
+1. Baixe o arquivo **`OWPick Installer.exe`**
+2. Execute o instalador e siga os passos (não requer privilégios de administrador)
+3. Abra o **OWPick** pelo atalho do Menu Iniciar ou da Área de Trabalho
 
-Nenhuma instalação adicional é necessária — Python, dependências e Tesseract OCR já estão embutidos no pacote. O programa verifica automaticamente por atualizações ao iniciar.
+O programa é instalado em `%LOCALAPPDATA%\Programs\OWPick`. Python, dependências e Tesseract OCR já estão embutidos — nenhuma instalação adicional é necessária. O programa verifica automaticamente por atualizações ao iniciar e as aplica sozinho (não é preciso baixar o instalador novamente).
+
+> O arquivo `OWPick_v1.1.6.zip` também presente na Release é o pacote consumido pelo sistema de auto-atualização — usuários não precisam baixá-lo manualmente.
 
 ---
 
@@ -213,7 +217,8 @@ O menu e os hotkeys rodam em **threads separadas**, permitindo que o pipeline se
 | **rapidfuzz** | Fuzzy matching do texto OCR contra a lista de mapas |
 | **difflib** | Fuzzy matching para busca de heróis por nome |
 | **urllib** | Download do pacote de atualização |
-| **PyInstaller** | Empacotamento em `.exe` portátil |
+| **PyInstaller** | Empacotamento em `.exe` (one-folder) |
+| **Inno Setup 6** | Instalador único (`OWPick Installer.exe`) — ferramenta externa de build, não é dependência Python |
 
 ---
 

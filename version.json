@@ -1,5 +1,5 @@
 {
-    "version": "1.1.5",
-    "download_url": "https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases/download/v1.1.5/OWPick_v1.1.5.zip",
-    "notas": "Terminal mais limpo: removidos prints de diagnostico/debug do pipeline (TAB+1), mantendo apenas as informacoes essenciais (herois identificados, bans, mapa e o ranking). Atualizacao do stats_inputs.csv com os dados da Season 3 (winrate/pickrate por mapa)."
+    "version": "1.1.6",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.1.6/OWPick_v1.1.6.zip",
+    "notas": "Nova distribuicao profissional via instalador (OWPick Installer.exe): instalacao per-user com atalhos no Menu Iniciar/Area de Trabalho, sem expor a pasta _internal. Correcao definitiva do icone na barra de tarefas do Windows 11 (AppUserModelID + icone multi-tamanho)."
 }

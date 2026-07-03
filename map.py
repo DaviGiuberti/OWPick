@@ -154,9 +154,9 @@ def executar() -> str:
 
     if mapa != "UNKNOWN":
         # print(f"[map.py] Mapa identificado: '{mapa}' (score={score:.1f})")
-        print(f"Mapa identificado")
+        print(f"Mapa identificado: '{mapa}'")
     else:
-        print("[map.py] Mapa não identificado -> UNKNOWN")
+        print("Mapa não identificado")
     return mapa
 
 
