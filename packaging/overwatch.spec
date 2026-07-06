@@ -115,6 +115,7 @@ a = Analysis(
         "owpick.ui.hotkey",
         "owpick.ui.sim",
         "owpick.ui.profiles",
+        "owpick.ui.weights",
         "owpick.ui.favorites",
         "owpick.ui.ranking_view",
         # ===== DEPENDÊNCIAS DE C-EXTENSIONS =====

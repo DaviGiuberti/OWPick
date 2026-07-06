@@ -81,6 +81,7 @@ class Settings:
     ban_match_max_score: float | None = None  # canônico: infra.matching
     map_min_confidence: float | None = None  # canônico: infra.map_detect
     updater_url: str | None = None  # canônico: infra.updater
+    stats_url: str | None = None  # canônico: infra.stats_update (download do CSV)
     # Região/tier do scraper de stats (tarefa 5.3 / tools/coletar_stats.py).
     scraper_region: str = "AMER"
     scraper_tier: str = "GRANDMASTER_AND_CHAMPION"
@@ -154,12 +155,12 @@ def _validate_field(name: str, value: object, default: object) -> tuple[object, 
             return float(value), None
         return default, f"'{name}' deve ser um número > 0 ou null (recebi {value!r})"
 
-    if name == "updater_url":
+    if name in ("updater_url", "stats_url"):
         if value is None:
             return None, None
         if isinstance(value, str) and value.startswith(("http://", "https://")):
             return value, None
-        return default, f"'updater_url' deve ser uma URL http(s) ou null (recebi {value!r})"
+        return default, f"'{name}' deve ser uma URL http(s) ou null (recebi {value!r})"
 
     if name == "active_profile":
         if value is None or (isinstance(value, str) and value.strip()):

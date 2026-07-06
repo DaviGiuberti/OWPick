@@ -1,21 +1,28 @@
-"""stats_update.py — Atualização das stats de meta a partir do app (tarefa 5.3).
+"""stats_update.py — Atualização das stats de meta a partir do app.
 
-Roda o scraper offline (tools/coletar_stats.py) e grava o resultado no OVERRIDE
-do usuário (%APPDATA%\\OWPick\\stats_inputs.csv, ver datasource.stats_source_path),
-que passa a ser lido em runtime — a atualização manual persiste entre updates.
+Baixa o `stats_inputs.csv` mais recente publicado no repositório (GitHub raw) e
+grava no OVERRIDE do usuário (%APPDATA%\\OWPick\\stats_inputs.csv, ver
+datasource.stats_source_path), que passa a ser lido em runtime — a atualização
+persiste entre updates da aplicação.
 
-Pré-requisitos (o scraper usa Playwright, que NÃO é dependência de runtime nem é
-empacotado): ambiente com o código-fonte (pasta tools/) e `playwright` instalado
-(grupo `scraper` do pyproject) + `playwright install chromium`. No executável
-congelado esses pré-requisitos não existem — a função avisa claramente e não trava.
+Só usa a stdlib (urllib) + pandas (já runtime), então funciona no executável
+congelado SEM nenhuma dependência externa: o usuário baixa o app e usa a opção
+"atualizar stats" direto, sem Playwright, sem código-fonte, sem navegador.
+
+Fluxo de PUBLICAÇÃO (autor/desenvolvedor): rodar o scraper offline
+`tools/coletar_stats.py` para regenerar `data/stats_inputs.csv`, commitar na
+main. A partir daí todos os usuários baixam essa versão por aqui.
 """
 
 from __future__ import annotations
 
-import subprocess
-import sys
+import io
+import os
+import urllib.error
+import urllib.request
 from collections.abc import Callable
-from pathlib import Path
+
+import pandas as pd
 
 from owpick.infra import datasource
 from owpick.log import get_logger
@@ -24,71 +31,89 @@ log = get_logger("stats_update")
 
 Reporter = Callable[[str], None]
 
+# URL do CSV publicado (mesma convenção do updater/version.json). Aponta para o
+# arquivo versionado na branch main; o autor o regenera com o scraper e commita.
+STATS_CSV_URL = "https://raw.githubusercontent.com/DaviGiuberti/OWPick/main/data/stats_inputs.csv"
 
-def _scraper_script() -> Path | None:
-    """Localiza tools/coletar_stats.py a partir da raiz do repositório (só existe
-    em execução por código-fonte; ausente no .exe congelado)."""
-    # src/owpick/infra/stats_update.py -> parents[3] = raiz do repositório.
-    repo_root = Path(__file__).resolve().parents[3]
-    script = repo_root / "tools" / "coletar_stats.py"
-    return script if script.exists() else None
+# Colunas mínimas esperadas — um CSV sem elas (ex.: página de erro 404 servida
+# como texto) é rejeitado antes de sobrescrever o override do usuário.
+REQUIRED_COLUMNS = {"map", "hero", "role", "winrate", "pickrate"}
+
+_TIMEOUT_SECONDS = 20
 
 
-def _playwright_available() -> bool:
+def _stats_url() -> str:
+    """URL efetiva: override do settings.json (avançado) ou a padrão do projeto."""
+    from owpick import settings
+
+    return settings.get().stats_url or STATS_CSV_URL
+
+
+def _validate_csv(data: bytes) -> str | None:
+    """None se o CSV é válido; senão a razão (evita gravar lixo por cima)."""
     try:
-        import playwright  # noqa: F401
-    except Exception:  # noqa: BLE001
-        return False
-    return True
+        df = pd.read_csv(io.BytesIO(data))
+    except Exception as e:  # noqa: BLE001
+        return f"não é um CSV válido ({e})"
+    missing = REQUIRED_COLUMNS - set(df.columns)
+    if missing:
+        return f"faltam colunas {sorted(missing)}"
+    if df.empty:
+        return "não contém linhas de dados"
+    return None
 
 
 def update_stats(report: Reporter = print) -> bool:
     """
-    Executa o scraper e atualiza o stats_inputs.csv local (override do usuário).
+    Baixa o stats_inputs.csv publicado e grava no override do usuário.
     Retorna True em sucesso. Nunca lança — reporta o problema com instrução clara.
     """
-    if getattr(sys, "frozen", False):
-        report(
-            "Atualização de stats indisponível no executável: o scraper (Playwright) "
-            "não é empacotado. Rode a partir do código-fonte com o grupo 'scraper'."
-        )
-        return False
-
-    script = _scraper_script()
-    if script is None:
-        report("Scraper não encontrado (tools/coletar_stats.py). Requer o código-fonte.")
-        return False
-
-    if not _playwright_available():
-        report(
-            "Playwright não instalado. Instale com:\n"
-            "  uv sync --group scraper   (ou: pip install playwright)\n"
-            "  playwright install chromium\n"
-            "e tente novamente."
-        )
-        return False
-
-    from owpick import settings
-
-    cfg = settings.get()
+    url = _stats_url()
     dest = datasource.user_stats_path()
-    report("Coletando stats de meta (isso pode levar alguns minutos)...")
-    log.info(
-        "executando scraper -> %s (region=%s, tier=%s)", dest, cfg.scraper_region, cfg.scraper_tier
-    )
+    report("Baixando as stats de meta mais recentes...")
+    log.info("baixando stats de %s -> %s", url, dest)
+
     try:
-        # argv: destino, região e tier (vindos do settings.json — tarefa 6.1).
-        proc = subprocess.run(
-            [sys.executable, str(script), dest, cfg.scraper_region, cfg.scraper_tier],
-            check=False,
+        req = urllib.request.Request(url, headers={"User-Agent": "OWPick-Stats/1.0"})
+        with urllib.request.urlopen(req, timeout=_TIMEOUT_SECONDS) as resp:
+            data = resp.read()
+    except (urllib.error.URLError, TimeoutError):
+        # Degradação segura: sem rede o app segue com as stats atuais/embutidas.
+        log.warning("falha ao baixar stats", exc_info=True)
+        report(
+            "Não foi possível baixar as stats (sem conexão ou servidor indisponível). "
+            "Verifique sua internet e tente novamente; o app continua com as stats atuais."
         )
+        return False
     except Exception as e:  # noqa: BLE001
-        log.warning("falha ao executar o scraper", exc_info=True)
-        report(f"Falha ao executar o scraper: {e}")
+        log.warning("erro inesperado ao baixar stats", exc_info=True)
+        report(f"Erro ao baixar as stats: {e}. Tente novamente mais tarde.")
         return False
 
-    if proc.returncode != 0:
-        report(f"O scraper terminou com erro (código {proc.returncode}). Stats não atualizadas.")
+    problem = _validate_csv(data)
+    if problem:
+        log.warning("CSV de stats inválido: %s", problem)
+        report(
+            f"O arquivo de stats baixado é inválido ({problem}). "
+            "As stats NÃO foram alteradas — tente novamente mais tarde."
+        )
+        return False
+
+    # Grava de forma atômica: escreve num temporário e substitui, para nunca
+    # deixar um override pela metade se a escrita falhar.
+    tmp = dest + ".download"
+    try:
+        os.makedirs(os.path.dirname(dest), exist_ok=True)
+        with open(tmp, "wb") as f:
+            f.write(data)
+        os.replace(tmp, dest)
+    except OSError as e:
+        log.warning("falha ao gravar %s", dest, exc_info=True)
+        report(f"Não foi possível salvar as stats em disco: {e}")
+        try:
+            os.remove(tmp)
+        except OSError:
+            pass
         return False
 
     datasource.refresh_stats_cache()  # runtime passa a ler o novo override

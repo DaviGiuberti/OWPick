@@ -18,7 +18,7 @@ from owpick import paths, pipeline, settings
 from owpick.i18n import t
 from owpick.infra import resources, stats_update, storage, updater, validation
 from owpick.log import get_logger, setup_logging
-from owpick.ui import favorites, hotkey, profiles, ranking_view, roles, sim
+from owpick.ui import favorites, hotkey, profiles, ranking_view, roles, sim, weights
 
 log = get_logger("console")
 
@@ -106,6 +106,15 @@ def run_profiles():
         profiles.executar()
     except Exception as e:
         print(f"Erro em perfis: {e}")
+
+
+def run_weights_config():
+    """Troca o preset de pesos do modelo (vinculado ao perfil ativo)."""
+    try:
+        print("\n>>> Preset de pesos do modelo")
+        weights.executar()
+    except Exception as e:
+        print(f"Erro ao alterar o preset de pesos: {e}")
 
 
 def run_sim(args: str):
@@ -264,6 +273,8 @@ def input_loop():
             call_and_pause_main(run_toggle_explain)
         elif cmd == "7":
             call_and_pause_main(run_profiles)
+        elif cmd == "8":
+            call_and_pause_main(run_weights_config)
         elif cmd == "update":
             call_and_pause_main(run_apply_update)
         elif cmd.startswith("sim"):

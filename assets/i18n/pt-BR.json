@@ -1,6 +1,6 @@
 {
-  "menu.main": "Comandos disponíveis:\n  2 -> alterar Role/Função\n  3 -> adicionar/remover heróis favoritos\n  4 -> atualizar stats de meta (avançado; requer Playwright)\n  5 -> configurar a hotkey de captura\n  6 -> ligar/desligar a explicação do ranking\n  7 -> perfis (role + favoritos + preset + tier)\n  sim mapa=<mapa> inimigos=<h1,h2> aliados=<h1,h2> -> simular sem captura\n",
-  "menu.small": "\n[2] Role  [3] Favoritos  [4] Atualizar stats  [5] Hotkey  [6] Explicação  [7] Perfis  [sim] Simular\n",
+  "menu.main": "Comandos disponíveis:\n  2 -> alterar Role/Função\n  3 -> adicionar/remover heróis favoritos\n  4 -> atualizar stats de meta (baixa a versão mais recente)\n  5 -> configurar a hotkey de captura\n  6 -> ligar/desligar a explicação do ranking\n  7 -> perfis (role + favoritos + preset + tier)\n  8 -> preset de pesos do modelo (como pontuar)\n  sim mapa=<mapa> inimigos=<h1,h2> aliados=<h1,h2> -> simular sem captura\n",
+  "menu.small": "\n[2] Role  [3] Favoritos  [4] Atualizar stats  [5] Hotkey  [6] Explicação  [7] Perfis  [8] Preset  [sim] Simular\n",
   "menu.unknown_command": "Comando não reconhecido. Use um dos números do menu e pressione ENTER.",
 
   "boot.started": " PROGRAMA INICIADO - OWPick",

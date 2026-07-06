@@ -21,6 +21,21 @@ from owpick.log import get_logger
 log = get_logger("profiles")
 
 
+def set_weights_preset(name: str) -> None:
+    """
+    Muda o preset de pesos ativo e o VINCULA ao perfil ativo (se houver): a
+    escolha passa a acompanhar o perfil e é preservada ao alternar entre perfis.
+    Sem perfil ativo, altera apenas o preset corrente do settings.
+    """
+    cfg = settings.get()
+    cfg.weights_preset = name
+    active = cfg.active_profile
+    if active and active in cfg.profiles:
+        cfg.profiles[active].weights_preset = name
+    settings.save(cfg)
+    log.info("preset de pesos alterado para '%s' (perfil ativo: %s)", name, active or "-")
+
+
 def snapshot_current() -> settings.Profile:
     """Fotografa o estado atual (role/favoritos/preset/tier) num Profile."""
     cfg = settings.get()

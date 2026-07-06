@@ -93,6 +93,16 @@ PRESETS: dict[str, ModelWeights] = {
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
 
+# Rótulo curto de cada preset (o que ele prioriza), exibido no menu de escolha.
+# Fica junto de PRESETS para não sair de sincronia; a chave é o mesmo nome
+# gravado em settings.weights_preset.
+PRESET_LABELS: dict[str, str] = {
+    "equilibrado": "Equilibrado (padrão) — balanceia meta, counter e sinergia",
+    "counter-first": "Counter-first — prioriza counterar o time inimigo",
+    "meta-first": "Meta-first — prioriza o desempenho estatístico no mapa atual",
+    "conforto+": "Conforto+ — valoriza a sinergia com o seu próprio time",
+}
+
 
 def resolve_weights(
     preset: str = "equilibrado", custom: dict[str, float] | None = None

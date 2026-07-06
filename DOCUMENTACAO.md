@@ -25,7 +25,8 @@ OWPick é uma ferramenta desktop para jogadores de **Overwatch** que automatiza 
 - Exibição do ranking de ameaças inimigas antes do ranking de heróis
 - Gerenciamento de heróis favoritos por função (DPS, Suporte, Tank, Fila Aberta)
 - **Settings único e validado** (`settings.json` em `%APPDATA%\OWPick`): hotkey, idioma, debug, preset de pesos, overrides avançados de calibração, perfis
-- **Presets de pesos do modelo** ("Equilibrado" = atual, "Counter-first", "Meta-first", "Conforto+") + modo avançado (`custom_weights`)
+- **Presets de pesos do modelo** ("Equilibrado" = atual, "Counter-first", "Meta-first", "Conforto+") + modo avançado (`custom_weights`); trocáveis pela **opção 8 do menu**, com a escolha **vinculada ao perfil ativo**
+- **Atualização de stats de meta por download** (opção 4): baixa o `stats_inputs.csv` publicado (GitHub raw) direto no app — funciona no executável **sem Playwright nem código-fonte**
 - **Explicabilidade do ranking** (opção 6 do menu, persistida): "por quê" dos top-3 — qual inimigo pesou (com peso de ameaça), qual sinergia puxou, quanto o mapa influenciou
 - **Console rico** (`rich`): tabela com cores por role, top-3 destacado, barras de score, painel de ameaças e spinner durante o pipeline
 - **Strings de UI por idioma** (PT-BR e EN, `assets/i18n/*.json`) no padrão "o que houve + o que fazer"
@@ -62,7 +63,7 @@ OWPick/
 │   │   ├── ocr_backends.py  # Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional)
 │   │   ├── datasource.py    # Leitura/cache das matrizes CSV, stats e layout (override de stats do usuário)
 │   │   ├── validation.py    # Validação de matrizes/stats/templates na carga (aviso claro)
-│   │   ├── stats_update.py  # Atualização das stats de meta pelo app (roda o scraper)
+│   │   ├── stats_update.py  # Atualização das stats de meta pelo app (baixa o CSV publicado)
 │   │   ├── storage.py       # Persistência: Roles/ALL/lineup/bans/current_map
 │   │   ├── resources.py     # resource_path + identidade no Windows (AUMID/ícone)
 │   │   └── updater.py       # Sistema de auto-update
@@ -73,6 +74,7 @@ OWPick/
 │       ├── hotkey.py        # Hotkey configurável: detector + captura em tempo real
 │       ├── sim.py           # Modo manual/simulação (scoring sem captura)
 │       ├── profiles.py      # Múltiplos perfis (role+favoritos+preset+tier)
+│       ├── weights.py       # Menu de troca do preset de pesos (vinculado ao perfil)
 │       └── ranking_view.py  # Formatação rich do ranking (consome RankingResult)
 │
 ├── tools/                   # Ferramentas de desenvolvimento (não empacotadas)
@@ -188,7 +190,7 @@ current_map.txt   # Mapa identificado na última captura (fluxo CLI)
 | infra | `infra/ocr_backends.py` | Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional) |
 | infra | `infra/datasource.py` | Leitura/cache das matrizes CSV, stats (com override do usuário) e layout |
 | infra | `infra/validation.py` | Validação de matrizes/stats/templates na carga (aviso claro do que falta) |
-| infra | `infra/stats_update.py` | Atualização das stats de meta pelo app (executa o scraper) |
+| infra | `infra/stats_update.py` | Atualização das stats de meta pelo app (baixa o CSV publicado; sem deps externas) |
 | infra | `infra/storage.py` | Persistência dos arquivos do usuário |
 | infra | `infra/updater.py` | Auto-update via GitHub |
 | tool | `tools/coletar_stats.py` | Scraper que gera `stats_inputs.csv` (destino via argv) |
@@ -658,9 +660,14 @@ herói), `validate_all` + `report_problems`. Roda nos testes e no boot com `--de
 
 #### `infra/stats_update.py`
 
-`update_stats(report)`: opção 4 do menu — roda o scraper (`tools/coletar_stats.py`)
-via subprocess, grava no **override do usuário** e invalida o cache. Avisos claros
-quando indisponível (exe congelado, `tools/` ausente ou Playwright não instalado).
+`update_stats(report)`: opção 4 do menu — **baixa** o `stats_inputs.csv` publicado
+(GitHub raw, `STATS_CSV_URL`; override via `settings.stats_url`), valida as colunas
+mínimas, grava de forma atômica no **override do usuário** e invalida o cache.
+Usa só stdlib (`urllib`) + pandas → funciona no **executável congelado sem nenhuma
+dependência externa** (sem Playwright/navegador/código-fonte). O usuário só baixa o
+app e atualiza. Publicação (autor): regenerar `data/stats_inputs.csv` com o scraper
+`tools/coletar_stats.py` e commitar na main. Falha de rede/CSV inválido → aviso
+claro e as stats atuais são preservadas.
 
 #### `infra/storage.py`
 
@@ -706,8 +713,8 @@ O fluxo completo (rollback + não bloqueante) está descrito na seção
 registra a hotkey → `input_loop` em thread daemon.
 
 Menu: `2` role · `3` favoritos · `4` atualizar stats · `5` hotkey · `6` explicação
-do ranking · `7` perfis · `sim ...` simulação · `update` aplicar update pendente ·
-`exit`. `IN_MAIN` bloqueia a hotkey durante subcomandos; cooldown de 1s evita
+do ranking · `7` perfis · `8` preset de pesos · `sim ...` simulação · `update`
+aplicar update pendente · `exit`. `IN_MAIN` bloqueia a hotkey durante subcomandos; cooldown de 1s evita
 disparo duplo. Combinações **com TAB** usam `keyboard.hook()` + `HotkeyDetector`
 (o `RegisterHotKey` do Windows não aceita TAB); as demais, `keyboard.add_hotkey`.
 
@@ -743,7 +750,16 @@ renderiza com a mesma `ranking_view`.
 Múltiplos perfis (perfil = role + favoritos + preset de pesos + tier de stats):
 `save_profile` fotografa o estado atual; `apply_profile` aplica **pelos
 mecanismos existentes** (`storage.write_role`, `save_heroes_to_files`, settings);
-`delete_profile`; menu `executar` com input injetável.
+`delete_profile`; menu `executar` com input injetável. `set_weights_preset(name)`
+troca o preset corrente e o **vincula ao perfil ativo** (se houver), preservando a
+escolha ao alternar perfis.
+
+#### `ui/weights.py`
+
+Menu da opção 8: mostra o preset atual, lista os presets (rótulos em
+`core.scoring.PRESET_LABELS`) e aplica a escolha via
+`profiles.set_weights_preset` — a troca fica **vinculada ao perfil ativo**. Input
+injetável para testes.
 
 ---
 

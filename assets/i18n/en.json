@@ -1,6 +1,6 @@
 {
-  "menu.main": "Available commands:\n  2 -> change Role\n  3 -> add/remove favorite heroes\n  4 -> update meta stats (advanced; requires Playwright)\n  5 -> configure the capture hotkey\n  6 -> toggle ranking explanations\n  7 -> profiles (role + favorites + preset + tier)\n  sim map=<map> enemies=<h1,h2> allies=<h1,h2> -> simulate without capture\n",
-  "menu.small": "\n[2] Role  [3] Favorites  [4] Update stats  [5] Hotkey  [6] Explanations  [7] Profiles  [sim] Simulate\n",
+  "menu.main": "Available commands:\n  2 -> change Role\n  3 -> add/remove favorite heroes\n  4 -> update meta stats (downloads the latest version)\n  5 -> configure the capture hotkey\n  6 -> toggle ranking explanations\n  7 -> profiles (role + favorites + preset + tier)\n  8 -> model weight preset (how to score)\n  sim map=<map> enemies=<h1,h2> allies=<h1,h2> -> simulate without capture\n",
+  "menu.small": "\n[2] Role  [3] Favorites  [4] Update stats  [5] Hotkey  [6] Explanations  [7] Profiles  [8] Preset  [sim] Simulate\n",
   "menu.unknown_command": "Unknown command. Use one of the menu numbers and press ENTER.",
 
   "boot.started": " PROGRAM STARTED - OWPick",

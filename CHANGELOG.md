@@ -4,6 +4,32 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.1] — 2026-07-06
+
+### Presets de pesos vinculados ao perfil
+
+- Nova **opção 8 do menu**: escolhe o preset de pesos do modelo
+  (Equilibrado/Counter-first/Meta-first/Conforto+) direto do console, sem
+  editar `settings.json` na mão.
+- A escolha fica **vinculada ao perfil ativo** (opção 7): trocar de perfil
+  troca também o preset, e o preset volta ao valor salvo do perfil ao
+  reativá-lo. Sem perfil ativo, a troca afeta só o preset corrente.
+
+### Atualização de stats sem dependências externas
+
+- A opção 4 do menu ("atualizar stats de meta") deixou de depender do
+  scraper local (Playwright) e agora **baixa** o `stats_inputs.csv`
+  publicado no repositório (GitHub raw) e grava no override do usuário.
+- Funciona no **executável já instalado, sem Playwright, sem navegador e sem
+  o código-fonte** — o usuário só clica em "atualizar stats".
+- Validação das colunas mínimas antes de gravar (uma resposta inesperada do
+  servidor não corrompe as stats atuais) e mensagens claras em falha de rede.
+- O scraper (`tools/coletar_stats.py`) continua existindo como ferramenta de
+  publicação: o autor o roda para regenerar `data/stats_inputs.csv` e
+  commita na main — a partir daí, todos os usuários baixam essa versão.
+
+---
+
 ## [v1.2.0] — 2026-07-05
 
 Versão maior de reengenharia do OWPick. Reúne todo o trabalho das fases 0 a 8:
