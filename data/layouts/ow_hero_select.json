@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "game_patch": "OW2",
+  "description": "Layout de captura da tela de selecao de herois do Overwatch 2. Coordenadas na resolucao-base 1280x720; o codigo escala/interpola para a resolucao atual. Ver owpick/infra/capture.py e owpick/core/resolution.py.",
+  "base_resolution": { "width": 1280, "height": 720 },
+  "lineup": {
+    "vertical_buffer": 8,
+    "portrait": { "width": 44, "height": 44 },
+    "slots": [
+      { "name": "ally1.png", "top": 125 },
+      { "name": "ally2.png", "top": 169 },
+      { "name": "ally3.png", "top": 213 },
+      { "name": "ally4.png", "top": 257 },
+      { "name": "ally5.png", "top": 301 },
+      { "name": "enemy1.png", "top": 396 },
+      { "name": "enemy2.png", "top": 440 },
+      { "name": "enemy3.png", "top": 484 },
+      { "name": "enemy4.png", "top": 528 },
+      { "name": "enemy5.png", "top": 572 }
+    ],
+    "perks": [
+      { "name": "0perk", "left": 230 },
+      { "name": "1perk", "left": 217 },
+      { "name": "bug", "left": 212 },
+      { "name": "2perk", "left": 197 }
+    ]
+  },
+  "bans": {
+    "slots": [
+      { "name": "ban1.png", "left": 270.5, "top": 14.0, "width": 31.0, "height": 30.5 },
+      { "name": "ban2.png", "left": 311.5, "top": 13.5, "width": 32.0, "height": 31.5 },
+      { "name": "ban3.png", "left": 353.5, "top": 13.5, "width": 31.5, "height": 31.5 },
+      { "name": "ban4.png", "left": 395.0, "top": 13.5, "width": 31.5, "height": 31.0 },
+      { "name": "ban5.png", "left": 437.0, "top": 13.5, "width": 31.5, "height": 31.0 }
+    ]
+  },
+  "map_region_anchors": {
+    "2k": {
+      "map_region": { "left": 2104, "top": 38, "width": 269, "height": 50 },
+      "base_resolution": { "width": 2560, "height": 1440 }
+    },
+    "720p": {
+      "map_region": { "left": 1055, "top": 16, "width": 131, "height": 31 },
+      "base_resolution": { "width": 1280, "height": 720 }
+    }
+  }
+}

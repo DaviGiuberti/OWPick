@@ -1,0 +1,36 @@
+{
+  "menu.main": "Available commands:\n  2 -> change Role\n  3 -> add/remove favorite heroes\n  4 -> update meta stats (advanced; requires Playwright)\n  5 -> configure the capture hotkey\n  6 -> toggle ranking explanations\n  7 -> profiles (role + favorites + preset + tier)\n  sim map=<map> enemies=<h1,h2> allies=<h1,h2> -> simulate without capture\n",
+  "menu.small": "\n[2] Role  [3] Favorites  [4] Update stats  [5] Hotkey  [6] Explanations  [7] Profiles  [sim] Simulate\n",
+  "menu.unknown_command": "Unknown command. Use one of the menu numbers and press ENTER.",
+
+  "boot.started": " PROGRAM STARTED - OWPick",
+  "boot.hotkey_hint": " - Press {hotkey} (global) to run the pipeline while on the main menu.",
+  "boot.menu_hint": " - Use the menu numbers and ENTER to run the other commands.",
+
+  "pipeline.capturing": "Capturing the screen...",
+  "pipeline.comparing": "Matching the crops and identifying the map...",
+  "pipeline.choosing": "Running hero selection...",
+  "pipeline.slot_unidentified": "{slot}: not identified (score {score})",
+  "pipeline.role_missing": "Your Role was not found. Use menu option 2 to set the role you play.",
+  "pipeline.favorites_missing": "Your favorites were not found ('{role}.txt'). Use menu option 3 to pick the heroes you play.",
+  "pipeline.no_heroes_detected": "Could not find the hero-select screen. Open Overwatch on the hero-select screen and press {hotkey} again.",
+  "pipeline.error": "Pipeline error: {error}. Try again; if it persists, run with --debug and check the log in %APPDATA%\\OWPick\\logs.",
+
+  "update.available": "Update available: v{version}. Type 'update' and ENTER to apply it now, or it will be applied automatically when you close the program.",
+  "update.applying": "Applying update... the program will restart.",
+  "update.none": "No pending update. You are already on the latest version.",
+
+  "ranking.available": "Available heroes: {heroes}",
+  "ranking.allies": "Allies: {names}",
+  "ranking.enemies": "Enemies: {names}",
+  "ranking.banned": "Banned: {names}",
+  "ranking.map": "Current map: {map}",
+  "ranking.meta_unavailable": "MetaStrength unavailable for this map — term treated as 0.",
+  "ranking.threat_title": "Enemy Threat Ranking",
+  "ranking.threat_label": "Threat",
+  "ranking.excluded_ally": "Excluded (already on your team): {names}",
+  "ranking.excluded_ban": "Excluded (banned): {names}",
+  "ranking.empty": "No candidate hero available to rank. Add heroes to your favorites (menu option 3).",
+  "ranking.why_title": "--- Why (top {n}) ---",
+  "ranking.why_neutral": "no relevant contributions (score close to neutral)"
+}

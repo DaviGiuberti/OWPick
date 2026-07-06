@@ -1,0 +1,104 @@
+name: Release
+
+# Dispara quando uma tag "vX.Y.Z" é enviada (ex.: git tag v1.2.0 && git push --tags).
+# Faz o build no Windows, publica a Release com os artefatos e, por fim, atualiza
+# o version.json na branch main — só então os usuários veem a atualização.
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write # necessário para criar a Release e commitar o version.json
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout (main, para poder commitar o version.json)
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Derivar a versão da tag
+        id: ver
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Sanidade: a tag tem de bater com o version.txt do repositório.
+          file_version="$(tr -d '[:space:]' < version.txt)"
+          if [ "$version" != "$file_version" ]; then
+            echo "::error::Tag ($version) difere de version.txt ($file_version). Rode tools/bump.py e commite antes de taguear."
+            exit 1
+          fi
+
+      - name: Instalar o uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Instalar dependências (runtime + build)
+        shell: bash
+        run: uv sync --group build
+
+      - name: Instalar o Inno Setup 6
+        shell: pwsh
+        run: choco install innosetup --no-progress -y
+
+      - name: Build completo (PyInstaller + zip + instalador)
+        shell: cmd
+        # build.bat usa o .venv se existir; o uv cria .venv na raiz.
+        run: packaging\build.bat
+
+      - name: Gerar SHA256 dos artefatos
+        shell: pwsh
+        run: |
+          $v = "${{ steps.ver.outputs.version }}"
+          $zip = "dist\OWPick_v$v.zip"
+          $inst = "dist\OWPick Installer.exe"
+          (Get-FileHash $zip  -Algorithm SHA256).Hash  | Out-File "dist\OWPick_v$v.zip.sha256"  -Encoding ascii
+          (Get-FileHash $inst -Algorithm SHA256).Hash  | Out-File "dist\OWPick Installer.exe.sha256" -Encoding ascii
+
+      - name: Extrair notas do CHANGELOG para esta versão
+        id: notes
+        shell: bash
+        run: |
+          v="${{ steps.ver.outputs.version }}"
+          # Bloco entre "## [vX.Y.Z]" e o próximo "## [".
+          awk -v ver="[v$v]" '
+            $0 ~ /^## \[/ { if (found) exit; if (index($0, ver)) { found=1; next } }
+            found { print }
+          ' CHANGELOG.md > release_notes.md
+          if [ ! -s release_notes.md ]; then echo "Release v$v" > release_notes.md; fi
+
+      - name: Criar a GitHub Release com os artefatos
+        uses: softprops/action-gh-release@v2
+        with:
+          name: OWPick v${{ steps.ver.outputs.version }}
+          body_path: release_notes.md
+          files: |
+            dist/OWPick_v${{ steps.ver.outputs.version }}.zip
+            dist/OWPick_v${{ steps.ver.outputs.version }}.zip.sha256
+            dist/OWPick Installer.exe
+            dist/OWPick Installer.exe.sha256
+
+      - name: Atualizar version.json e commitar na main
+        shell: bash
+        run: |
+          v="${{ steps.ver.outputs.version }}"
+          url="https://github.com/${GITHUB_REPOSITORY}/releases/download/v$v/OWPick_v$v.zip"
+          # Notas em uma linha (o version.json é o que o auto-updater mostra).
+          notas="$(head -c 400 release_notes.md | tr '\n' ' ' | sed 's/  */ /g' | sed 's/"/\\"/g')"
+          cat > version.json <<EOF
+          {
+              "version": "$v",
+              "download_url": "$url",
+              "notas": "$notas"
+          }
+          EOF
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add version.json
+          git commit -m "chore: publish version.json for v$v [skip ci]" || echo "Sem mudanças em version.json."
+          git push origin main

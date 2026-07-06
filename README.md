@@ -7,10 +7,13 @@ Ferramenta de recomendação automática de heróis para **Overwatch**. O progra
 ## Funcionalidades
 
 - **Captura automática** da tela de seleção com hotkey global (`TAB+1`)
-- **Identificação de heróis** por template matching (janela deslizante com MAE normalizado)
+- **Captura da janela do jogo** (suporta multi-monitor e modo janela): localiza a janela do Overwatch e captura o retângulo do cliente; se a janela não for encontrada, cai automaticamente para o monitor primário
+- **Identificação de heróis** por template matching (janela deslizante com correlação normalizada `TM_CCOEFF_NORMED`, robusta a brilho/HDR/highlight)
 - **Suporte aos bans do Competitivo**: heróis banidos são identificados e removidos automaticamente do ranking (tratados como indisponíveis, igual aos heróis já no seu time)
 - **Identificação automática do mapa** via OCR (Tesseract embutido) + fuzzy matching
 - **Suporte a múltiplas resoluções**: 720p, 1080p e 2K, com escalonamento automático e escolha inteligente do banco de templates pelo tamanho do retrato
+
+> ⚠️ **Somente resolução 16:9.** O OWPick só é compatível com telas/janelas na proporção **16:9** (ex.: 1280×720, 1920×1080, 2560×1440). **Não há suporte a ultrawide (21:9)** nem a outros formatos — a geometria de captura assume 16:9.
 - **Ranking de heróis** ordenado por pontuação combinada de MetaStrength + counter + sinergia
 - **Threat Weighting integrado**: amplifica automaticamente inimigos perigosos e fortes no mapa atual
 - **Ranking de ameaças inimigas**: exibido antes do ranking de heróis, ordenado por periculosidade
@@ -23,38 +26,70 @@ Ferramenta de recomendação automática de heróis para **Overwatch**. O progra
 ## Estrutura do Projeto
 
 ```
-Overwatch-Best-Picks/
-├── main.py                  # Ponto de entrada — menu e hotkeys
-├── screenshot.py            # Captura e recorte da tela do jogo
-├── comparar.py              # Template matching para identificar heróis
-├── map.py                   # OCR + fuzzy match do nome do mapa
-├── choose_ow_hero.py        # Cálculo e exibição do ranking de heróis
-├── utils.py                 # Fonte única de dados: heróis, mapas, planilhas, utilitários
-├── enemy_mult.py            # Utilitário de diagnóstico de threat weight
-├── favoriteHero.py          # Gerenciamento de heróis favoritos
-├── roles.py                 # Seleção de função (role)
-├── updater.py               # Auto-atualização via GitHub
-├── coletar_stats.py         # Scraper externo para atualizar stats_inputs.csv
-├── resolucao.py             # [Utilitário dev] Seletor visual de coordenadas
-├── heroscreenshot.py        # [Legado] Script antigo de screenshot
+OWPick/
+├── src/owpick/              # Pacote do aplicativo (3 camadas)
+│   ├── __main__.py          # Ponto de entrada (python -m owpick)
+│   ├── pipeline.py          # Casos de uso (run_pipeline → ranking)
+│   ├── paths.py             # Dados do usuário/cache (%APPDATA% / %LOCALAPPDATA%)
+│   ├── settings.py          # Settings tipado/validado (settings.json)
+│   ├── i18n.py              # Strings de UI por idioma (PT-BR/EN)
+│   ├── log.py               # Logging estruturado (arquivo rotativo + console)
+│   ├── core/                # Domínio puro (zero I/O)
+│   │   ├── heroes.py        # Heróis/mapas + aliases + normalização de nomes
+│   │   ├── resolution.py    # Matemática de resolução e recorte
+│   │   ├── models.py        # Dataclasses de domínio (Hero, Lineup, ...)
+│   │   ├── scoring.py       # MetaStrength + threat + ranking + presets
+│   │   └── ports.py         # Protocolos (ScreenCapturer, MetaSource, ...)
+│   ├── infra/               # I/O: captura, matching, OCR, dados, updater
+│   │   ├── capture.py       # Captura (janela do jogo/mss) + recorte em memória
+│   │   ├── matching.py      # Template matching para identificar heróis
+│   │   ├── map_detect.py    # OCR + fuzzy match do nome do mapa
+│   │   ├── ocr_backends.py  # Backends de OCR (Tesseract padrão)
+│   │   ├── datasource.py    # Leitura/cache das matrizes CSV, stats e layout
+│   │   ├── validation.py    # Validação de matrizes/stats/templates
+│   │   ├── stats_update.py  # Atualização das stats de meta pelo app
+│   │   ├── storage.py       # Persistência dos arquivos do usuário
+│   │   ├── resources.py     # resource_path + identidade no Windows
+│   │   └── updater.py       # Auto-atualização via GitHub (rollback seguro)
+│   └── ui/                  # Console: menus, hotkeys, formatação
+│       ├── console.py       # Menu principal e hotkey de captura
+│       ├── roles.py         # Seleção de função (role)
+│       ├── favorites.py     # Gerenciamento de heróis favoritos
+│       ├── hotkey.py        # Hotkey configurável (captura em tempo real)
+│       ├── sim.py           # Modo manual/simulação (sem captura)
+│       ├── profiles.py      # Múltiplos perfis
+│       └── ranking_view.py  # Formatação rich do ranking no console
 │
-├── heroes ally.xlsx         # Planilha de sinergias entre heróis
-├── heroes enemy.xlsx        # Planilha de counters entre heróis
-├── stats_inputs.csv         # Winrate/pickrate por mapa (fonte do MetaStrength)
-├── config.json              # Coordenadas de captura do mapa por resolução
-├── version.txt              # Versão local
+├── tools/                   # Ferramentas de desenvolvimento (fora do app)
+│   ├── coletar_stats.py     # Scraper externo → data/stats_inputs.csv
+│   ├── xlsx_to_csv.py       # Converte as matrizes .xlsx (edição) → .csv (runtime)
+│   ├── enemy_mult.py        # Diagnóstico de threat weight (consumidor do core)
+│   ├── bump.py              # Sincroniza version.txt + CHANGELOG p/ release
+│   └── resolucao.py         # Seletor visual de coordenadas
+│
+├── assets/                  # Recursos imutáveis empacotados no exe
+│   ├── heroes/              # Templates: 720p|2k/dps|sup|tank/ + bans/
+│   ├── ocr/                 # Tesseract OCR embutido (tesseract.exe + tessdata/)
+│   ├── i18n/                # Strings de UI (pt-BR.json, en.json)
+│   └── icone.ico            # Ícone do app
+│
+├── data/                    # Dados do modelo
+│   ├── synergies.csv        # Matriz de sinergias (lida em runtime)
+│   ├── counters.csv         # Matriz de counters (lida em runtime)
+│   ├── heroes ally.xlsx     # Fonte de EDIÇÃO das sinergias (não empacotada)
+│   ├── heroes enemy.xlsx    # Fonte de EDIÇÃO dos counters (não empacotada)
+│   ├── layouts/ow_hero_select.json  # Layout de captura versionado
+│   └── stats_inputs.csv     # Winrate/pickrate por mapa (fonte do MetaStrength)
+│
+├── packaging/               # Build e distribuição
+│   ├── overwatch.spec       # Configuração do PyInstaller
+│   ├── installer.iss        # Script do instalador (Inno Setup)
+│   └── build.bat            # Build completo: PyInstaller → zip do updater → instalador
+│
+├── tests/                   # Testes (pytest) + fixtures golden de matching
+├── version.txt              # Versão local (fonte única)
 ├── version.json             # Versão remota para update
-├── requirements.txt         # Dependências Python
-├── overwatch.spec           # Configuração do PyInstaller
-├── installer.iss            # Script do instalador (Inno Setup)
-├── build.bat                # Build completo: PyInstaller → zip do updater → instalador
-│
-├── heroes/                  # Templates de imagem dos heróis
-│   ├── 720p/dps|sup|tank/   # Retratos do lineup (TAB+1)
-│   ├── 2k/dps|sup|tank/     # Retratos do lineup (TAB+1)
-│   └── bans/                # Ícones 3D oficiais (reconhecimento de bans)
-│
-└── ocr/                     # Tesseract OCR embutido (tesseract.exe + tessdata/)
+└── pyproject.toml           # Metadados, dependências (uv) e config de tooling
 ```
 
 ---
@@ -64,14 +99,14 @@ Overwatch-Best-Picks/
 ### Pré-requisitos
 
 - Python 3.11+
-- A pasta `ocr/` com o Tesseract já está inclusa no repositório — nenhuma instalação adicional de OCR é necessária
+- A pasta `assets/ocr/` com o Tesseract já está inclusa no repositório — nenhuma instalação adicional de OCR é necessária
 
 ### Passos
 
 ```bash
 # 1. Clone o repositório
-git clone https://github.com/DaviGiuberti/Overwatch-Best-Picks.git
-cd Overwatch-Best-Picks
+git clone https://github.com/DaviGiuberti/OWPick.git
+cd OWPick
 
 # 2. Crie e ative o ambiente virtual
 python -m venv .venv
@@ -81,7 +116,7 @@ python -m venv .venv
 pip install -r requirements.txt
 
 # 4. Execute o programa
-python main.py
+python src\owpick\__main__.py
 ```
 
 > **Windows**: a biblioteca `keyboard` requer execução com privilégios de administrador para capturar hotkeys globais.
@@ -93,7 +128,7 @@ python main.py
 ### Iniciando o Programa
 
 ```bash
-python main.py
+python src\owpick\__main__.py
 ```
 
 Na primeira execução, o programa solicitará:
@@ -102,7 +137,8 @@ Na primeira execução, o programa solicitará:
 
 ### Hotkey Principal
 
-Com o jogo aberto na **tela de seleção de heróis**, pressione:
+Com o jogo aberto na **tela de seleção de heróis**, pressione (padrão;
+configurável na opção 5 do menu):
 
 ```
 TAB + 1
@@ -120,7 +156,7 @@ O programa irá:
 >>> Capturando a tela...
 >>> Comparando os prints com os heróis do Overwatch...
 >>> Identificando o mapa atual...
-[map.py] Mapa identificado: 'Route 66' (score=100.0)
+[map_detect.py] Mapa identificado: 'Route 66' (score=100.0)
 >>> Executando escolha de herói...
 
 Role selecionada: DPS
@@ -154,51 +190,60 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 |---|---|
 | `2` + ENTER | Alterar Role/Função |
 | `3` + ENTER | Adicionar/remover heróis favoritos |
+| `4` + ENTER | Atualizar as stats de meta (avançado; requer Playwright) |
+| `5` + ENTER | Configurar a hotkey de captura |
+| `6` + ENTER | Ligar/desligar a explicação do ranking |
+| `7` + ENTER | Perfis (role + favoritos + preset de pesos + tier) |
+| `sim ...` + ENTER | Simular sem captura (ex.: `sim mapa=Ilios inimigos=Tracer,Winston aliados=Mei`) |
+| `update` + ENTER | Aplicar uma atualização pendente (quando avisada no boot) |
 | `exit` + ENTER | Encerrar o programa |
 
 ---
 
 ## Instalador (usuário final)
 
-A versão pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/Overwatch-Best-Picks/releases).
+A versão pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/OWPick/releases).
 
-**Versão atual**: `1.1.6`
+**Versão atual**: `1.2.0`
 
 Para instalar:
 1. Baixe o arquivo **`OWPick Installer.exe`**
 2. Execute o instalador e siga os passos (não requer privilégios de administrador)
 3. Abra o **OWPick** pelo atalho do Menu Iniciar ou da Área de Trabalho
 
-O programa é instalado em `%LOCALAPPDATA%\Programs\OWPick`. Python, dependências e Tesseract OCR já estão embutidos — nenhuma instalação adicional é necessária. O programa verifica automaticamente por atualizações ao iniciar e as aplica sozinho (não é preciso baixar o instalador novamente).
+O programa é instalado em `%LOCALAPPDATA%\Programs\OWPick`. Python, dependências e Tesseract OCR já estão embutidos — nenhuma instalação adicional é necessária. A verificação de atualização roda em segundo plano no boot (sem travar a inicialização); havendo versão nova, o programa avisa e aplica a atualização de forma segura, com rollback automático caso a cópia falhe (você nunca fica sem app).
 
-> O arquivo `OWPick_v1.1.6.zip` também presente na Release é o pacote consumido pelo sistema de auto-atualização — usuários não precisam baixá-lo manualmente.
+> O arquivo `OWPick_v1.2.0.zip` também presente na Release é o pacote consumido pelo sistema de auto-atualização — usuários não precisam baixá-lo manualmente.
 
 ---
 
 ## Arquitetura
 
-O sistema opera em um **pipeline de 4 etapas** acionado por hotkey:
+O sistema opera em um **pipeline em memória** acionado pela hotkey de captura
+(nenhum arquivo intermediário é escrito fora do modo `--debug`):
 
 ```
-[TAB+1]
+[hotkey de captura]
    │
    ▼
-screenshot.py      ← Captura a tela e recorta os retratos (4 perks) + 5 slots de ban
-   │  print/{perk}/ally1..5.png, enemy1..5.png, print/bans/ban1..5.png, print/full.png
+infra/capture.py     ← Captura a janela do jogo (ou o monitor primário) e recorta
+   │                   em memória: retratos (4 variações de perk) + 5 slots de ban
+   │  CaptureResult
    ▼
-comparar.py        ← Template matching com sliding window (MAE normalizado)
-   │  lineup.txt (4 aliados + 5 inimigos) + bans.txt (0-5 banidos)
+infra/matching.py    ← Template matching (cv2, TM_CCOEFF_NORMED) com limiar de
+   │                   confiança por slot          [em paralelo com o OCR ↓]
+infra/map_detect.py  ← OCR (Tesseract) + fuzzy match (aliases PT-BR) → mapa
+   │  Lineup + BanList + MapDetection
    ▼
-map.py             ← OCR (Tesseract) + fuzzy match → nome do mapa
-   │  current_map.txt
+core/scoring.py      ← MetaStrength + Threat Weighting + Sinergia → ranking
+   │                    (pesos do preset ativo; explicabilidade opcional)
    ▼
-choose_ow_hero.py  ← MetaStrength + Threat Weighting + Sinergia → ranking
-        │
+ui/ranking_view.py   ← Tabela rich no console
         ├── [Ranking de Ameaças Inimigas]
         └── [Ranking de Heróis Recomendados]
 ```
 
-O menu e os hotkeys rodam em **threads separadas**, permitindo que o pipeline seja executado sem bloquear a interface.
+O menu e os hotkeys rodam em **threads separadas**, permitindo que o pipeline seja executado sem bloquear a interface. O OCR do mapa roda **em paralelo** ao matching dos heróis.
 
 ---
 
@@ -209,16 +254,35 @@ O menu e os hotkeys rodam em **threads separadas**, permitindo que o pipeline se
 | **Python 3.11** | Linguagem principal |
 | **MSS** | Captura de tela de alta performance |
 | **Pillow (PIL)** | Manipulação e crop de imagens, pré-processamento para OCR |
-| **OpenCV (cv2)** | Redimensionamento de imagens para template matching |
-| **NumPy** | Cálculo de MAE (Mean Absolute Error) para matching |
-| **Pandas + openpyxl** | Leitura das planilhas de counters, sinergias e stats por mapa |
+| **OpenCV (cv2)** | Template matching (`matchTemplate`, TM_CCOEFF_NORMED) e redimensionamento |
+| **NumPy** | Arrays numéricos do matching |
+| **Pandas** | Leitura dos CSVs de counters, sinergias e stats por mapa |
 | **keyboard** | Hotkeys globais funcionando fora do foco da janela |
 | **pytesseract + Tesseract OCR** | Identificação do nome do mapa via OCR |
-| **rapidfuzz** | Fuzzy matching do texto OCR contra a lista de mapas |
-| **difflib** | Fuzzy matching para busca de heróis por nome |
+| **rapidfuzz** | Fuzzy matching do mapa (OCR) e da busca de heróis por nome |
+| **rich** | Console rico: tabela do ranking, painel de ameaças, spinner |
 | **urllib** | Download do pacote de atualização |
 | **PyInstaller** | Empacotamento em `.exe` (one-folder) |
 | **Inno Setup 6** | Instalador único (`OWPick Installer.exe`) — ferramenta externa de build, não é dependência Python |
+
+---
+
+## Aviso sobre Termos de Serviço (leia antes de usar)
+
+O OWPick é um **observador passivo**: ele apenas **tira print da tela** e mostra
+o resultado no seu terminal. Por design, ele **nunca**:
+
+- injeta código, lê a memória ou faz hook do processo do Overwatch;
+- desenha overlay sobre o jogo (não há e não haverá overlay — é só um terminal);
+- automatiza mouse/teclado dentro do jogo (a hotkey global só *detecta* que você
+  a pressionou; nada é enviado ao jogo).
+
+Ainda assim, **ferramentas externas de terceiros são uma área cinzenta dos Termos
+de Serviço** do Overwatch. **O uso é por sua conta e risco.** O autor não se
+responsabiliza por eventuais penalidades aplicadas pela publicadora do jogo.
+
+> ℹ️ Detalhes dessa postura estão documentados em
+> [`DOCUMENTACAO.md`](DOCUMENTACAO.md) como restrição permanente de arquitetura.
 
 ---
 

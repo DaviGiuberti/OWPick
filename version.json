@@ -1,5 +1,5 @@
 {
-    "version": "1.1.6",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.1.6/OWPick_v1.1.6.zip",
-    "notas": "Nova distribuicao profissional via instalador (OWPick Installer.exe): instalacao per-user com atalhos no Menu Iniciar/Area de Trabalho, sem expor a pasta _internal. Correcao definitiva do icone na barra de tarefas do Windows 11 (AppUserModelID + icone multi-tamanho)."
+    "version": "1.2.0",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.0/OWPick_v1.2.0.zip",
+    "notas": "Versao maior de reengenharia: arquitetura em 3 camadas (core/infra/ui), pipeline em memoria, matching mais robusto (TM_CCOEFF_NORMED + limiar de confianca), OCR de mapa por idioma (PT-BR), settings unico validado, presets de pesos, explicabilidade do ranking, console rico, modo simulacao, multiplos perfis, hotkey configuravel e update seguro com rollback + checagem nao bloqueante."
 }

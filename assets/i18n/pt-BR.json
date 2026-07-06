@@ -1,0 +1,36 @@
+{
+  "menu.main": "Comandos disponíveis:\n  2 -> alterar Role/Função\n  3 -> adicionar/remover heróis favoritos\n  4 -> atualizar stats de meta (avançado; requer Playwright)\n  5 -> configurar a hotkey de captura\n  6 -> ligar/desligar a explicação do ranking\n  7 -> perfis (role + favoritos + preset + tier)\n  sim mapa=<mapa> inimigos=<h1,h2> aliados=<h1,h2> -> simular sem captura\n",
+  "menu.small": "\n[2] Role  [3] Favoritos  [4] Atualizar stats  [5] Hotkey  [6] Explicação  [7] Perfis  [sim] Simular\n",
+  "menu.unknown_command": "Comando não reconhecido. Use um dos números do menu e pressione ENTER.",
+
+  "boot.started": " PROGRAMA INICIADO - OWPick",
+  "boot.hotkey_hint": " - Pressione {hotkey} (global) para executar o pipeline quando estiver no menu principal.",
+  "boot.menu_hint": " - Use os números do menu e ENTER para rodar os outros comandos.",
+
+  "pipeline.capturing": "Capturando a tela...",
+  "pipeline.comparing": "Comparando os prints e identificando o mapa...",
+  "pipeline.choosing": "Executando escolha de herói...",
+  "pipeline.slot_unidentified": "{slot}: não identificado (score {score})",
+  "pipeline.role_missing": "Não encontrei sua Role. Use a opção 2 do menu para definir a função que você joga.",
+  "pipeline.favorites_missing": "Não encontrei seus favoritos ('{role}.txt'). Use a opção 3 do menu para escolher os heróis que você joga.",
+  "pipeline.no_heroes_detected": "Não encontrei a tela de seleção de heróis. Abra o Overwatch na tela de escolha de personagem e pressione {hotkey} novamente.",
+  "pipeline.error": "Erro no pipeline: {error}. Tente novamente; se persistir, rode com --debug e consulte o log em %APPDATA%\\OWPick\\logs.",
+
+  "update.available": "Atualização disponível: v{version}. Digite 'update' e ENTER para aplicar agora, ou ela será aplicada automaticamente ao fechar o programa.",
+  "update.applying": "Aplicando atualização... o programa será reiniciado.",
+  "update.none": "Nenhuma atualização pendente. Você já está na versão mais recente.",
+
+  "ranking.available": "Heróis disponíveis: {heroes}",
+  "ranking.allies": "Aliados: {names}",
+  "ranking.enemies": "Inimigos: {names}",
+  "ranking.banned": "Banidos: {names}",
+  "ranking.map": "Mapa atual: {map}",
+  "ranking.meta_unavailable": "MetaStrength indisponível para este mapa — termo tratado como 0.",
+  "ranking.threat_title": "Ranking de Ameaças Inimigas",
+  "ranking.threat_label": "Ameaça",
+  "ranking.excluded_ally": "Excluídos (já no time aliado): {names}",
+  "ranking.excluded_ban": "Excluídos (banidos): {names}",
+  "ranking.empty": "Nenhum herói candidato disponível para ranquear. Adicione heróis aos favoritos (opção 3 do menu).",
+  "ranking.why_title": "--- Por quê (top {n}) ---",
+  "ranking.why_neutral": "sem contribuições relevantes (score próximo do neutro)"
+}

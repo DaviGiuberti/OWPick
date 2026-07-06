@@ -1,0 +1,102 @@
+[project]
+name = "owpick"
+version = "1.1.6"
+description = "Ferramenta de recomendacao automatica de herois para Overwatch (captura de tela + template matching + scoring)"
+authors = [{ name = "Davi Giuberti" }]
+requires-python = ">=3.11"
+# Runtime — usadas diretamente pelo código do app.
+dependencies = [
+    "mss>=10.2.0",
+    "Pillow>=12.2.0",
+    "opencv-python>=4.13.0",
+    "numpy>=2.4.0",
+    "pandas>=2.0.0",
+    "keyboard>=0.13.5",
+    "rapidfuzz>=3.14.5",   # fuzzy match do nome do mapa (map.py)
+    "unidecode>=1.4.0",
+    "pytesseract>=0.3.13", # OCR do nome do mapa (map.py) — Tesseract embutido em ocr/
+    "rich>=13.0",          # console rico: tabela de ranking, painel de ameaças, spinner (6.5)
+]
+
+[dependency-groups]
+# Ferramentas de desenvolvimento (lint, format, types, testes).
+dev = [
+    "ruff>=0.8",
+    "pyright>=1.1.390",
+    "pytest>=8.0",
+    "PyAutoGUI>=0.9.54",   # utilitário de dev (resolucao.py) — não exigido em runtime
+    "openpyxl>=3.1.5",     # só p/ o conversor offline tools/xlsx_to_csv.py (5.1)
+]
+# Build do executável/instalador (Inno Setup é ferramenta externa, não-Python).
+build = [
+    "PyInstaller>=6.20.0",
+]
+# Scraper de stats (coletar_stats.py) — fora do pipeline runtime.
+scraper = [
+    "playwright>=1.40",
+]
+# OCR nativo do Windows (Windows.Media.Ocr) — backend OPCIONAL/experimental de
+# avaliação (tarefa 4.5). NÃO é dependência de runtime: o backend padrão é o
+# Tesseract embutido. Instale este grupo + `set OWPICK_OCR_BACKEND=windows` para
+# medir a acurácia do OCR nativo contra as fixtures antes de considerar a troca.
+ocr-win = [
+    # A última versão publicada do winsdk é pre-release (1.0.0b10) — ">=1.0"
+    # não resolve; o marker evita quebrar a resolução em Pythons sem wheel.
+    "winsdk>=1.0.0b10; python_version < '3.14'",
+]
+
+[tool.uv]
+# Projeto de scripts (módulos na raiz) — não é um pacote instalável (ainda; ver
+# tarefa 2.1 da reorganização para src/owpick/).
+package = false
+
+# ---------------------------------------------------------------------------
+# Ruff — linter e formatador (tarefa 1.2)
+# ---------------------------------------------------------------------------
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+# Diretórios de código first-party (detecção de import para o isort — o pacote
+# owpick é resolvido a partir de src/).
+src = ["src", "tests", "tools"]
+exclude = [".venv", "build", "dist", "assets", "print", "testes"]
+
+[tool.ruff.lint]
+# E/W = pycodestyle, F = pyflakes, I = isort, B = bugbear, UP = pyupgrade
+select = ["E", "W", "F", "I", "B", "UP"]
+ignore = [
+    "E501",  # linhas longas: tratadas pelo formatador; docstrings/tabelas podem exceder
+]
+
+[tool.ruff.lint.per-file-ignores]
+# O bootstrap (path do pacote + reconfiguração de encoding) roda ANTES de
+# importar owpick.* — os imports não podem ficar no topo.
+"src/owpick/__main__.py" = ["E402"]
+
+# ---------------------------------------------------------------------------
+# Pyright — type checking (tarefa 1.5); modo básico, subindo rigidez por módulo
+# ---------------------------------------------------------------------------
+[tool.pyright]
+typeCheckingMode = "basic"
+pythonVersion = "3.11"
+venvPath = "."
+venv = ".venv"
+include = ["src", "tests", "tools"]
+extraPaths = ["src"]
+exclude = [
+    ".venv",
+    "build",
+    "dist",
+    "assets",
+    "print",
+    "testes",
+    "__pycache__",
+    "tools/resolucao.py",  # utilitário Tkinter legado de dev — fora do escopo de tipos
+]
+
+# ---------------------------------------------------------------------------
+# Pytest (tarefa 1.3)
+# ---------------------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

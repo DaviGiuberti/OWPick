@@ -1,0 +1,6 @@
+{
+    "allies": ["DVa", "Reaper", "Sojourn", "Kiriko", "Jetpack Cat"],
+    "enemies": ["DVa", "Tracer", "Reaper", "Kiriko", "Wuyang"],
+    "bans": ["Mizuki", "Cassidy", "Pharah", "Wrecking Ball"],
+    "map": "Lijiang Tower"
+}

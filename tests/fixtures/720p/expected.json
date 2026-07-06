@@ -1,0 +1,6 @@
+{
+    "allies": ["Doomfist", "Sierra", "Soldier 76", "Illari", "Mercy"],
+    "enemies": ["Ramattra", "Soldier 76", "Emre", "Illari", "Mercy"],
+    "bans": ["DVa", "Domina", "Widowmaker", "Mauga"],
+    "map": "Dorado"
+}

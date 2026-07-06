@@ -4,6 +4,107 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.0] — 2026-07-05
+
+Versão maior de reengenharia do OWPick. Reúne todo o trabalho das fases 0 a 8:
+higiene de código, rede de testes, refatoração arquitetural, performance,
+robustez de matching/OCR, dados versionáveis, settings/UX e build/release.
+
+### Arquitetura e qualidade de código
+
+- **Reorganização em `src/owpick/` com três camadas** — `core/` (domínio puro,
+  zero I/O), `infra/` (captura, matching, OCR, dados, updater, persistência) e
+  `ui/` (console, a única camada que imprime). Casos de uso em `pipeline.py`.
+- **Domínio modelado com dataclasses** (`Hero`, `Lineup`, `BanList`,
+  `MatchResult`, `MapDetection`, `CaptureResult`, `Recommendation`): a
+  normalização de nomes acontece **uma vez**, na fronteira.
+- **Pipeline em memória**: cada etapa recebe/devolve objetos NumPy/dataclasses;
+  os ~45 PNGs e os `.txt` viram artefatos **apenas de debug** (`--debug`).
+- **Renomeações** para nomes consistentes: `comparar.py → matching.py`,
+  `map.py → map_detect.py`, `favoriteHero.py → favorites.py`.
+- **`paths.py`**: separa os três tipos de dado (app imutável / dados do usuário em
+  `%APPDATA%\OWPick` / cache em `%LOCALAPPDATA%\OWPick\cache`) com migração
+  automática dos dados de versões antigas. Nenhum módulo usa mais caminho
+  relativo/`Path.cwd()`.
+- **Layout de captura versionado** (`data/layouts/ow_hero_select.json`): o código
+  interpreta o layout; nada de coordenadas hardcoded (`config.json` removido).
+- **Tooling**: `pyproject.toml` + `uv.lock` (grupos runtime/dev/build/scraper),
+  **Ruff** (lint+format), **Pyright** (0 erros) e **pytest** (rede de testes com
+  fixtures golden 720p/1080p/2K).
+- Logging estruturado (`logging` + arquivo rotativo em `%APPDATA%\OWPick\logs`),
+  exceções disciplinadas (degradações logadas e justificadas) e encoding do
+  console corrigido de vez.
+
+### Performance
+
+- Janela deslizante em Python puro trocada por **`cv2.matchTemplate`** (C++/SIMD).
+- **Cache de templates escalados** por `(banco, tamanho)`.
+- **OCR do mapa em paralelo** ao matching (`ThreadPoolExecutor`), fora do caminho
+  crítico.
+
+### Robustez de matching e OCR
+
+- **Limiar de confiança no lineup**: slot acima do limiar vira "não identificado"
+  e é excluído das somas de counter/sinergia (fim da recomendação sobre lineup
+  fictício).
+- Métrica de matching **`TM_CCOEFF_NORMED`** (imune a brilho/HDR/highlight),
+  escolhida pelos dados por elevar a margem 1º–2º.
+- **Captura da janela do jogo** via Win32 (`ctypes`), com fallback ao monitor
+  primário. **Compatível apenas com 16:9** (documentado).
+- Fuzzy match do mapa simplificado (`rapidfuzz.token_set_ratio`, fim da explosão
+  combinatória) e **suporte ao idioma do cliente** (aliases PT-BR → nome
+  canônico; "Rota 66" deixa de virar `UNKNOWN`). Backend de OCR plugável
+  (Tesseract padrão; `Windows.Media.Ocr` opcional).
+- **Região do nome do mapa recalibrada em 720p** no layout de captura (âncora
+  agora consistente com a âncora 2K): o OCR do mapa passa a funcionar também em
+  720p — antes lia lixo e podia casar um mapa errado com falsa confiança — e o
+  1080p interpolado ficou mais confiável.
+
+### Dados
+
+- Matrizes de counters/sinergias em **CSV versionável** (`data/counters.csv`,
+  `data/synergies.csv`); os `.xlsx` viram fonte de edição (conversor
+  `tools/xlsx_to_csv.py`, fora do bundle).
+- **Validador de matrizes/stats/templates** com aviso claro do que falta.
+- Opção no menu para **atualizar as stats de meta** (roda o scraper e grava no
+  override do usuário).
+- **Melhorias nos counters da Kiriko, Illari e Wuyang.**
+
+### Settings e UX
+
+- **`settings.json`** único, tipado e validado em `%APPDATA%\OWPick` (campo
+  inválido cai para o default com aviso; nunca derruba o boot).
+- **Hotkey de captura configurável** (captura em tempo real; padrão `TAB+1`).
+- **Presets de pesos** do modelo (Equilibrado/Counter-first/Meta-first/Conforto+)
+  + modo avançado.
+- **Explicabilidade do ranking** (liga/desliga): o "por quê" dos top-3.
+- **Console rico** (`rich`): cores por role, top-3 destacado, barras, painel de
+  ameaças e spinner.
+- **Strings de UI por idioma** (PT-BR/EN) no padrão "o que houve + o que fazer".
+- **Modo simulação** (`sim mapa=... inimigos=... aliados=...`, só scoring).
+- **Múltiplos perfis** (role + favoritos + preset + tier).
+
+### Build, release e atualização
+
+- **Update seguro com rollback**: o `.bat` renomeia a instalação atual para
+  `OWPick.old` antes de aplicar a nova e restaura em caso de falha do `robocopy`;
+  o app novo apaga o backup ao subir. O usuário nunca fica sem app.
+- **Checagem de update não bloqueante**: o boot é imediato; a checagem roda em
+  thread de fundo e avisa sem travar (comando `update` ou aplicação ao fechar).
+- **Release automatizado por tag** (GitHub Actions `v*`): build no runner
+  Windows, publicação da Release com `.zip` + instalador + `sha256` e commit
+  automático do `version.json`. Script local `tools/bump.py X.Y.Z` sincroniza
+  `version.txt` e o `CHANGELOG`.
+
+### Postura de anticheat / Termos de Serviço
+
+- Registrada como **restrição permanente de arquitetura**: apenas captura passiva
+  de tela; zero interação com o processo do jogo; zero automação de input; sem
+  planos de overlay. Aviso claro no README e no instalador de que o uso é por
+  conta do usuário.
+
+---
+
 ## [v1.1.6] — 2026-07-03
 
 ### Distribuição profissional via instalador (Inno Setup)
