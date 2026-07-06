@@ -1,1509 +1,1509 @@
 map,map_type,map_slug,hero,role,winrate,pickrate
-Antarctic Peninsula,Control,antarctic-peninsula,Anran,DPS,54.80,3.80
-Antarctic Peninsula,Control,antarctic-peninsula,Ashe,DPS,49.00,4.10
-Antarctic Peninsula,Control,antarctic-peninsula,Bastion,DPS,45.10,3.40
-Antarctic Peninsula,Control,antarctic-peninsula,Cassidy,DPS,49.80,29.20
-Antarctic Peninsula,Control,antarctic-peninsula,Echo,DPS,50.90,3.60
-Antarctic Peninsula,Control,antarctic-peninsula,Emre,DPS,44.60,5.00
-Antarctic Peninsula,Control,antarctic-peninsula,Freja,DPS,53.30,1.20
-Antarctic Peninsula,Control,antarctic-peninsula,Genji,DPS,45.60,11.00
-Antarctic Peninsula,Control,antarctic-peninsula,Hanzo,DPS,37.30,3.00
-Antarctic Peninsula,Control,antarctic-peninsula,Junkrat,DPS,50.00,3.20
-Antarctic Peninsula,Control,antarctic-peninsula,Mei,DPS,54.00,6.40
-Antarctic Peninsula,Control,antarctic-peninsula,Pharah,DPS,53.10,4.40
-Antarctic Peninsula,Control,antarctic-peninsula,Reaper,DPS,48.00,7.90
-Antarctic Peninsula,Control,antarctic-peninsula,Shion,DPS,53.40,48.90
-Antarctic Peninsula,Control,antarctic-peninsula,Sierra,DPS,42.60,1.90
-Antarctic Peninsula,Control,antarctic-peninsula,Sojourn,DPS,48.40,19.60
-Antarctic Peninsula,Control,antarctic-peninsula,Soldier: 76,DPS,52.90,11.70
-Antarctic Peninsula,Control,antarctic-peninsula,Sombra,DPS,48.70,1.70
-Antarctic Peninsula,Control,antarctic-peninsula,Symmetra,DPS,53.80,3.30
-Antarctic Peninsula,Control,antarctic-peninsula,Torbjörn,DPS,49.80,3.30
-Antarctic Peninsula,Control,antarctic-peninsula,Tracer,DPS,52.50,17.80
-Antarctic Peninsula,Control,antarctic-peninsula,Vendetta,DPS,53.90,1.70
-Antarctic Peninsula,Control,antarctic-peninsula,Venture,DPS,54.30,2.40
-Antarctic Peninsula,Control,antarctic-peninsula,Widowmaker,DPS,37.10,1.60
-Antarctic Peninsula,Control,antarctic-peninsula,D.Va,TANK,47.30,3.90
-Antarctic Peninsula,Control,antarctic-peninsula,Domina,TANK,48.10,2.50
-Antarctic Peninsula,Control,antarctic-peninsula,Doomfist,TANK,49.10,9.20
-Antarctic Peninsula,Control,antarctic-peninsula,Hazard,TANK,44.90,8.10
-Antarctic Peninsula,Control,antarctic-peninsula,Junker Queen,TANK,47.60,4.60
-Antarctic Peninsula,Control,antarctic-peninsula,Mauga,TANK,59.40,8.60
-Antarctic Peninsula,Control,antarctic-peninsula,Orisa,TANK,46.50,7.20
-Antarctic Peninsula,Control,antarctic-peninsula,Ramattra,TANK,46.30,6.90
-Antarctic Peninsula,Control,antarctic-peninsula,Reinhardt,TANK,52.20,9.00
-Antarctic Peninsula,Control,antarctic-peninsula,Roadhog,TANK,48.60,6.50
-Antarctic Peninsula,Control,antarctic-peninsula,Sigma,TANK,52.80,12.20
-Antarctic Peninsula,Control,antarctic-peninsula,Winston,TANK,48.50,4.90
-Antarctic Peninsula,Control,antarctic-peninsula,Wrecking Ball,TANK,45.80,8.10
-Antarctic Peninsula,Control,antarctic-peninsula,Zarya,TANK,58.90,8.50
-Antarctic Peninsula,Control,antarctic-peninsula,Ana,SUP,45.80,21.90
-Antarctic Peninsula,Control,antarctic-peninsula,Baptiste,SUP,49.60,6.10
-Antarctic Peninsula,Control,antarctic-peninsula,Brigitte,SUP,50.60,11.70
-Antarctic Peninsula,Control,antarctic-peninsula,Illari,SUP,54.60,6.50
-Antarctic Peninsula,Control,antarctic-peninsula,Jetpack Cat,SUP,53.50,4.40
-Antarctic Peninsula,Control,antarctic-peninsula,Juno,SUP,49.50,17.80
-Antarctic Peninsula,Control,antarctic-peninsula,Kiriko,SUP,52.50,55.80
-Antarctic Peninsula,Control,antarctic-peninsula,Lifeweaver,SUP,50.70,4.70
-Antarctic Peninsula,Control,antarctic-peninsula,Lúcio,SUP,47.20,12.10
-Antarctic Peninsula,Control,antarctic-peninsula,Mercy,SUP,51.30,10.80
-Antarctic Peninsula,Control,antarctic-peninsula,Mizuki,SUP,54.00,19.10
-Antarctic Peninsula,Control,antarctic-peninsula,Moira,SUP,49.50,13.40
-Antarctic Peninsula,Control,antarctic-peninsula,Wuyang,SUP,46.90,9.50
-Antarctic Peninsula,Control,antarctic-peninsula,Zenyatta,SUP,44.90,5.90
-Busan,Control,busan,Anran,DPS,54.40,3.30
-Busan,Control,busan,Ashe,DPS,54.40,5.10
-Busan,Control,busan,Bastion,DPS,54.50,3.30
-Busan,Control,busan,Cassidy,DPS,48.40,19.90
-Busan,Control,busan,Echo,DPS,45.60,3.40
-Busan,Control,busan,Emre,DPS,51.10,6.40
-Busan,Control,busan,Freja,DPS,32.90,1.60
-Busan,Control,busan,Genji,DPS,50.30,11.30
-Busan,Control,busan,Hanzo,DPS,42.20,3.20
-Busan,Control,busan,Junkrat,DPS,48.60,2.60
-Busan,Control,busan,Mei,DPS,49.50,5.80
-Busan,Control,busan,Pharah,DPS,54.80,3.70
-Busan,Control,busan,Reaper,DPS,40.00,7.50
-Busan,Control,busan,Shion,DPS,52.50,46.10
-Busan,Control,busan,Sierra,DPS,36.20,1.90
-Busan,Control,busan,Sojourn,DPS,47.50,18.70
-Busan,Control,busan,Soldier: 76,DPS,54.20,16.50
-Busan,Control,busan,Sombra,DPS,53.00,2.20
-Busan,Control,busan,Symmetra,DPS,55.40,2.50
-Busan,Control,busan,Torbjörn,DPS,61.70,3.50
-Busan,Control,busan,Tracer,DPS,47.70,20.00
-Busan,Control,busan,Vendetta,DPS,52.00,1.60
-Busan,Control,busan,Venture,DPS,50.00,2.10
-Busan,Control,busan,Widowmaker,DPS,51.80,7.90
-Busan,Control,busan,D.Va,TANK,40.80,5.60
-Busan,Control,busan,Domina,TANK,36.50,1.80
-Busan,Control,busan,Doomfist,TANK,44.80,12.10
-Busan,Control,busan,Hazard,TANK,59.40,7.20
-Busan,Control,busan,Junker Queen,TANK,44.00,4.30
-Busan,Control,busan,Mauga,TANK,51.10,7.70
-Busan,Control,busan,Orisa,TANK,55.50,6.40
-Busan,Control,busan,Ramattra,TANK,45.10,4.20
-Busan,Control,busan,Reinhardt,TANK,52.30,7.90
-Busan,Control,busan,Roadhog,TANK,55.40,5.50
-Busan,Control,busan,Sigma,TANK,49.80,10.10
-Busan,Control,busan,Winston,TANK,53.00,10.90
-Busan,Control,busan,Wrecking Ball,TANK,46.80,10.30
-Busan,Control,busan,Zarya,TANK,56.10,6.20
-Busan,Control,busan,Ana,SUP,47.40,25.60
-Busan,Control,busan,Baptiste,SUP,52.30,5.20
-Busan,Control,busan,Brigitte,SUP,50.20,14.10
-Busan,Control,busan,Illari,SUP,59.10,8.30
-Busan,Control,busan,Jetpack Cat,SUP,51.50,4.40
-Busan,Control,busan,Juno,SUP,47.60,16.30
-Busan,Control,busan,Kiriko,SUP,48.00,55.10
-Busan,Control,busan,Lifeweaver,SUP,50.90,5.00
-Busan,Control,busan,Lúcio,SUP,42.50,12.40
-Busan,Control,busan,Mercy,SUP,55.00,11.10
-Busan,Control,busan,Mizuki,SUP,50.20,15.70
-Busan,Control,busan,Moira,SUP,51.40,10.50
-Busan,Control,busan,Wuyang,SUP,51.00,9.50
-Busan,Control,busan,Zenyatta,SUP,53.60,6.80
-Ilios,Control,ilios,Anran,DPS,47.40,3.30
-Ilios,Control,ilios,Ashe,DPS,53.00,4.30
-Ilios,Control,ilios,Bastion,DPS,51.90,4.00
-Ilios,Control,ilios,Cassidy,DPS,48.70,26.60
-Ilios,Control,ilios,Echo,DPS,54.70,8.20
-Ilios,Control,ilios,Emre,DPS,43.60,4.10
-Ilios,Control,ilios,Freja,DPS,45.80,6.80
-Ilios,Control,ilios,Genji,DPS,52.80,12.80
-Ilios,Control,ilios,Hanzo,DPS,51.50,2.10
-Ilios,Control,ilios,Junkrat,DPS,50.30,2.90
-Ilios,Control,ilios,Mei,DPS,47.20,3.10
-Ilios,Control,ilios,Pharah,DPS,58.10,6.10
-Ilios,Control,ilios,Reaper,DPS,43.20,8.50
-Ilios,Control,ilios,Shion,DPS,53.00,45.40
-Ilios,Control,ilios,Sierra,DPS,42.30,1.80
-Ilios,Control,ilios,Sojourn,DPS,46.10,12.40
-Ilios,Control,ilios,Soldier: 76,DPS,43.90,7.10
-Ilios,Control,ilios,Sombra,DPS,50.80,2.10
-Ilios,Control,ilios,Symmetra,DPS,53.60,2.00
-Ilios,Control,ilios,Torbjörn,DPS,51.40,3.40
-Ilios,Control,ilios,Tracer,DPS,49.40,22.40
-Ilios,Control,ilios,Vendetta,DPS,56.60,1.20
-Ilios,Control,ilios,Venture,DPS,53.90,2.40
-Ilios,Control,ilios,Widowmaker,DPS,54.80,6.90
-Ilios,Control,ilios,D.Va,TANK,48.60,8.00
-Ilios,Control,ilios,Domina,TANK,52.00,1.30
-Ilios,Control,ilios,Doomfist,TANK,50.00,10.90
-Ilios,Control,ilios,Hazard,TANK,58.20,11.80
-Ilios,Control,ilios,Junker Queen,TANK,50.40,3.70
-Ilios,Control,ilios,Mauga,TANK,50.70,6.70
-Ilios,Control,ilios,Orisa,TANK,47.30,6.20
-Ilios,Control,ilios,Ramattra,TANK,48.60,1.50
-Ilios,Control,ilios,Reinhardt,TANK,47.80,5.20
-Ilios,Control,ilios,Roadhog,TANK,50.20,8.40
-Ilios,Control,ilios,Sigma,TANK,48.20,6.20
+Antarctic Peninsula,Control,antarctic-peninsula,Anran,DPS,55.10,3.70
+Antarctic Peninsula,Control,antarctic-peninsula,Ashe,DPS,47.80,4.30
+Antarctic Peninsula,Control,antarctic-peninsula,Bastion,DPS,48.20,3.40
+Antarctic Peninsula,Control,antarctic-peninsula,Cassidy,DPS,48.60,29.40
+Antarctic Peninsula,Control,antarctic-peninsula,Echo,DPS,50.10,3.40
+Antarctic Peninsula,Control,antarctic-peninsula,Emre,DPS,44.40,4.90
+Antarctic Peninsula,Control,antarctic-peninsula,Freja,DPS,54.40,1.10
+Antarctic Peninsula,Control,antarctic-peninsula,Genji,DPS,46.50,10.90
+Antarctic Peninsula,Control,antarctic-peninsula,Hanzo,DPS,38.00,3.30
+Antarctic Peninsula,Control,antarctic-peninsula,Junkrat,DPS,47.50,3.10
+Antarctic Peninsula,Control,antarctic-peninsula,Mei,DPS,52.00,6.70
+Antarctic Peninsula,Control,antarctic-peninsula,Pharah,DPS,54.40,4.30
+Antarctic Peninsula,Control,antarctic-peninsula,Reaper,DPS,47.00,8.30
+Antarctic Peninsula,Control,antarctic-peninsula,Shion,DPS,53.80,46.60
+Antarctic Peninsula,Control,antarctic-peninsula,Sierra,DPS,45.70,2.00
+Antarctic Peninsula,Control,antarctic-peninsula,Sojourn,DPS,47.30,20.30
+Antarctic Peninsula,Control,antarctic-peninsula,Soldier: 76,DPS,53.60,11.40
+Antarctic Peninsula,Control,antarctic-peninsula,Sombra,DPS,49.00,1.60
+Antarctic Peninsula,Control,antarctic-peninsula,Symmetra,DPS,54.30,3.30
+Antarctic Peninsula,Control,antarctic-peninsula,Torbjörn,DPS,54.20,3.60
+Antarctic Peninsula,Control,antarctic-peninsula,Tracer,DPS,53.00,18.50
+Antarctic Peninsula,Control,antarctic-peninsula,Vendetta,DPS,54.00,1.80
+Antarctic Peninsula,Control,antarctic-peninsula,Venture,DPS,54.70,2.30
+Antarctic Peninsula,Control,antarctic-peninsula,Widowmaker,DPS,37.70,1.90
+Antarctic Peninsula,Control,antarctic-peninsula,D.Va,TANK,44.50,4.00
+Antarctic Peninsula,Control,antarctic-peninsula,Domina,TANK,47.40,2.30
+Antarctic Peninsula,Control,antarctic-peninsula,Doomfist,TANK,49.20,8.90
+Antarctic Peninsula,Control,antarctic-peninsula,Hazard,TANK,45.60,8.20
+Antarctic Peninsula,Control,antarctic-peninsula,Junker Queen,TANK,50.90,4.80
+Antarctic Peninsula,Control,antarctic-peninsula,Mauga,TANK,59.70,8.70
+Antarctic Peninsula,Control,antarctic-peninsula,Orisa,TANK,46.30,7.50
+Antarctic Peninsula,Control,antarctic-peninsula,Ramattra,TANK,46.50,6.60
+Antarctic Peninsula,Control,antarctic-peninsula,Reinhardt,TANK,52.60,8.60
+Antarctic Peninsula,Control,antarctic-peninsula,Roadhog,TANK,48.00,6.40
+Antarctic Peninsula,Control,antarctic-peninsula,Sigma,TANK,51.60,12.60
+Antarctic Peninsula,Control,antarctic-peninsula,Winston,TANK,48.70,5.00
+Antarctic Peninsula,Control,antarctic-peninsula,Wrecking Ball,TANK,46.00,7.90
+Antarctic Peninsula,Control,antarctic-peninsula,Zarya,TANK,58.70,8.60
+Antarctic Peninsula,Control,antarctic-peninsula,Ana,SUP,46.50,22.10
+Antarctic Peninsula,Control,antarctic-peninsula,Baptiste,SUP,47.50,6.10
+Antarctic Peninsula,Control,antarctic-peninsula,Brigitte,SUP,50.90,11.90
+Antarctic Peninsula,Control,antarctic-peninsula,Illari,SUP,57.00,6.70
+Antarctic Peninsula,Control,antarctic-peninsula,Jetpack Cat,SUP,50.70,4.80
+Antarctic Peninsula,Control,antarctic-peninsula,Juno,SUP,49.90,18.00
+Antarctic Peninsula,Control,antarctic-peninsula,Kiriko,SUP,51.90,55.50
+Antarctic Peninsula,Control,antarctic-peninsula,Lifeweaver,SUP,50.50,4.60
+Antarctic Peninsula,Control,antarctic-peninsula,Lúcio,SUP,45.80,11.90
+Antarctic Peninsula,Control,antarctic-peninsula,Mercy,SUP,50.80,10.70
+Antarctic Peninsula,Control,antarctic-peninsula,Mizuki,SUP,54.60,18.60
+Antarctic Peninsula,Control,antarctic-peninsula,Moira,SUP,50.10,13.00
+Antarctic Peninsula,Control,antarctic-peninsula,Wuyang,SUP,48.10,9.50
+Antarctic Peninsula,Control,antarctic-peninsula,Zenyatta,SUP,43.70,6.50
+Busan,Control,busan,Anran,DPS,55.10,3.50
+Busan,Control,busan,Ashe,DPS,53.50,5.20
+Busan,Control,busan,Bastion,DPS,54.20,3.20
+Busan,Control,busan,Cassidy,DPS,49.40,20.50
+Busan,Control,busan,Echo,DPS,45.90,3.10
+Busan,Control,busan,Emre,DPS,48.30,6.20
+Busan,Control,busan,Freja,DPS,37.50,1.60
+Busan,Control,busan,Genji,DPS,48.90,11.40
+Busan,Control,busan,Hanzo,DPS,43.50,3.50
+Busan,Control,busan,Junkrat,DPS,46.30,2.60
+Busan,Control,busan,Mei,DPS,48.40,5.60
+Busan,Control,busan,Pharah,DPS,53.40,3.50
+Busan,Control,busan,Reaper,DPS,40.50,7.40
+Busan,Control,busan,Shion,DPS,52.70,44.10
+Busan,Control,busan,Sierra,DPS,38.40,1.90
+Busan,Control,busan,Sojourn,DPS,48.80,19.30
+Busan,Control,busan,Soldier: 76,DPS,52.60,16.60
+Busan,Control,busan,Sombra,DPS,55.30,2.30
+Busan,Control,busan,Symmetra,DPS,55.50,2.60
+Busan,Control,busan,Torbjörn,DPS,61.20,3.20
+Busan,Control,busan,Tracer,DPS,48.20,20.50
+Busan,Control,busan,Vendetta,DPS,51.90,1.60
+Busan,Control,busan,Venture,DPS,53.10,2.20
+Busan,Control,busan,Widowmaker,DPS,52.20,8.50
+Busan,Control,busan,D.Va,TANK,42.20,5.90
+Busan,Control,busan,Domina,TANK,38.50,1.70
+Busan,Control,busan,Doomfist,TANK,44.90,11.80
+Busan,Control,busan,Hazard,TANK,58.90,7.40
+Busan,Control,busan,Junker Queen,TANK,45.00,4.10
+Busan,Control,busan,Mauga,TANK,52.60,7.80
+Busan,Control,busan,Orisa,TANK,53.10,6.80
+Busan,Control,busan,Ramattra,TANK,45.20,4.00
+Busan,Control,busan,Reinhardt,TANK,52.90,7.60
+Busan,Control,busan,Roadhog,TANK,55.20,5.90
+Busan,Control,busan,Sigma,TANK,50.20,10.50
+Busan,Control,busan,Winston,TANK,51.70,10.50
+Busan,Control,busan,Wrecking Ball,TANK,45.90,9.80
+Busan,Control,busan,Zarya,TANK,55.70,6.10
+Busan,Control,busan,Ana,SUP,47.80,25.40
+Busan,Control,busan,Baptiste,SUP,52.60,5.30
+Busan,Control,busan,Brigitte,SUP,50.70,13.50
+Busan,Control,busan,Illari,SUP,58.60,8.50
+Busan,Control,busan,Jetpack Cat,SUP,51.50,4.70
+Busan,Control,busan,Juno,SUP,48.60,16.50
+Busan,Control,busan,Kiriko,SUP,47.80,54.80
+Busan,Control,busan,Lifeweaver,SUP,50.30,4.90
+Busan,Control,busan,Lúcio,SUP,42.80,12.20
+Busan,Control,busan,Mercy,SUP,53.90,11.10
+Busan,Control,busan,Mizuki,SUP,49.10,15.90
+Busan,Control,busan,Moira,SUP,53.10,10.30
+Busan,Control,busan,Wuyang,SUP,50.50,9.80
+Busan,Control,busan,Zenyatta,SUP,51.40,7.00
+Ilios,Control,ilios,Anran,DPS,45.80,3.40
+Ilios,Control,ilios,Ashe,DPS,49.50,4.50
+Ilios,Control,ilios,Bastion,DPS,49.60,3.80
+Ilios,Control,ilios,Cassidy,DPS,48.40,27.20
+Ilios,Control,ilios,Echo,DPS,53.50,8.80
+Ilios,Control,ilios,Emre,DPS,44.70,4.00
+Ilios,Control,ilios,Freja,DPS,48.70,7.00
+Ilios,Control,ilios,Genji,DPS,53.00,12.60
+Ilios,Control,ilios,Hanzo,DPS,51.90,2.20
+Ilios,Control,ilios,Junkrat,DPS,48.90,2.80
+Ilios,Control,ilios,Mei,DPS,48.50,3.20
+Ilios,Control,ilios,Pharah,DPS,57.30,6.00
+Ilios,Control,ilios,Reaper,DPS,42.80,8.70
+Ilios,Control,ilios,Shion,DPS,52.10,43.70
+Ilios,Control,ilios,Sierra,DPS,43.00,1.70
+Ilios,Control,ilios,Sojourn,DPS,47.10,11.90
+Ilios,Control,ilios,Soldier: 76,DPS,46.10,7.50
+Ilios,Control,ilios,Sombra,DPS,54.10,2.20
+Ilios,Control,ilios,Symmetra,DPS,54.90,2.30
+Ilios,Control,ilios,Torbjörn,DPS,50.20,3.40
+Ilios,Control,ilios,Tracer,DPS,49.40,22.70
+Ilios,Control,ilios,Vendetta,DPS,56.90,1.20
+Ilios,Control,ilios,Venture,DPS,54.10,2.30
+Ilios,Control,ilios,Widowmaker,DPS,55.30,6.90
+Ilios,Control,ilios,D.Va,TANK,48.90,8.10
+Ilios,Control,ilios,Domina,TANK,49.40,1.20
+Ilios,Control,ilios,Doomfist,TANK,49.80,10.70
+Ilios,Control,ilios,Hazard,TANK,57.20,11.90
+Ilios,Control,ilios,Junker Queen,TANK,51.40,3.40
+Ilios,Control,ilios,Mauga,TANK,50.60,7.10
+Ilios,Control,ilios,Orisa,TANK,47.60,6.20
+Ilios,Control,ilios,Ramattra,TANK,48.00,1.60
+Ilios,Control,ilios,Reinhardt,TANK,46.90,5.10
+Ilios,Control,ilios,Roadhog,TANK,49.70,8.40
+Ilios,Control,ilios,Sigma,TANK,49.90,6.70
 Ilios,Control,ilios,Winston,TANK,48.30,13.80
-Ilios,Control,ilios,Wrecking Ball,TANK,48.40,11.60
-Ilios,Control,ilios,Zarya,TANK,48.40,4.80
-Ilios,Control,ilios,Ana,SUP,48.60,20.10
-Ilios,Control,ilios,Baptiste,SUP,52.00,4.40
-Ilios,Control,ilios,Brigitte,SUP,50.00,15.30
-Ilios,Control,ilios,Illari,SUP,46.00,6.30
-Ilios,Control,ilios,Jetpack Cat,SUP,56.40,7.80
-Ilios,Control,ilios,Juno,SUP,53.80,17.30
-Ilios,Control,ilios,Kiriko,SUP,49.30,55.50
-Ilios,Control,ilios,Lifeweaver,SUP,47.80,5.40
-Ilios,Control,ilios,Lúcio,SUP,51.20,16.60
-Ilios,Control,ilios,Mercy,SUP,44.90,12.90
-Ilios,Control,ilios,Mizuki,SUP,51.90,16.20
-Ilios,Control,ilios,Moira,SUP,49.00,11.00
-Ilios,Control,ilios,Wuyang,SUP,50.80,6.50
-Ilios,Control,ilios,Zenyatta,SUP,47.30,4.80
-Lijiang Tower,Control,lijiang-tower,Anran,DPS,50.20,4.10
-Lijiang Tower,Control,lijiang-tower,Ashe,DPS,46.30,2.80
-Lijiang Tower,Control,lijiang-tower,Bastion,DPS,48.00,4.60
-Lijiang Tower,Control,lijiang-tower,Cassidy,DPS,47.60,25.40
-Lijiang Tower,Control,lijiang-tower,Echo,DPS,49.20,6.20
-Lijiang Tower,Control,lijiang-tower,Emre,DPS,42.50,4.00
-Lijiang Tower,Control,lijiang-tower,Freja,DPS,42.10,1.80
-Lijiang Tower,Control,lijiang-tower,Genji,DPS,48.20,10.00
-Lijiang Tower,Control,lijiang-tower,Hanzo,DPS,52.30,3.10
-Lijiang Tower,Control,lijiang-tower,Junkrat,DPS,46.30,4.30
-Lijiang Tower,Control,lijiang-tower,Mei,DPS,53.00,5.80
-Lijiang Tower,Control,lijiang-tower,Pharah,DPS,54.90,9.60
-Lijiang Tower,Control,lijiang-tower,Reaper,DPS,52.60,7.50
-Lijiang Tower,Control,lijiang-tower,Shion,DPS,55.50,44.70
-Lijiang Tower,Control,lijiang-tower,Sierra,DPS,51.30,1.70
-Lijiang Tower,Control,lijiang-tower,Sojourn,DPS,48.40,21.40
-Lijiang Tower,Control,lijiang-tower,Soldier: 76,DPS,46.10,8.70
-Lijiang Tower,Control,lijiang-tower,Sombra,DPS,46.40,1.50
-Lijiang Tower,Control,lijiang-tower,Symmetra,DPS,56.20,5.20
-Lijiang Tower,Control,lijiang-tower,Torbjörn,DPS,56.10,3.20
-Lijiang Tower,Control,lijiang-tower,Tracer,DPS,46.80,17.50
+Ilios,Control,ilios,Wrecking Ball,TANK,48.50,11.40
+Ilios,Control,ilios,Zarya,TANK,48.50,4.50
+Ilios,Control,ilios,Ana,SUP,48.90,20.00
+Ilios,Control,ilios,Baptiste,SUP,53.10,4.30
+Ilios,Control,ilios,Brigitte,SUP,49.60,15.40
+Ilios,Control,ilios,Illari,SUP,44.90,6.00
+Ilios,Control,ilios,Jetpack Cat,SUP,55.50,8.30
+Ilios,Control,ilios,Juno,SUP,52.30,16.90
+Ilios,Control,ilios,Kiriko,SUP,49.50,55.50
+Ilios,Control,ilios,Lifeweaver,SUP,48.80,5.40
+Ilios,Control,ilios,Lúcio,SUP,52.50,16.70
+Ilios,Control,ilios,Mercy,SUP,45.90,13.10
+Ilios,Control,ilios,Mizuki,SUP,50.30,16.20
+Ilios,Control,ilios,Moira,SUP,50.00,11.00
+Ilios,Control,ilios,Wuyang,SUP,49.10,6.60
+Ilios,Control,ilios,Zenyatta,SUP,48.30,4.50
+Lijiang Tower,Control,lijiang-tower,Anran,DPS,48.10,4.00
+Lijiang Tower,Control,lijiang-tower,Ashe,DPS,46.20,2.80
+Lijiang Tower,Control,lijiang-tower,Bastion,DPS,47.80,4.70
+Lijiang Tower,Control,lijiang-tower,Cassidy,DPS,48.30,25.90
+Lijiang Tower,Control,lijiang-tower,Echo,DPS,49.70,6.10
+Lijiang Tower,Control,lijiang-tower,Emre,DPS,41.20,3.90
+Lijiang Tower,Control,lijiang-tower,Freja,DPS,44.70,1.80
+Lijiang Tower,Control,lijiang-tower,Genji,DPS,46.70,10.00
+Lijiang Tower,Control,lijiang-tower,Hanzo,DPS,53.10,3.20
+Lijiang Tower,Control,lijiang-tower,Junkrat,DPS,48.90,4.40
+Lijiang Tower,Control,lijiang-tower,Mei,DPS,53.40,6.00
+Lijiang Tower,Control,lijiang-tower,Pharah,DPS,54.30,9.50
+Lijiang Tower,Control,lijiang-tower,Reaper,DPS,52.50,7.80
+Lijiang Tower,Control,lijiang-tower,Shion,DPS,54.00,43.00
+Lijiang Tower,Control,lijiang-tower,Sierra,DPS,50.90,1.70
+Lijiang Tower,Control,lijiang-tower,Sojourn,DPS,49.30,21.80
+Lijiang Tower,Control,lijiang-tower,Soldier: 76,DPS,47.20,9.10
+Lijiang Tower,Control,lijiang-tower,Sombra,DPS,45.20,1.40
+Lijiang Tower,Control,lijiang-tower,Symmetra,DPS,56.40,5.30
+Lijiang Tower,Control,lijiang-tower,Torbjörn,DPS,57.10,3.10
+Lijiang Tower,Control,lijiang-tower,Tracer,DPS,46.60,17.70
 Lijiang Tower,Control,lijiang-tower,Vendetta,DPS,47.20,1.70
-Lijiang Tower,Control,lijiang-tower,Venture,DPS,56.40,2.60
-Lijiang Tower,Control,lijiang-tower,Widowmaker,DPS,45.70,2.60
-Lijiang Tower,Control,lijiang-tower,D.Va,TANK,46.30,4.50
-Lijiang Tower,Control,lijiang-tower,Domina,TANK,42.70,2.10
-Lijiang Tower,Control,lijiang-tower,Doomfist,TANK,47.90,11.50
-Lijiang Tower,Control,lijiang-tower,Hazard,TANK,50.30,7.00
-Lijiang Tower,Control,lijiang-tower,Junker Queen,TANK,54.50,4.10
-Lijiang Tower,Control,lijiang-tower,Mauga,TANK,49.20,8.70
-Lijiang Tower,Control,lijiang-tower,Orisa,TANK,50.50,9.10
-Lijiang Tower,Control,lijiang-tower,Ramattra,TANK,44.20,5.80
+Lijiang Tower,Control,lijiang-tower,Venture,DPS,56.60,2.60
+Lijiang Tower,Control,lijiang-tower,Widowmaker,DPS,47.50,2.60
+Lijiang Tower,Control,lijiang-tower,D.Va,TANK,47.00,4.80
+Lijiang Tower,Control,lijiang-tower,Domina,TANK,43.40,1.90
+Lijiang Tower,Control,lijiang-tower,Doomfist,TANK,47.40,11.20
+Lijiang Tower,Control,lijiang-tower,Hazard,TANK,51.10,6.90
+Lijiang Tower,Control,lijiang-tower,Junker Queen,TANK,52.70,3.90
+Lijiang Tower,Control,lijiang-tower,Mauga,TANK,50.10,9.00
+Lijiang Tower,Control,lijiang-tower,Orisa,TANK,50.20,9.00
+Lijiang Tower,Control,lijiang-tower,Ramattra,TANK,44.80,5.70
 Lijiang Tower,Control,lijiang-tower,Reinhardt,TANK,56.60,10.20
-Lijiang Tower,Control,lijiang-tower,Roadhog,TANK,51.60,6.90
-Lijiang Tower,Control,lijiang-tower,Sigma,TANK,50.20,9.00
-Lijiang Tower,Control,lijiang-tower,Winston,TANK,38.70,4.00
-Lijiang Tower,Control,lijiang-tower,Wrecking Ball,TANK,52.50,8.70
-Lijiang Tower,Control,lijiang-tower,Zarya,TANK,52.70,8.50
-Lijiang Tower,Control,lijiang-tower,Ana,SUP,47.70,19.30
-Lijiang Tower,Control,lijiang-tower,Baptiste,SUP,51.30,5.60
-Lijiang Tower,Control,lijiang-tower,Brigitte,SUP,52.30,10.50
-Lijiang Tower,Control,lijiang-tower,Illari,SUP,48.90,6.00
-Lijiang Tower,Control,lijiang-tower,Jetpack Cat,SUP,54.20,6.50
-Lijiang Tower,Control,lijiang-tower,Juno,SUP,50.50,16.90
-Lijiang Tower,Control,lijiang-tower,Kiriko,SUP,49.10,56.60
-Lijiang Tower,Control,lijiang-tower,Lifeweaver,SUP,46.10,3.60
-Lijiang Tower,Control,lijiang-tower,Lúcio,SUP,51.40,17.00
-Lijiang Tower,Control,lijiang-tower,Mercy,SUP,50.70,10.90
-Lijiang Tower,Control,lijiang-tower,Mizuki,SUP,54.80,19.00
-Lijiang Tower,Control,lijiang-tower,Moira,SUP,45.70,13.10
-Lijiang Tower,Control,lijiang-tower,Wuyang,SUP,47.00,8.80
-Lijiang Tower,Control,lijiang-tower,Zenyatta,SUP,49.50,6.20
-Nepal,Control,nepal,Anran,DPS,54.80,3.20
-Nepal,Control,nepal,Ashe,DPS,48.30,4.70
-Nepal,Control,nepal,Bastion,DPS,57.70,4.60
-Nepal,Control,nepal,Cassidy,DPS,48.20,23.80
-Nepal,Control,nepal,Echo,DPS,48.50,5.00
-Nepal,Control,nepal,Emre,DPS,51.00,5.00
-Nepal,Control,nepal,Freja,DPS,51.50,1.70
-Nepal,Control,nepal,Genji,DPS,46.30,11.70
-Nepal,Control,nepal,Hanzo,DPS,52.00,4.00
-Nepal,Control,nepal,Junkrat,DPS,60.20,4.10
-Nepal,Control,nepal,Mei,DPS,48.50,4.60
-Nepal,Control,nepal,Pharah,DPS,57.60,7.60
-Nepal,Control,nepal,Reaper,DPS,46.90,7.70
-Nepal,Control,nepal,Shion,DPS,50.20,45.40
-Nepal,Control,nepal,Sierra,DPS,46.90,2.00
-Nepal,Control,nepal,Sojourn,DPS,48.10,21.60
-Nepal,Control,nepal,Soldier: 76,DPS,52.30,9.60
-Nepal,Control,nepal,Sombra,DPS,48.70,1.50
-Nepal,Control,nepal,Symmetra,DPS,54.00,4.70
-Nepal,Control,nepal,Torbjörn,DPS,49.10,3.50
-Nepal,Control,nepal,Tracer,DPS,45.90,17.10
-Nepal,Control,nepal,Vendetta,DPS,52.40,2.00
-Nepal,Control,nepal,Venture,DPS,52.00,2.40
-Nepal,Control,nepal,Widowmaker,DPS,44.50,2.50
-Nepal,Control,nepal,D.Va,TANK,43.70,4.70
-Nepal,Control,nepal,Domina,TANK,45.70,2.30
-Nepal,Control,nepal,Doomfist,TANK,51.10,10.90
-Nepal,Control,nepal,Hazard,TANK,53.40,8.00
-Nepal,Control,nepal,Junker Queen,TANK,50.20,3.90
-Nepal,Control,nepal,Mauga,TANK,54.10,8.70
-Nepal,Control,nepal,Orisa,TANK,46.50,8.00
-Nepal,Control,nepal,Ramattra,TANK,46.10,4.90
-Nepal,Control,nepal,Reinhardt,TANK,49.10,9.70
-Nepal,Control,nepal,Roadhog,TANK,49.90,6.70
-Nepal,Control,nepal,Sigma,TANK,51.80,12.70
-Nepal,Control,nepal,Winston,TANK,49.50,5.20
-Nepal,Control,nepal,Wrecking Ball,TANK,53.20,7.10
-Nepal,Control,nepal,Zarya,TANK,48.10,7.10
-Nepal,Control,nepal,Ana,SUP,47.00,23.20
-Nepal,Control,nepal,Baptiste,SUP,47.00,5.00
-Nepal,Control,nepal,Brigitte,SUP,56.10,12.20
-Nepal,Control,nepal,Illari,SUP,51.50,6.30
-Nepal,Control,nepal,Jetpack Cat,SUP,46.50,4.70
-Nepal,Control,nepal,Juno,SUP,49.30,17.40
-Nepal,Control,nepal,Kiriko,SUP,46.90,55.20
-Nepal,Control,nepal,Lifeweaver,SUP,45.10,4.50
-Nepal,Control,nepal,Lúcio,SUP,48.20,12.80
-Nepal,Control,nepal,Mercy,SUP,49.90,12.20
-Nepal,Control,nepal,Mizuki,SUP,52.30,17.70
-Nepal,Control,nepal,Moira,SUP,55.50,12.60
-Nepal,Control,nepal,Wuyang,SUP,48.80,9.10
-Nepal,Control,nepal,Zenyatta,SUP,55.50,7.20
-Oasis,Control,oasis,Anran,DPS,54.00,3.30
-Oasis,Control,oasis,Ashe,DPS,54.70,3.40
-Oasis,Control,oasis,Bastion,DPS,56.80,4.10
-Oasis,Control,oasis,Cassidy,DPS,47.30,30.90
-Oasis,Control,oasis,Echo,DPS,52.00,5.00
-Oasis,Control,oasis,Emre,DPS,44.30,3.60
-Oasis,Control,oasis,Freja,DPS,44.50,2.10
-Oasis,Control,oasis,Genji,DPS,46.40,11.10
-Oasis,Control,oasis,Hanzo,DPS,44.80,2.60
-Oasis,Control,oasis,Junkrat,DPS,43.50,3.30
-Oasis,Control,oasis,Mei,DPS,51.80,4.50
-Oasis,Control,oasis,Pharah,DPS,49.20,6.30
-Oasis,Control,oasis,Reaper,DPS,47.60,8.40
-Oasis,Control,oasis,Shion,DPS,55.30,49.20
-Oasis,Control,oasis,Sierra,DPS,43.60,1.50
-Oasis,Control,oasis,Sojourn,DPS,48.70,17.40
-Oasis,Control,oasis,Soldier: 76,DPS,47.90,10.60
-Oasis,Control,oasis,Sombra,DPS,51.80,2.10
-Oasis,Control,oasis,Symmetra,DPS,55.50,2.70
-Oasis,Control,oasis,Torbjörn,DPS,49.80,3.00
-Oasis,Control,oasis,Tracer,DPS,51.00,19.50
-Oasis,Control,oasis,Vendetta,DPS,58.00,1.70
-Oasis,Control,oasis,Venture,DPS,48.40,2.40
-Oasis,Control,oasis,Widowmaker,DPS,52.60,1.30
-Oasis,Control,oasis,D.Va,TANK,46.10,6.20
-Oasis,Control,oasis,Domina,TANK,53.20,1.70
-Oasis,Control,oasis,Doomfist,TANK,45.90,10.90
-Oasis,Control,oasis,Hazard,TANK,56.40,9.30
-Oasis,Control,oasis,Junker Queen,TANK,53.70,4.50
-Oasis,Control,oasis,Mauga,TANK,51.20,8.60
-Oasis,Control,oasis,Orisa,TANK,44.80,7.60
-Oasis,Control,oasis,Ramattra,TANK,45.50,2.60
-Oasis,Control,oasis,Reinhardt,TANK,49.50,8.90
-Oasis,Control,oasis,Roadhog,TANK,58.30,7.80
-Oasis,Control,oasis,Sigma,TANK,49.10,8.20
-Oasis,Control,oasis,Winston,TANK,48.60,7.40
-Oasis,Control,oasis,Wrecking Ball,TANK,45.30,8.50
-Oasis,Control,oasis,Zarya,TANK,54.30,7.90
-Oasis,Control,oasis,Ana,SUP,45.50,19.40
-Oasis,Control,oasis,Baptiste,SUP,53.70,5.00
-Oasis,Control,oasis,Brigitte,SUP,47.40,12.70
-Oasis,Control,oasis,Illari,SUP,57.80,6.30
-Oasis,Control,oasis,Jetpack Cat,SUP,55.70,5.80
-Oasis,Control,oasis,Juno,SUP,47.30,14.80
-Oasis,Control,oasis,Kiriko,SUP,51.10,58.60
-Oasis,Control,oasis,Lifeweaver,SUP,45.40,4.90
-Oasis,Control,oasis,Lúcio,SUP,46.90,15.00
-Oasis,Control,oasis,Mercy,SUP,44.30,12.50
-Oasis,Control,oasis,Mizuki,SUP,53.30,17.60
-Oasis,Control,oasis,Moira,SUP,53.10,12.40
-Oasis,Control,oasis,Wuyang,SUP,54.40,8.40
-Oasis,Control,oasis,Zenyatta,SUP,52.40,6.50
-Samoa,Control,samoa,Anran,DPS,50.60,4.40
-Samoa,Control,samoa,Ashe,DPS,54.00,5.20
-Samoa,Control,samoa,Bastion,DPS,48.10,3.40
-Samoa,Control,samoa,Cassidy,DPS,49.60,27.20
-Samoa,Control,samoa,Echo,DPS,50.80,4.20
-Samoa,Control,samoa,Emre,DPS,41.10,5.20
-Samoa,Control,samoa,Freja,DPS,40.50,1.50
-Samoa,Control,samoa,Genji,DPS,51.10,9.90
-Samoa,Control,samoa,Hanzo,DPS,47.80,3.40
-Samoa,Control,samoa,Junkrat,DPS,50.30,4.30
-Samoa,Control,samoa,Mei,DPS,48.80,5.20
-Samoa,Control,samoa,Pharah,DPS,45.60,4.40
-Samoa,Control,samoa,Reaper,DPS,50.40,8.90
-Samoa,Control,samoa,Shion,DPS,55.20,47.20
-Samoa,Control,samoa,Sierra,DPS,43.90,1.80
-Samoa,Control,samoa,Sojourn,DPS,50.90,19.90
-Samoa,Control,samoa,Soldier: 76,DPS,46.30,10.00
-Samoa,Control,samoa,Sombra,DPS,47.30,2.00
-Samoa,Control,samoa,Symmetra,DPS,56.70,3.00
-Samoa,Control,samoa,Torbjörn,DPS,52.90,4.50
-Samoa,Control,samoa,Tracer,DPS,49.00,19.30
-Samoa,Control,samoa,Vendetta,DPS,45.10,1.20
-Samoa,Control,samoa,Venture,DPS,51.60,2.30
+Lijiang Tower,Control,lijiang-tower,Roadhog,TANK,50.20,6.70
+Lijiang Tower,Control,lijiang-tower,Sigma,TANK,49.80,9.00
+Lijiang Tower,Control,lijiang-tower,Winston,TANK,36.70,3.90
+Lijiang Tower,Control,lijiang-tower,Wrecking Ball,TANK,52.70,9.00
+Lijiang Tower,Control,lijiang-tower,Zarya,TANK,54.70,8.80
+Lijiang Tower,Control,lijiang-tower,Ana,SUP,46.50,19.30
+Lijiang Tower,Control,lijiang-tower,Baptiste,SUP,50.90,5.60
+Lijiang Tower,Control,lijiang-tower,Brigitte,SUP,52.10,10.40
+Lijiang Tower,Control,lijiang-tower,Illari,SUP,48.40,5.90
+Lijiang Tower,Control,lijiang-tower,Jetpack Cat,SUP,54.40,6.80
+Lijiang Tower,Control,lijiang-tower,Juno,SUP,50.80,17.10
+Lijiang Tower,Control,lijiang-tower,Kiriko,SUP,49.90,56.60
+Lijiang Tower,Control,lijiang-tower,Lifeweaver,SUP,45.60,3.50
+Lijiang Tower,Control,lijiang-tower,Lúcio,SUP,51.60,16.70
+Lijiang Tower,Control,lijiang-tower,Mercy,SUP,50.30,10.80
+Lijiang Tower,Control,lijiang-tower,Mizuki,SUP,53.90,19.30
+Lijiang Tower,Control,lijiang-tower,Moira,SUP,47.20,13.10
+Lijiang Tower,Control,lijiang-tower,Wuyang,SUP,47.00,8.70
+Lijiang Tower,Control,lijiang-tower,Zenyatta,SUP,49.40,6.20
+Nepal,Control,nepal,Anran,DPS,53.30,3.20
+Nepal,Control,nepal,Ashe,DPS,50.10,5.00
+Nepal,Control,nepal,Bastion,DPS,56.10,4.90
+Nepal,Control,nepal,Cassidy,DPS,48.70,24.00
+Nepal,Control,nepal,Echo,DPS,46.90,5.10
+Nepal,Control,nepal,Emre,DPS,51.60,4.90
+Nepal,Control,nepal,Freja,DPS,52.10,1.80
+Nepal,Control,nepal,Genji,DPS,46.20,11.70
+Nepal,Control,nepal,Hanzo,DPS,53.90,3.90
+Nepal,Control,nepal,Junkrat,DPS,57.90,4.00
+Nepal,Control,nepal,Mei,DPS,48.80,4.60
+Nepal,Control,nepal,Pharah,DPS,58.50,7.40
+Nepal,Control,nepal,Reaper,DPS,48.80,7.90
+Nepal,Control,nepal,Shion,DPS,49.50,43.20
+Nepal,Control,nepal,Sierra,DPS,48.60,2.10
+Nepal,Control,nepal,Sojourn,DPS,47.70,21.70
+Nepal,Control,nepal,Soldier: 76,DPS,52.80,9.90
+Nepal,Control,nepal,Sombra,DPS,50.10,1.70
+Nepal,Control,nepal,Symmetra,DPS,54.20,5.00
+Nepal,Control,nepal,Torbjörn,DPS,47.00,3.60
+Nepal,Control,nepal,Tracer,DPS,46.00,17.50
+Nepal,Control,nepal,Vendetta,DPS,50.50,2.00
+Nepal,Control,nepal,Venture,DPS,53.60,2.30
+Nepal,Control,nepal,Widowmaker,DPS,43.50,2.50
+Nepal,Control,nepal,D.Va,TANK,42.70,4.60
+Nepal,Control,nepal,Domina,TANK,43.70,2.20
+Nepal,Control,nepal,Doomfist,TANK,51.70,10.70
+Nepal,Control,nepal,Hazard,TANK,52.50,8.50
+Nepal,Control,nepal,Junker Queen,TANK,50.50,3.90
+Nepal,Control,nepal,Mauga,TANK,54.60,8.60
+Nepal,Control,nepal,Orisa,TANK,46.70,7.90
+Nepal,Control,nepal,Ramattra,TANK,45.40,4.80
+Nepal,Control,nepal,Reinhardt,TANK,50.00,9.40
+Nepal,Control,nepal,Roadhog,TANK,50.30,6.80
+Nepal,Control,nepal,Sigma,TANK,50.90,12.70
+Nepal,Control,nepal,Winston,TANK,49.60,5.20
+Nepal,Control,nepal,Wrecking Ball,TANK,51.50,7.40
+Nepal,Control,nepal,Zarya,TANK,50.80,7.40
+Nepal,Control,nepal,Ana,SUP,47.50,23.20
+Nepal,Control,nepal,Baptiste,SUP,46.10,5.10
+Nepal,Control,nepal,Brigitte,SUP,55.50,12.10
+Nepal,Control,nepal,Illari,SUP,50.60,6.20
+Nepal,Control,nepal,Jetpack Cat,SUP,49.10,5.40
+Nepal,Control,nepal,Juno,SUP,49.00,17.30
+Nepal,Control,nepal,Kiriko,SUP,46.80,55.40
+Nepal,Control,nepal,Lifeweaver,SUP,47.90,4.60
+Nepal,Control,nepal,Lúcio,SUP,48.00,12.50
+Nepal,Control,nepal,Mercy,SUP,49.80,12.00
+Nepal,Control,nepal,Mizuki,SUP,53.60,17.60
+Nepal,Control,nepal,Moira,SUP,55.30,12.40
+Nepal,Control,nepal,Wuyang,SUP,48.20,9.20
+Nepal,Control,nepal,Zenyatta,SUP,53.80,7.00
+Oasis,Control,oasis,Anran,DPS,56.30,3.70
+Oasis,Control,oasis,Ashe,DPS,54.80,3.40
+Oasis,Control,oasis,Bastion,DPS,55.70,4.00
+Oasis,Control,oasis,Cassidy,DPS,47.90,31.10
+Oasis,Control,oasis,Echo,DPS,50.60,4.90
+Oasis,Control,oasis,Emre,DPS,45.30,3.60
+Oasis,Control,oasis,Freja,DPS,44.90,2.20
+Oasis,Control,oasis,Genji,DPS,46.60,11.10
+Oasis,Control,oasis,Hanzo,DPS,45.40,2.70
+Oasis,Control,oasis,Junkrat,DPS,45.10,3.30
+Oasis,Control,oasis,Mei,DPS,53.00,4.50
+Oasis,Control,oasis,Pharah,DPS,51.40,6.50
+Oasis,Control,oasis,Reaper,DPS,45.60,8.70
+Oasis,Control,oasis,Shion,DPS,54.30,46.60
+Oasis,Control,oasis,Sierra,DPS,45.20,1.60
+Oasis,Control,oasis,Sojourn,DPS,48.70,17.80
+Oasis,Control,oasis,Soldier: 76,DPS,47.80,10.60
+Oasis,Control,oasis,Sombra,DPS,50.80,2.00
+Oasis,Control,oasis,Symmetra,DPS,56.50,2.80
+Oasis,Control,oasis,Torbjörn,DPS,50.20,3.10
+Oasis,Control,oasis,Tracer,DPS,51.40,20.40
+Oasis,Control,oasis,Vendetta,DPS,54.60,1.70
+Oasis,Control,oasis,Venture,DPS,47.10,2.40
+Oasis,Control,oasis,Widowmaker,DPS,51.70,1.30
+Oasis,Control,oasis,D.Va,TANK,47.70,6.30
+Oasis,Control,oasis,Domina,TANK,52.10,1.60
+Oasis,Control,oasis,Doomfist,TANK,45.30,10.60
+Oasis,Control,oasis,Hazard,TANK,57.60,9.40
+Oasis,Control,oasis,Junker Queen,TANK,53.30,4.50
+Oasis,Control,oasis,Mauga,TANK,52.00,8.50
+Oasis,Control,oasis,Orisa,TANK,45.40,7.60
+Oasis,Control,oasis,Ramattra,TANK,47.70,2.50
+Oasis,Control,oasis,Reinhardt,TANK,48.70,8.80
+Oasis,Control,oasis,Roadhog,TANK,57.50,7.70
+Oasis,Control,oasis,Sigma,TANK,47.80,8.50
+Oasis,Control,oasis,Winston,TANK,49.30,7.40
+Oasis,Control,oasis,Wrecking Ball,TANK,46.30,8.70
+Oasis,Control,oasis,Zarya,TANK,52.00,7.70
+Oasis,Control,oasis,Ana,SUP,46.20,19.30
+Oasis,Control,oasis,Baptiste,SUP,52.40,5.00
+Oasis,Control,oasis,Brigitte,SUP,48.40,12.70
+Oasis,Control,oasis,Illari,SUP,57.70,6.40
+Oasis,Control,oasis,Jetpack Cat,SUP,56.20,6.10
+Oasis,Control,oasis,Juno,SUP,47.50,15.30
+Oasis,Control,oasis,Kiriko,SUP,50.20,58.10
+Oasis,Control,oasis,Lifeweaver,SUP,44.30,4.70
+Oasis,Control,oasis,Lúcio,SUP,46.30,14.90
+Oasis,Control,oasis,Mercy,SUP,46.50,13.20
+Oasis,Control,oasis,Mizuki,SUP,53.40,17.70
+Oasis,Control,oasis,Moira,SUP,52.00,12.00
+Oasis,Control,oasis,Wuyang,SUP,54.50,8.30
+Oasis,Control,oasis,Zenyatta,SUP,52.70,6.30
+Samoa,Control,samoa,Anran,DPS,51.10,4.60
+Samoa,Control,samoa,Ashe,DPS,50.00,5.40
+Samoa,Control,samoa,Bastion,DPS,47.30,3.40
+Samoa,Control,samoa,Cassidy,DPS,49.40,27.90
+Samoa,Control,samoa,Echo,DPS,49.80,4.00
+Samoa,Control,samoa,Emre,DPS,42.20,5.10
+Samoa,Control,samoa,Freja,DPS,43.10,1.50
+Samoa,Control,samoa,Genji,DPS,50.40,10.40
+Samoa,Control,samoa,Hanzo,DPS,48.40,3.40
+Samoa,Control,samoa,Junkrat,DPS,51.20,4.00
+Samoa,Control,samoa,Mei,DPS,49.10,5.40
+Samoa,Control,samoa,Pharah,DPS,44.90,4.40
+Samoa,Control,samoa,Reaper,DPS,49.40,9.10
+Samoa,Control,samoa,Shion,DPS,54.80,44.80
+Samoa,Control,samoa,Sierra,DPS,45.80,1.70
+Samoa,Control,samoa,Sojourn,DPS,50.20,20.10
+Samoa,Control,samoa,Soldier: 76,DPS,48.00,10.20
+Samoa,Control,samoa,Sombra,DPS,47.90,1.80
+Samoa,Control,samoa,Symmetra,DPS,57.70,3.00
+Samoa,Control,samoa,Torbjörn,DPS,54.20,4.40
+Samoa,Control,samoa,Tracer,DPS,50.30,19.70
+Samoa,Control,samoa,Vendetta,DPS,43.50,1.00
+Samoa,Control,samoa,Venture,DPS,50.40,2.40
 Samoa,Control,samoa,Widowmaker,DPS,43.60,1.90
-Samoa,Control,samoa,D.Va,TANK,40.80,4.20
-Samoa,Control,samoa,Domina,TANK,50.00,2.70
-Samoa,Control,samoa,Doomfist,TANK,48.80,11.30
-Samoa,Control,samoa,Hazard,TANK,52.60,7.50
-Samoa,Control,samoa,Junker Queen,TANK,52.70,4.10
-Samoa,Control,samoa,Mauga,TANK,55.90,8.10
-Samoa,Control,samoa,Orisa,TANK,53.20,8.30
-Samoa,Control,samoa,Ramattra,TANK,51.90,4.90
-Samoa,Control,samoa,Reinhardt,TANK,48.80,9.40
-Samoa,Control,samoa,Roadhog,TANK,49.10,6.60
-Samoa,Control,samoa,Sigma,TANK,49.60,11.00
-Samoa,Control,samoa,Winston,TANK,51.70,6.10
-Samoa,Control,samoa,Wrecking Ball,TANK,44.90,8.30
-Samoa,Control,samoa,Zarya,TANK,49.80,7.40
-Samoa,Control,samoa,Ana,SUP,48.00,23.40
-Samoa,Control,samoa,Baptiste,SUP,41.10,4.90
-Samoa,Control,samoa,Brigitte,SUP,54.90,11.80
-Samoa,Control,samoa,Illari,SUP,47.90,7.30
-Samoa,Control,samoa,Jetpack Cat,SUP,48.30,4.10
-Samoa,Control,samoa,Juno,SUP,49.10,18.10
-Samoa,Control,samoa,Kiriko,SUP,50.90,54.80
-Samoa,Control,samoa,Lifeweaver,SUP,52.40,4.90
-Samoa,Control,samoa,Lúcio,SUP,49.90,12.10
-Samoa,Control,samoa,Mercy,SUP,51.30,11.70
-Samoa,Control,samoa,Mizuki,SUP,50.00,18.30
-Samoa,Control,samoa,Moira,SUP,53.60,11.80
-Samoa,Control,samoa,Wuyang,SUP,48.70,9.60
-Samoa,Control,samoa,Zenyatta,SUP,49.20,7.10
-Circuit Royal,Escort,circuit-royal,Anran,DPS,36.50,1.80
-Circuit Royal,Escort,circuit-royal,Ashe,DPS,58.90,16.50
-Circuit Royal,Escort,circuit-royal,Bastion,DPS,49.20,7.10
-Circuit Royal,Escort,circuit-royal,Cassidy,DPS,49.20,9.60
-Circuit Royal,Escort,circuit-royal,Echo,DPS,41.00,4.80
-Circuit Royal,Escort,circuit-royal,Emre,DPS,37.90,9.60
-Circuit Royal,Escort,circuit-royal,Freja,DPS,46.30,7.90
-Circuit Royal,Escort,circuit-royal,Genji,DPS,45.60,10.80
-Circuit Royal,Escort,circuit-royal,Hanzo,DPS,51.60,13.60
-Circuit Royal,Escort,circuit-royal,Junkrat,DPS,53.50,3.30
-Circuit Royal,Escort,circuit-royal,Mei,DPS,58.90,10.20
-Circuit Royal,Escort,circuit-royal,Pharah,DPS,54.40,7.40
-Circuit Royal,Escort,circuit-royal,Reaper,DPS,37.80,2.30
-Circuit Royal,Escort,circuit-royal,Shion,DPS,46.80,27.80
-Circuit Royal,Escort,circuit-royal,Sierra,DPS,42.20,3.80
-Circuit Royal,Escort,circuit-royal,Sojourn,DPS,51.90,32.30
-Circuit Royal,Escort,circuit-royal,Soldier: 76,DPS,55.60,7.00
-Circuit Royal,Escort,circuit-royal,Sombra,DPS,45.90,1.30
-Circuit Royal,Escort,circuit-royal,Symmetra,DPS,43.10,2.30
-Circuit Royal,Escort,circuit-royal,Torbjörn,DPS,57.30,3.40
-Circuit Royal,Escort,circuit-royal,Tracer,DPS,43.00,2.80
-Circuit Royal,Escort,circuit-royal,Vendetta,DPS,57.40,0.70
-Circuit Royal,Escort,circuit-royal,Venture,DPS,36.10,1.40
-Circuit Royal,Escort,circuit-royal,Widowmaker,DPS,61.00,12.20
-Circuit Royal,Escort,circuit-royal,D.Va,TANK,50.20,2.50
-Circuit Royal,Escort,circuit-royal,Domina,TANK,56.50,8.40
-Circuit Royal,Escort,circuit-royal,Doomfist,TANK,43.40,8.70
-Circuit Royal,Escort,circuit-royal,Hazard,TANK,45.90,1.50
-Circuit Royal,Escort,circuit-royal,Junker Queen,TANK,39.20,1.10
+Samoa,Control,samoa,D.Va,TANK,44.50,4.50
+Samoa,Control,samoa,Domina,TANK,51.70,2.60
+Samoa,Control,samoa,Doomfist,TANK,47.00,10.90
+Samoa,Control,samoa,Hazard,TANK,54.50,7.60
+Samoa,Control,samoa,Junker Queen,TANK,51.80,3.80
+Samoa,Control,samoa,Mauga,TANK,55.60,8.20
+Samoa,Control,samoa,Orisa,TANK,54.70,8.80
+Samoa,Control,samoa,Ramattra,TANK,52.90,4.70
+Samoa,Control,samoa,Reinhardt,TANK,47.40,9.20
+Samoa,Control,samoa,Roadhog,TANK,49.50,6.60
+Samoa,Control,samoa,Sigma,TANK,47.70,11.20
+Samoa,Control,samoa,Winston,TANK,50.30,6.00
+Samoa,Control,samoa,Wrecking Ball,TANK,45.20,8.20
+Samoa,Control,samoa,Zarya,TANK,50.50,7.70
+Samoa,Control,samoa,Ana,SUP,47.30,23.50
+Samoa,Control,samoa,Baptiste,SUP,44.10,5.30
+Samoa,Control,samoa,Brigitte,SUP,55.20,12.10
+Samoa,Control,samoa,Illari,SUP,49.90,7.10
+Samoa,Control,samoa,Jetpack Cat,SUP,48.00,4.60
+Samoa,Control,samoa,Juno,SUP,48.70,17.70
+Samoa,Control,samoa,Kiriko,SUP,51.00,55.30
+Samoa,Control,samoa,Lifeweaver,SUP,51.40,4.90
+Samoa,Control,samoa,Lúcio,SUP,50.80,12.20
+Samoa,Control,samoa,Mercy,SUP,49.50,11.60
+Samoa,Control,samoa,Mizuki,SUP,49.60,17.70
+Samoa,Control,samoa,Moira,SUP,54.50,11.60
+Samoa,Control,samoa,Wuyang,SUP,47.70,9.50
+Samoa,Control,samoa,Zenyatta,SUP,49.50,6.80
+Circuit Royal,Escort,circuit-royal,Anran,DPS,41.40,2.20
+Circuit Royal,Escort,circuit-royal,Ashe,DPS,57.50,17.10
+Circuit Royal,Escort,circuit-royal,Bastion,DPS,48.80,7.00
+Circuit Royal,Escort,circuit-royal,Cassidy,DPS,50.50,9.60
+Circuit Royal,Escort,circuit-royal,Echo,DPS,43.90,4.70
+Circuit Royal,Escort,circuit-royal,Emre,DPS,41.10,9.90
+Circuit Royal,Escort,circuit-royal,Freja,DPS,44.30,8.00
+Circuit Royal,Escort,circuit-royal,Genji,DPS,46.40,11.00
+Circuit Royal,Escort,circuit-royal,Hanzo,DPS,54.20,13.80
+Circuit Royal,Escort,circuit-royal,Junkrat,DPS,52.50,3.30
+Circuit Royal,Escort,circuit-royal,Mei,DPS,55.90,10.10
+Circuit Royal,Escort,circuit-royal,Pharah,DPS,53.00,7.20
+Circuit Royal,Escort,circuit-royal,Reaper,DPS,40.50,2.50
+Circuit Royal,Escort,circuit-royal,Shion,DPS,46.40,25.70
+Circuit Royal,Escort,circuit-royal,Sierra,DPS,47.70,4.10
+Circuit Royal,Escort,circuit-royal,Sojourn,DPS,51.40,32.50
+Circuit Royal,Escort,circuit-royal,Soldier: 76,DPS,52.00,7.10
+Circuit Royal,Escort,circuit-royal,Sombra,DPS,51.80,1.40
+Circuit Royal,Escort,circuit-royal,Symmetra,DPS,46.10,2.50
+Circuit Royal,Escort,circuit-royal,Torbjörn,DPS,53.90,3.50
+Circuit Royal,Escort,circuit-royal,Tracer,DPS,39.80,2.80
+Circuit Royal,Escort,circuit-royal,Vendetta,DPS,61.50,0.60
+Circuit Royal,Escort,circuit-royal,Venture,DPS,32.90,1.40
+Circuit Royal,Escort,circuit-royal,Widowmaker,DPS,61.40,12.10
+Circuit Royal,Escort,circuit-royal,D.Va,TANK,51.10,2.70
+Circuit Royal,Escort,circuit-royal,Domina,TANK,57.50,8.10
+Circuit Royal,Escort,circuit-royal,Doomfist,TANK,42.90,8.50
+Circuit Royal,Escort,circuit-royal,Hazard,TANK,47.40,1.60
+Circuit Royal,Escort,circuit-royal,Junker Queen,TANK,45.70,1.20
 Circuit Royal,Escort,circuit-royal,Mauga,TANK,32.50,3.20
-Circuit Royal,Escort,circuit-royal,Orisa,TANK,50.50,9.40
-Circuit Royal,Escort,circuit-royal,Ramattra,TANK,55.00,8.80
-Circuit Royal,Escort,circuit-royal,Reinhardt,TANK,50.90,9.60
-Circuit Royal,Escort,circuit-royal,Roadhog,TANK,45.20,3.40
-Circuit Royal,Escort,circuit-royal,Sigma,TANK,58.60,30.60
-Circuit Royal,Escort,circuit-royal,Winston,TANK,34.00,2.60
-Circuit Royal,Escort,circuit-royal,Wrecking Ball,TANK,41.90,3.30
-Circuit Royal,Escort,circuit-royal,Zarya,TANK,52.20,6.90
-Circuit Royal,Escort,circuit-royal,Ana,SUP,48.00,34.00
-Circuit Royal,Escort,circuit-royal,Baptiste,SUP,53.30,15.40
-Circuit Royal,Escort,circuit-royal,Brigitte,SUP,43.80,4.50
-Circuit Royal,Escort,circuit-royal,Illari,SUP,45.30,14.40
-Circuit Royal,Escort,circuit-royal,Jetpack Cat,SUP,42.40,3.00
-Circuit Royal,Escort,circuit-royal,Juno,SUP,49.60,20.50
-Circuit Royal,Escort,circuit-royal,Kiriko,SUP,47.20,38.90
-Circuit Royal,Escort,circuit-royal,Lifeweaver,SUP,51.10,8.90
-Circuit Royal,Escort,circuit-royal,Lúcio,SUP,44.30,2.10
-Circuit Royal,Escort,circuit-royal,Mercy,SUP,49.90,15.80
-Circuit Royal,Escort,circuit-royal,Mizuki,SUP,61.50,10.00
-Circuit Royal,Escort,circuit-royal,Moira,SUP,48.80,6.20
-Circuit Royal,Escort,circuit-royal,Wuyang,SUP,53.20,11.00
-Circuit Royal,Escort,circuit-royal,Zenyatta,SUP,54.30,15.30
-Dorado,Escort,dorado,Anran,DPS,54.00,4.20
-Dorado,Escort,dorado,Ashe,DPS,53.40,14.40
-Dorado,Escort,dorado,Bastion,DPS,46.80,4.60
-Dorado,Escort,dorado,Cassidy,DPS,41.40,19.60
-Dorado,Escort,dorado,Echo,DPS,52.60,11.50
-Dorado,Escort,dorado,Emre,DPS,45.20,7.00
-Dorado,Escort,dorado,Freja,DPS,41.80,4.60
-Dorado,Escort,dorado,Genji,DPS,50.60,14.50
-Dorado,Escort,dorado,Hanzo,DPS,59.40,4.50
-Dorado,Escort,dorado,Junkrat,DPS,44.70,2.40
-Dorado,Escort,dorado,Mei,DPS,52.70,3.50
-Dorado,Escort,dorado,Pharah,DPS,54.20,6.10
-Dorado,Escort,dorado,Reaper,DPS,50.30,7.40
-Dorado,Escort,dorado,Shion,DPS,50.20,32.90
-Dorado,Escort,dorado,Sierra,DPS,50.80,2.60
-Dorado,Escort,dorado,Sojourn,DPS,43.50,11.60
-Dorado,Escort,dorado,Soldier: 76,DPS,52.10,13.00
-Dorado,Escort,dorado,Sombra,DPS,48.10,1.60
-Dorado,Escort,dorado,Symmetra,DPS,66.20,1.90
-Dorado,Escort,dorado,Torbjörn,DPS,30.90,3.10
-Dorado,Escort,dorado,Tracer,DPS,53.50,15.20
-Dorado,Escort,dorado,Vendetta,DPS,81.10,1.00
-Dorado,Escort,dorado,Venture,DPS,62.20,3.40
-Dorado,Escort,dorado,Widowmaker,DPS,52.50,9.50
-Dorado,Escort,dorado,D.Va,TANK,48.20,9.70
-Dorado,Escort,dorado,Domina,TANK,50.40,1.10
-Dorado,Escort,dorado,Doomfist,TANK,50.40,10.50
-Dorado,Escort,dorado,Hazard,TANK,61.30,8.60
-Dorado,Escort,dorado,Junker Queen,TANK,54.30,1.50
-Dorado,Escort,dorado,Mauga,TANK,50.70,5.50
-Dorado,Escort,dorado,Orisa,TANK,44.70,4.60
-Dorado,Escort,dorado,Ramattra,TANK,40.80,1.60
-Dorado,Escort,dorado,Reinhardt,TANK,41.60,4.70
-Dorado,Escort,dorado,Roadhog,TANK,60.80,6.10
-Dorado,Escort,dorado,Sigma,TANK,47.40,11.60
-Dorado,Escort,dorado,Winston,TANK,46.80,24.30
-Dorado,Escort,dorado,Wrecking Ball,TANK,49.70,8.30
-Dorado,Escort,dorado,Zarya,TANK,54.10,2.00
-Dorado,Escort,dorado,Ana,SUP,45.90,37.40
-Dorado,Escort,dorado,Baptiste,SUP,47.10,6.40
-Dorado,Escort,dorado,Brigitte,SUP,51.90,16.00
-Dorado,Escort,dorado,Illari,SUP,50.80,10.40
-Dorado,Escort,dorado,Jetpack Cat,SUP,57.20,4.80
-Dorado,Escort,dorado,Juno,SUP,61.10,12.60
-Dorado,Escort,dorado,Kiriko,SUP,49.70,48.30
-Dorado,Escort,dorado,Lifeweaver,SUP,48.60,7.60
-Dorado,Escort,dorado,Lúcio,SUP,40.10,5.60
-Dorado,Escort,dorado,Mercy,SUP,44.10,14.40
-Dorado,Escort,dorado,Mizuki,SUP,52.50,13.10
-Dorado,Escort,dorado,Moira,SUP,56.40,8.30
-Dorado,Escort,dorado,Wuyang,SUP,53.90,8.10
-Dorado,Escort,dorado,Zenyatta,SUP,41.30,7.00
-Havana,Escort,havana,Anran,DPS,44.70,1.20
-Havana,Escort,havana,Ashe,DPS,49.60,14.80
-Havana,Escort,havana,Bastion,DPS,71.90,5.20
-Havana,Escort,havana,Cassidy,DPS,43.70,11.90
-Havana,Escort,havana,Echo,DPS,32.30,1.80
-Havana,Escort,havana,Emre,DPS,54.80,9.70
-Havana,Escort,havana,Freja,DPS,27.50,4.90
-Havana,Escort,havana,Genji,DPS,40.10,12.40
-Havana,Escort,havana,Hanzo,DPS,55.80,15.80
-Havana,Escort,havana,Junkrat,DPS,58.90,3.60
-Havana,Escort,havana,Mei,DPS,58.10,7.20
-Havana,Escort,havana,Pharah,DPS,34.00,4.10
-Havana,Escort,havana,Reaper,DPS,40.50,3.40
-Havana,Escort,havana,Shion,DPS,61.40,29.50
-Havana,Escort,havana,Sierra,DPS,72.20,2.70
-Havana,Escort,havana,Sojourn,DPS,49.30,26.20
-Havana,Escort,havana,Soldier: 76,DPS,53.30,11.80
-Havana,Escort,havana,Sombra,DPS,29.40,1.60
-Havana,Escort,havana,Symmetra,DPS,34.20,2.50
-Havana,Escort,havana,Torbjörn,DPS,32.50,3.90
-Havana,Escort,havana,Tracer,DPS,43.20,8.20
-Havana,Escort,havana,Vendetta,DPS,70.00,1.30
-Havana,Escort,havana,Venture,DPS,56.40,2.10
-Havana,Escort,havana,Widowmaker,DPS,45.10,14.40
-Havana,Escort,havana,D.Va,TANK,31.30,2.40
-Havana,Escort,havana,Domina,TANK,49.10,7.20
-Havana,Escort,havana,Doomfist,TANK,44.50,8.20
-Havana,Escort,havana,Hazard,TANK,40.50,2.60
-Havana,Escort,havana,Junker Queen,TANK,54.20,1.40
-Havana,Escort,havana,Mauga,TANK,66.80,5.00
-Havana,Escort,havana,Orisa,TANK,51.30,7.00
-Havana,Escort,havana,Ramattra,TANK,30.20,8.70
-Havana,Escort,havana,Reinhardt,TANK,44.90,8.80
-Havana,Escort,havana,Roadhog,TANK,38.50,2.90
-Havana,Escort,havana,Sigma,TANK,73.10,31.10
-Havana,Escort,havana,Winston,TANK,47.80,4.10
-Havana,Escort,havana,Wrecking Ball,TANK,46.60,4.50
-Havana,Escort,havana,Zarya,TANK,30.00,6.20
-Havana,Escort,havana,Ana,SUP,41.90,44.50
-Havana,Escort,havana,Baptiste,SUP,46.20,10.90
-Havana,Escort,havana,Brigitte,SUP,62.00,5.10
-Havana,Escort,havana,Illari,SUP,66.40,12.70
-Havana,Escort,havana,Jetpack Cat,SUP,46.10,3.10
-Havana,Escort,havana,Juno,SUP,54.20,11.20
-Havana,Escort,havana,Kiriko,SUP,49.20,45.90
-Havana,Escort,havana,Lifeweaver,SUP,54.10,5.50
-Havana,Escort,havana,Lúcio,SUP,36.10,2.40
-Havana,Escort,havana,Mercy,SUP,48.50,14.10
-Havana,Escort,havana,Mizuki,SUP,56.30,9.40
-Havana,Escort,havana,Moira,SUP,34.20,7.00
-Havana,Escort,havana,Wuyang,SUP,37.60,9.40
-Havana,Escort,havana,Zenyatta,SUP,60.70,18.70
-Junkertown,Escort,junkertown,Anran,DPS,52.90,2.90
-Junkertown,Escort,junkertown,Ashe,DPS,47.40,18.20
-Junkertown,Escort,junkertown,Bastion,DPS,49.50,5.50
-Junkertown,Escort,junkertown,Cassidy,DPS,38.80,17.80
-Junkertown,Escort,junkertown,Echo,DPS,40.00,3.70
-Junkertown,Escort,junkertown,Emre,DPS,56.50,10.60
-Junkertown,Escort,junkertown,Freja,DPS,49.20,5.20
-Junkertown,Escort,junkertown,Genji,DPS,61.60,11.90
-Junkertown,Escort,junkertown,Hanzo,DPS,39.70,9.40
-Junkertown,Escort,junkertown,Junkrat,DPS,41.10,3.20
-Junkertown,Escort,junkertown,Mei,DPS,47.80,5.30
-Junkertown,Escort,junkertown,Pharah,DPS,25.80,1.30
-Junkertown,Escort,junkertown,Reaper,DPS,44.20,3.70
-Junkertown,Escort,junkertown,Shion,DPS,50.90,34.70
-Junkertown,Escort,junkertown,Sierra,DPS,40.50,2.60
-Junkertown,Escort,junkertown,Sojourn,DPS,47.70,20.10
-Junkertown,Escort,junkertown,Soldier: 76,DPS,59.70,13.70
-Junkertown,Escort,junkertown,Sombra,DPS,44.10,1.70
-Junkertown,Escort,junkertown,Symmetra,DPS,48.90,1.80
-Junkertown,Escort,junkertown,Torbjörn,DPS,73.70,3.60
-Junkertown,Escort,junkertown,Tracer,DPS,50.60,11.80
-Junkertown,Escort,junkertown,Vendetta,DPS,8.90,0.60
-Junkertown,Escort,junkertown,Venture,DPS,74.00,2.20
-Junkertown,Escort,junkertown,Widowmaker,DPS,59.70,8.50
-Junkertown,Escort,junkertown,D.Va,TANK,38.20,6.40
-Junkertown,Escort,junkertown,Domina,TANK,41.70,6.20
-Junkertown,Escort,junkertown,Doomfist,TANK,56.30,10.80
-Junkertown,Escort,junkertown,Hazard,TANK,22.80,6.30
-Junkertown,Escort,junkertown,Junker Queen,TANK,46.50,1.60
-Junkertown,Escort,junkertown,Mauga,TANK,39.10,4.90
-Junkertown,Escort,junkertown,Orisa,TANK,35.00,5.10
-Junkertown,Escort,junkertown,Ramattra,TANK,23.80,1.30
-Junkertown,Escort,junkertown,Reinhardt,TANK,55.30,3.90
-Junkertown,Escort,junkertown,Roadhog,TANK,58.30,7.50
-Junkertown,Escort,junkertown,Sigma,TANK,56.40,24.60
-Junkertown,Escort,junkertown,Winston,TANK,50.20,10.00
-Junkertown,Escort,junkertown,Wrecking Ball,TANK,73.70,7.30
-Junkertown,Escort,junkertown,Zarya,TANK,58.60,4.00
-Junkertown,Escort,junkertown,Ana,SUP,49.10,35.50
-Junkertown,Escort,junkertown,Baptiste,SUP,42.80,6.50
-Junkertown,Escort,junkertown,Brigitte,SUP,42.70,10.00
-Junkertown,Escort,junkertown,Illari,SUP,50.20,12.60
-Junkertown,Escort,junkertown,Jetpack Cat,SUP,67.90,3.60
-Junkertown,Escort,junkertown,Juno,SUP,30.10,11.40
-Junkertown,Escort,junkertown,Kiriko,SUP,47.90,45.20
-Junkertown,Escort,junkertown,Lifeweaver,SUP,75.80,10.70
-Junkertown,Escort,junkertown,Lúcio,SUP,48.70,2.30
-Junkertown,Escort,junkertown,Mercy,SUP,49.10,17.00
-Junkertown,Escort,junkertown,Mizuki,SUP,48.00,12.40
-Junkertown,Escort,junkertown,Moira,SUP,57.60,10.30
-Junkertown,Escort,junkertown,Wuyang,SUP,47.70,9.40
-Junkertown,Escort,junkertown,Zenyatta,SUP,55.50,13.10
-Rialto,Escort,rialto,Anran,DPS,66.60,3.10
-Rialto,Escort,rialto,Ashe,DPS,50.50,13.20
-Rialto,Escort,rialto,Bastion,DPS,44.30,5.60
-Rialto,Escort,rialto,Cassidy,DPS,44.90,15.00
-Rialto,Escort,rialto,Echo,DPS,51.20,6.60
-Rialto,Escort,rialto,Emre,DPS,44.80,9.40
-Rialto,Escort,rialto,Freja,DPS,49.90,3.20
-Rialto,Escort,rialto,Genji,DPS,48.00,11.80
-Rialto,Escort,rialto,Hanzo,DPS,51.70,7.00
-Rialto,Escort,rialto,Junkrat,DPS,53.60,3.70
-Rialto,Escort,rialto,Mei,DPS,47.80,5.10
-Rialto,Escort,rialto,Pharah,DPS,52.00,7.20
-Rialto,Escort,rialto,Reaper,DPS,43.50,4.90
-Rialto,Escort,rialto,Shion,DPS,59.30,37.80
-Rialto,Escort,rialto,Sierra,DPS,30.40,1.90
-Rialto,Escort,rialto,Sojourn,DPS,50.30,20.00
-Rialto,Escort,rialto,Soldier: 76,DPS,45.50,10.50
-Rialto,Escort,rialto,Sombra,DPS,53.80,1.60
-Rialto,Escort,rialto,Symmetra,DPS,47.70,1.30
-Rialto,Escort,rialto,Torbjörn,DPS,42.20,4.40
-Rialto,Escort,rialto,Tracer,DPS,46.20,10.10
-Rialto,Escort,rialto,Vendetta,DPS,30.10,0.90
-Rialto,Escort,rialto,Venture,DPS,62.30,2.70
-Rialto,Escort,rialto,Widowmaker,DPS,55.30,12.70
-Rialto,Escort,rialto,D.Va,TANK,49.10,6.20
-Rialto,Escort,rialto,Domina,TANK,47.20,3.30
-Rialto,Escort,rialto,Doomfist,TANK,47.80,9.20
-Rialto,Escort,rialto,Hazard,TANK,50.40,5.10
-Rialto,Escort,rialto,Junker Queen,TANK,44.40,3.00
-Rialto,Escort,rialto,Mauga,TANK,49.80,5.80
-Rialto,Escort,rialto,Orisa,TANK,51.20,7.30
-Rialto,Escort,rialto,Ramattra,TANK,49.40,4.10
-Rialto,Escort,rialto,Reinhardt,TANK,50.20,9.80
-Rialto,Escort,rialto,Roadhog,TANK,51.10,7.00
-Rialto,Escort,rialto,Sigma,TANK,55.30,19.30
-Rialto,Escort,rialto,Winston,TANK,44.20,8.70
-Rialto,Escort,rialto,Wrecking Ball,TANK,52.70,5.60
-Rialto,Escort,rialto,Zarya,TANK,50.60,5.60
-Rialto,Escort,rialto,Ana,SUP,52.60,39.20
-Rialto,Escort,rialto,Baptiste,SUP,54.00,7.90
-Rialto,Escort,rialto,Brigitte,SUP,47.10,8.30
-Rialto,Escort,rialto,Illari,SUP,53.80,10.60
-Rialto,Escort,rialto,Jetpack Cat,SUP,52.90,5.90
-Rialto,Escort,rialto,Juno,SUP,45.50,13.40
-Rialto,Escort,rialto,Kiriko,SUP,43.80,44.90
-Rialto,Escort,rialto,Lifeweaver,SUP,48.50,7.60
-Rialto,Escort,rialto,Lúcio,SUP,49.90,4.30
-Rialto,Escort,rialto,Mercy,SUP,48.60,16.40
-Rialto,Escort,rialto,Mizuki,SUP,47.20,11.60
-Rialto,Escort,rialto,Moira,SUP,58.90,6.90
-Rialto,Escort,rialto,Wuyang,SUP,52.90,11.30
-Rialto,Escort,rialto,Zenyatta,SUP,53.80,11.70
-Route 66,Escort,route-66,Anran,DPS,62.30,3.30
-Route 66,Escort,route-66,Ashe,DPS,55.70,12.80
-Route 66,Escort,route-66,Bastion,DPS,49.80,5.90
-Route 66,Escort,route-66,Cassidy,DPS,48.40,20.90
-Route 66,Escort,route-66,Echo,DPS,47.40,4.40
-Route 66,Escort,route-66,Emre,DPS,58.60,8.30
-Route 66,Escort,route-66,Freja,DPS,41.40,5.00
-Route 66,Escort,route-66,Genji,DPS,51.90,13.90
-Route 66,Escort,route-66,Hanzo,DPS,50.90,6.40
-Route 66,Escort,route-66,Junkrat,DPS,55.10,3.80
-Route 66,Escort,route-66,Mei,DPS,53.60,5.40
-Route 66,Escort,route-66,Pharah,DPS,51.60,4.20
-Route 66,Escort,route-66,Reaper,DPS,51.40,5.30
-Route 66,Escort,route-66,Shion,DPS,51.30,37.80
-Route 66,Escort,route-66,Sierra,DPS,30.40,2.40
-Route 66,Escort,route-66,Sojourn,DPS,46.60,18.80
-Route 66,Escort,route-66,Soldier: 76,DPS,46.50,8.30
-Route 66,Escort,route-66,Sombra,DPS,40.50,1.30
-Route 66,Escort,route-66,Symmetra,DPS,36.90,2.10
-Route 66,Escort,route-66,Torbjörn,DPS,41.20,3.20
-Route 66,Escort,route-66,Tracer,DPS,41.10,13.00
-Route 66,Escort,route-66,Vendetta,DPS,85.10,1.50
-Route 66,Escort,route-66,Venture,DPS,48.90,2.50
-Route 66,Escort,route-66,Widowmaker,DPS,53.70,9.60
-Route 66,Escort,route-66,D.Va,TANK,52.70,6.30
-Route 66,Escort,route-66,Domina,TANK,56.20,2.40
-Route 66,Escort,route-66,Doomfist,TANK,59.60,8.10
-Route 66,Escort,route-66,Hazard,TANK,46.90,7.20
-Route 66,Escort,route-66,Junker Queen,TANK,30.10,1.90
-Route 66,Escort,route-66,Mauga,TANK,63.80,4.00
-Route 66,Escort,route-66,Orisa,TANK,35.20,5.30
-Route 66,Escort,route-66,Ramattra,TANK,46.80,2.80
-Route 66,Escort,route-66,Reinhardt,TANK,54.90,7.80
-Route 66,Escort,route-66,Roadhog,TANK,44.70,9.50
-Route 66,Escort,route-66,Sigma,TANK,49.70,19.60
-Route 66,Escort,route-66,Winston,TANK,49.40,10.80
-Route 66,Escort,route-66,Wrecking Ball,TANK,47.90,7.80
-Route 66,Escort,route-66,Zarya,TANK,53.20,6.60
-Route 66,Escort,route-66,Ana,SUP,46.30,34.20
-Route 66,Escort,route-66,Baptiste,SUP,57.40,8.60
-Route 66,Escort,route-66,Brigitte,SUP,49.30,11.30
-Route 66,Escort,route-66,Illari,SUP,58.30,10.90
-Route 66,Escort,route-66,Jetpack Cat,SUP,64.20,3.30
-Route 66,Escort,route-66,Juno,SUP,53.50,15.80
-Route 66,Escort,route-66,Kiriko,SUP,46.30,46.40
-Route 66,Escort,route-66,Lifeweaver,SUP,35.40,7.40
-Route 66,Escort,route-66,Lúcio,SUP,60.50,4.50
-Route 66,Escort,route-66,Mercy,SUP,53.00,15.60
-Route 66,Escort,route-66,Mizuki,SUP,54.80,14.50
-Route 66,Escort,route-66,Moira,SUP,35.00,5.50
-Route 66,Escort,route-66,Wuyang,SUP,50.90,11.80
-Route 66,Escort,route-66,Zenyatta,SUP,45.80,10.30
-Shambali Monastery,Escort,shambali-monastery,Anran,DPS,36.60,3.60
-Shambali Monastery,Escort,shambali-monastery,Ashe,DPS,50.10,10.90
-Shambali Monastery,Escort,shambali-monastery,Bastion,DPS,44.40,4.20
-Shambali Monastery,Escort,shambali-monastery,Cassidy,DPS,47.10,21.00
-Shambali Monastery,Escort,shambali-monastery,Echo,DPS,36.40,8.30
-Shambali Monastery,Escort,shambali-monastery,Emre,DPS,53.10,5.60
-Shambali Monastery,Escort,shambali-monastery,Freja,DPS,51.90,3.60
-Shambali Monastery,Escort,shambali-monastery,Genji,DPS,52.80,10.20
-Shambali Monastery,Escort,shambali-monastery,Hanzo,DPS,58.00,6.60
-Shambali Monastery,Escort,shambali-monastery,Junkrat,DPS,57.30,3.30
-Shambali Monastery,Escort,shambali-monastery,Mei,DPS,67.90,6.40
-Shambali Monastery,Escort,shambali-monastery,Pharah,DPS,59.10,6.80
-Shambali Monastery,Escort,shambali-monastery,Reaper,DPS,61.20,4.90
-Shambali Monastery,Escort,shambali-monastery,Shion,DPS,55.00,42.50
-Shambali Monastery,Escort,shambali-monastery,Sierra,DPS,48.10,1.50
-Shambali Monastery,Escort,shambali-monastery,Sojourn,DPS,39.60,25.30
-Shambali Monastery,Escort,shambali-monastery,Soldier: 76,DPS,54.10,7.50
-Shambali Monastery,Escort,shambali-monastery,Sombra,DPS,57.30,1.30
-Shambali Monastery,Escort,shambali-monastery,Symmetra,DPS,42.60,2.00
-Shambali Monastery,Escort,shambali-monastery,Torbjörn,DPS,48.30,3.50
-Shambali Monastery,Escort,shambali-monastery,Tracer,DPS,49.10,11.60
-Shambali Monastery,Escort,shambali-monastery,Vendetta,DPS,29.50,1.30
-Shambali Monastery,Escort,shambali-monastery,Venture,DPS,60.10,1.60
-Shambali Monastery,Escort,shambali-monastery,Widowmaker,DPS,38.20,6.80
-Shambali Monastery,Escort,shambali-monastery,D.Va,TANK,33.80,3.20
-Shambali Monastery,Escort,shambali-monastery,Domina,TANK,56.00,4.00
-Shambali Monastery,Escort,shambali-monastery,Doomfist,TANK,51.40,9.70
-Shambali Monastery,Escort,shambali-monastery,Hazard,TANK,48.10,3.90
-Shambali Monastery,Escort,shambali-monastery,Junker Queen,TANK,42.60,2.70
-Shambali Monastery,Escort,shambali-monastery,Mauga,TANK,43.30,6.10
-Shambali Monastery,Escort,shambali-monastery,Orisa,TANK,48.30,8.30
-Shambali Monastery,Escort,shambali-monastery,Ramattra,TANK,31.80,7.70
-Shambali Monastery,Escort,shambali-monastery,Reinhardt,TANK,66.40,12.90
-Shambali Monastery,Escort,shambali-monastery,Roadhog,TANK,47.90,7.20
-Shambali Monastery,Escort,shambali-monastery,Sigma,TANK,47.00,18.90
-Shambali Monastery,Escort,shambali-monastery,Winston,TANK,45.30,4.00
-Shambali Monastery,Escort,shambali-monastery,Wrecking Ball,TANK,62.40,4.10
-Shambali Monastery,Escort,shambali-monastery,Zarya,TANK,62.40,7.40
-Shambali Monastery,Escort,shambali-monastery,Ana,SUP,56.50,29.40
-Shambali Monastery,Escort,shambali-monastery,Baptiste,SUP,49.10,8.70
-Shambali Monastery,Escort,shambali-monastery,Brigitte,SUP,44.30,9.60
-Shambali Monastery,Escort,shambali-monastery,Illari,SUP,38.40,9.40
-Shambali Monastery,Escort,shambali-monastery,Jetpack Cat,SUP,54.60,4.40
-Shambali Monastery,Escort,shambali-monastery,Juno,SUP,44.90,16.50
-Shambali Monastery,Escort,shambali-monastery,Kiriko,SUP,48.80,50.00
-Shambali Monastery,Escort,shambali-monastery,Lifeweaver,SUP,54.30,6.60
-Shambali Monastery,Escort,shambali-monastery,Lúcio,SUP,44.80,5.60
-Shambali Monastery,Escort,shambali-monastery,Mercy,SUP,50.10,13.50
-Shambali Monastery,Escort,shambali-monastery,Mizuki,SUP,59.90,12.30
-Shambali Monastery,Escort,shambali-monastery,Moira,SUP,49.90,7.90
-Shambali Monastery,Escort,shambali-monastery,Wuyang,SUP,49.80,12.40
-Shambali Monastery,Escort,shambali-monastery,Zenyatta,SUP,50.10,13.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Anran,DPS,61.00,2.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ashe,DPS,57.80,13.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Bastion,DPS,60.50,4.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Cassidy,DPS,53.10,17.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Echo,DPS,48.40,5.40
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Emre,DPS,61.80,7.30
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Freja,DPS,38.60,6.00
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Genji,DPS,57.70,15.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Hanzo,DPS,57.70,6.00
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Junkrat,DPS,38.60,3.00
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mei,DPS,39.50,3.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Pharah,DPS,47.70,3.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Reaper,DPS,33.40,7.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Shion,DPS,49.10,36.60
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sierra,DPS,37.50,2.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sojourn,DPS,38.40,10.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Soldier: 76,DPS,49.10,10.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sombra,DPS,27.60,1.30
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Symmetra,DPS,44.40,1.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Torbjörn,DPS,39.70,2.10
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Tracer,DPS,56.50,20.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Vendetta,DPS,22.00,1.50
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Venture,DPS,48.30,4.70
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Widowmaker,DPS,52.60,10.90
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,D.Va,TANK,49.10,8.60
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Domina,TANK,42.90,0.70
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Doomfist,TANK,40.50,13.40
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Hazard,TANK,54.40,10.90
+Circuit Royal,Escort,circuit-royal,Orisa,TANK,49.80,9.00
+Circuit Royal,Escort,circuit-royal,Ramattra,TANK,54.10,8.50
+Circuit Royal,Escort,circuit-royal,Reinhardt,TANK,50.00,9.40
+Circuit Royal,Escort,circuit-royal,Roadhog,TANK,41.30,3.20
+Circuit Royal,Escort,circuit-royal,Sigma,TANK,59.90,31.10
+Circuit Royal,Escort,circuit-royal,Winston,TANK,32.40,2.90
+Circuit Royal,Escort,circuit-royal,Wrecking Ball,TANK,39.80,3.10
+Circuit Royal,Escort,circuit-royal,Zarya,TANK,55.00,7.50
+Circuit Royal,Escort,circuit-royal,Ana,SUP,48.80,34.20
+Circuit Royal,Escort,circuit-royal,Baptiste,SUP,53.00,14.90
+Circuit Royal,Escort,circuit-royal,Brigitte,SUP,43.70,4.40
+Circuit Royal,Escort,circuit-royal,Illari,SUP,44.70,14.50
+Circuit Royal,Escort,circuit-royal,Jetpack Cat,SUP,41.70,3.40
+Circuit Royal,Escort,circuit-royal,Juno,SUP,49.40,20.30
+Circuit Royal,Escort,circuit-royal,Kiriko,SUP,46.00,38.80
+Circuit Royal,Escort,circuit-royal,Lifeweaver,SUP,51.70,8.60
+Circuit Royal,Escort,circuit-royal,Lúcio,SUP,38.30,2.20
+Circuit Royal,Escort,circuit-royal,Mercy,SUP,52.00,16.20
+Circuit Royal,Escort,circuit-royal,Mizuki,SUP,61.20,9.80
+Circuit Royal,Escort,circuit-royal,Moira,SUP,48.90,6.70
+Circuit Royal,Escort,circuit-royal,Wuyang,SUP,54.80,11.10
+Circuit Royal,Escort,circuit-royal,Zenyatta,SUP,54.10,15.00
+Dorado,Escort,dorado,Anran,DPS,56.10,4.20
+Dorado,Escort,dorado,Ashe,DPS,54.70,14.50
+Dorado,Escort,dorado,Bastion,DPS,46.50,5.00
+Dorado,Escort,dorado,Cassidy,DPS,43.20,20.40
+Dorado,Escort,dorado,Echo,DPS,52.10,11.40
+Dorado,Escort,dorado,Emre,DPS,43.90,6.50
+Dorado,Escort,dorado,Freja,DPS,45.60,5.00
+Dorado,Escort,dorado,Genji,DPS,48.40,14.40
+Dorado,Escort,dorado,Hanzo,DPS,56.10,4.60
+Dorado,Escort,dorado,Junkrat,DPS,49.70,2.60
+Dorado,Escort,dorado,Mei,DPS,56.10,4.00
+Dorado,Escort,dorado,Pharah,DPS,54.80,5.80
+Dorado,Escort,dorado,Reaper,DPS,49.60,7.50
+Dorado,Escort,dorado,Shion,DPS,49.60,31.60
+Dorado,Escort,dorado,Sierra,DPS,47.30,2.50
+Dorado,Escort,dorado,Sojourn,DPS,43.30,11.80
+Dorado,Escort,dorado,Soldier: 76,DPS,55.20,12.70
+Dorado,Escort,dorado,Sombra,DPS,46.50,1.50
+Dorado,Escort,dorado,Symmetra,DPS,63.40,1.80
+Dorado,Escort,dorado,Torbjörn,DPS,28.50,3.00
+Dorado,Escort,dorado,Tracer,DPS,53.90,15.30
+Dorado,Escort,dorado,Vendetta,DPS,59.80,1.30
+Dorado,Escort,dorado,Venture,DPS,58.30,3.60
+Dorado,Escort,dorado,Widowmaker,DPS,52.00,9.30
+Dorado,Escort,dorado,D.Va,TANK,53.60,10.60
+Dorado,Escort,dorado,Domina,TANK,42.20,1.20
+Dorado,Escort,dorado,Doomfist,TANK,50.30,10.00
+Dorado,Escort,dorado,Hazard,TANK,56.20,9.00
+Dorado,Escort,dorado,Junker Queen,TANK,65.70,1.80
+Dorado,Escort,dorado,Mauga,TANK,50.30,5.00
+Dorado,Escort,dorado,Orisa,TANK,49.70,4.50
+Dorado,Escort,dorado,Ramattra,TANK,38.20,1.50
+Dorado,Escort,dorado,Reinhardt,TANK,40.20,4.60
+Dorado,Escort,dorado,Roadhog,TANK,56.90,6.10
+Dorado,Escort,dorado,Sigma,TANK,46.20,11.60
+Dorado,Escort,dorado,Winston,TANK,46.30,23.70
+Dorado,Escort,dorado,Wrecking Ball,TANK,51.70,8.00
+Dorado,Escort,dorado,Zarya,TANK,54.30,2.30
+Dorado,Escort,dorado,Ana,SUP,44.90,37.30
+Dorado,Escort,dorado,Baptiste,SUP,45.40,6.20
+Dorado,Escort,dorado,Brigitte,SUP,52.40,15.60
+Dorado,Escort,dorado,Illari,SUP,53.10,11.30
+Dorado,Escort,dorado,Jetpack Cat,SUP,52.10,6.10
+Dorado,Escort,dorado,Juno,SUP,57.90,12.90
+Dorado,Escort,dorado,Kiriko,SUP,50.80,48.50
+Dorado,Escort,dorado,Lifeweaver,SUP,50.00,6.90
+Dorado,Escort,dorado,Lúcio,SUP,41.10,5.30
+Dorado,Escort,dorado,Mercy,SUP,43.40,14.20
+Dorado,Escort,dorado,Mizuki,SUP,55.60,12.70
+Dorado,Escort,dorado,Moira,SUP,57.20,7.80
+Dorado,Escort,dorado,Wuyang,SUP,52.70,8.30
+Dorado,Escort,dorado,Zenyatta,SUP,42.40,6.90
+Havana,Escort,havana,Anran,DPS,46.60,1.90
+Havana,Escort,havana,Ashe,DPS,50.50,15.30
+Havana,Escort,havana,Bastion,DPS,68.90,5.10
+Havana,Escort,havana,Cassidy,DPS,41.40,12.80
+Havana,Escort,havana,Echo,DPS,28.50,1.70
+Havana,Escort,havana,Emre,DPS,55.30,9.50
+Havana,Escort,havana,Freja,DPS,28.90,4.90
+Havana,Escort,havana,Genji,DPS,38.60,12.90
+Havana,Escort,havana,Hanzo,DPS,55.40,15.20
+Havana,Escort,havana,Junkrat,DPS,53.80,3.40
+Havana,Escort,havana,Mei,DPS,55.00,7.20
+Havana,Escort,havana,Pharah,DPS,39.10,4.20
+Havana,Escort,havana,Reaper,DPS,39.60,3.10
+Havana,Escort,havana,Shion,DPS,62.60,27.00
+Havana,Escort,havana,Sierra,DPS,70.60,2.60
+Havana,Escort,havana,Sojourn,DPS,49.10,26.90
+Havana,Escort,havana,Soldier: 76,DPS,56.30,13.10
+Havana,Escort,havana,Sombra,DPS,38.30,1.70
+Havana,Escort,havana,Symmetra,DPS,42.50,2.50
+Havana,Escort,havana,Torbjörn,DPS,29.30,3.70
+Havana,Escort,havana,Tracer,DPS,49.00,8.10
+Havana,Escort,havana,Vendetta,DPS,70.00,1.10
+Havana,Escort,havana,Venture,DPS,59.80,1.90
+Havana,Escort,havana,Widowmaker,DPS,40.10,14.20
+Havana,Escort,havana,D.Va,TANK,30.70,2.40
+Havana,Escort,havana,Domina,TANK,49.20,7.20
+Havana,Escort,havana,Doomfist,TANK,41.70,7.50
+Havana,Escort,havana,Hazard,TANK,47.80,2.60
+Havana,Escort,havana,Junker Queen,TANK,54.20,1.20
+Havana,Escort,havana,Mauga,TANK,60.80,5.60
+Havana,Escort,havana,Orisa,TANK,49.20,6.60
+Havana,Escort,havana,Ramattra,TANK,33.60,8.00
+Havana,Escort,havana,Reinhardt,TANK,45.10,8.80
+Havana,Escort,havana,Roadhog,TANK,47.90,3.30
+Havana,Escort,havana,Sigma,TANK,72.10,32.60
+Havana,Escort,havana,Winston,TANK,48.60,4.10
+Havana,Escort,havana,Wrecking Ball,TANK,41.60,4.20
+Havana,Escort,havana,Zarya,TANK,37.70,5.90
+Havana,Escort,havana,Ana,SUP,38.60,42.80
+Havana,Escort,havana,Baptiste,SUP,45.60,10.90
+Havana,Escort,havana,Brigitte,SUP,64.60,5.00
+Havana,Escort,havana,Illari,SUP,62.40,12.40
+Havana,Escort,havana,Jetpack Cat,SUP,48.30,3.40
+Havana,Escort,havana,Juno,SUP,51.90,11.00
+Havana,Escort,havana,Kiriko,SUP,52.40,46.10
+Havana,Escort,havana,Lifeweaver,SUP,56.90,6.10
+Havana,Escort,havana,Lúcio,SUP,35.70,2.70
+Havana,Escort,havana,Mercy,SUP,46.80,14.20
+Havana,Escort,havana,Mizuki,SUP,60.10,9.90
+Havana,Escort,havana,Moira,SUP,33.10,7.10
+Havana,Escort,havana,Wuyang,SUP,41.90,9.90
+Havana,Escort,havana,Zenyatta,SUP,60.50,18.60
+Junkertown,Escort,junkertown,Anran,DPS,56.70,2.90
+Junkertown,Escort,junkertown,Ashe,DPS,49.90,17.20
+Junkertown,Escort,junkertown,Bastion,DPS,45.20,5.00
+Junkertown,Escort,junkertown,Cassidy,DPS,35.70,19.30
+Junkertown,Escort,junkertown,Echo,DPS,40.20,3.70
+Junkertown,Escort,junkertown,Emre,DPS,56.10,9.90
+Junkertown,Escort,junkertown,Freja,DPS,53.10,5.00
+Junkertown,Escort,junkertown,Genji,DPS,56.00,11.70
+Junkertown,Escort,junkertown,Hanzo,DPS,38.50,9.50
+Junkertown,Escort,junkertown,Junkrat,DPS,45.90,3.00
+Junkertown,Escort,junkertown,Mei,DPS,43.70,4.80
+Junkertown,Escort,junkertown,Pharah,DPS,16.30,1.70
+Junkertown,Escort,junkertown,Reaper,DPS,42.70,3.50
+Junkertown,Escort,junkertown,Shion,DPS,54.50,33.20
+Junkertown,Escort,junkertown,Sierra,DPS,39.00,2.60
+Junkertown,Escort,junkertown,Sojourn,DPS,46.50,20.30
+Junkertown,Escort,junkertown,Soldier: 76,DPS,64.50,14.10
+Junkertown,Escort,junkertown,Sombra,DPS,50.80,1.60
+Junkertown,Escort,junkertown,Symmetra,DPS,57.50,1.90
+Junkertown,Escort,junkertown,Torbjörn,DPS,67.20,4.00
+Junkertown,Escort,junkertown,Tracer,DPS,48.40,12.90
+Junkertown,Escort,junkertown,Vendetta,DPS,18.40,0.90
+Junkertown,Escort,junkertown,Venture,DPS,69.80,2.30
+Junkertown,Escort,junkertown,Widowmaker,DPS,61.30,8.90
+Junkertown,Escort,junkertown,D.Va,TANK,36.40,6.20
+Junkertown,Escort,junkertown,Domina,TANK,45.90,5.80
+Junkertown,Escort,junkertown,Doomfist,TANK,52.80,11.30
+Junkertown,Escort,junkertown,Hazard,TANK,23.30,5.40
+Junkertown,Escort,junkertown,Junker Queen,TANK,52.60,1.50
+Junkertown,Escort,junkertown,Mauga,TANK,38.60,5.30
+Junkertown,Escort,junkertown,Orisa,TANK,32.70,4.70
+Junkertown,Escort,junkertown,Ramattra,TANK,45.60,1.70
+Junkertown,Escort,junkertown,Reinhardt,TANK,61.70,4.10
+Junkertown,Escort,junkertown,Roadhog,TANK,56.80,7.20
+Junkertown,Escort,junkertown,Sigma,TANK,57.20,24.00
+Junkertown,Escort,junkertown,Winston,TANK,41.90,10.40
+Junkertown,Escort,junkertown,Wrecking Ball,TANK,71.30,8.50
+Junkertown,Escort,junkertown,Zarya,TANK,59.40,3.70
+Junkertown,Escort,junkertown,Ana,SUP,49.70,37.60
+Junkertown,Escort,junkertown,Baptiste,SUP,49.30,7.00
+Junkertown,Escort,junkertown,Brigitte,SUP,45.00,10.60
+Junkertown,Escort,junkertown,Illari,SUP,52.90,12.00
+Junkertown,Escort,junkertown,Jetpack Cat,SUP,65.90,3.60
+Junkertown,Escort,junkertown,Juno,SUP,37.10,11.20
+Junkertown,Escort,junkertown,Kiriko,SUP,45.60,45.60
+Junkertown,Escort,junkertown,Lifeweaver,SUP,66.60,10.50
+Junkertown,Escort,junkertown,Lúcio,SUP,43.50,2.10
+Junkertown,Escort,junkertown,Mercy,SUP,44.90,17.40
+Junkertown,Escort,junkertown,Mizuki,SUP,46.40,11.40
+Junkertown,Escort,junkertown,Moira,SUP,59.20,9.30
+Junkertown,Escort,junkertown,Wuyang,SUP,43.20,9.00
+Junkertown,Escort,junkertown,Zenyatta,SUP,59.80,12.70
+Rialto,Escort,rialto,Anran,DPS,64.90,3.10
+Rialto,Escort,rialto,Ashe,DPS,51.40,13.10
+Rialto,Escort,rialto,Bastion,DPS,43.70,5.50
+Rialto,Escort,rialto,Cassidy,DPS,44.90,15.10
+Rialto,Escort,rialto,Echo,DPS,53.00,6.80
+Rialto,Escort,rialto,Emre,DPS,44.90,9.30
+Rialto,Escort,rialto,Freja,DPS,51.40,3.60
+Rialto,Escort,rialto,Genji,DPS,47.90,11.90
+Rialto,Escort,rialto,Hanzo,DPS,50.50,7.30
+Rialto,Escort,rialto,Junkrat,DPS,51.90,3.80
+Rialto,Escort,rialto,Mei,DPS,47.10,5.10
+Rialto,Escort,rialto,Pharah,DPS,52.60,7.40
+Rialto,Escort,rialto,Reaper,DPS,43.80,4.80
+Rialto,Escort,rialto,Shion,DPS,59.00,36.00
+Rialto,Escort,rialto,Sierra,DPS,31.90,2.10
+Rialto,Escort,rialto,Sojourn,DPS,49.50,20.00
+Rialto,Escort,rialto,Soldier: 76,DPS,45.10,10.50
+Rialto,Escort,rialto,Sombra,DPS,53.20,1.50
+Rialto,Escort,rialto,Symmetra,DPS,50.10,1.60
+Rialto,Escort,rialto,Torbjörn,DPS,43.90,4.40
+Rialto,Escort,rialto,Tracer,DPS,46.00,10.50
+Rialto,Escort,rialto,Vendetta,DPS,29.40,0.80
+Rialto,Escort,rialto,Venture,DPS,60.00,2.70
+Rialto,Escort,rialto,Widowmaker,DPS,57.00,13.20
+Rialto,Escort,rialto,D.Va,TANK,49.60,6.40
+Rialto,Escort,rialto,Domina,TANK,49.30,3.10
+Rialto,Escort,rialto,Doomfist,TANK,49.10,9.10
+Rialto,Escort,rialto,Hazard,TANK,49.50,5.40
+Rialto,Escort,rialto,Junker Queen,TANK,44.60,2.80
+Rialto,Escort,rialto,Mauga,TANK,48.90,5.80
+Rialto,Escort,rialto,Orisa,TANK,51.70,7.10
+Rialto,Escort,rialto,Ramattra,TANK,48.60,4.20
+Rialto,Escort,rialto,Reinhardt,TANK,49.40,9.80
+Rialto,Escort,rialto,Roadhog,TANK,48.70,7.00
+Rialto,Escort,rialto,Sigma,TANK,55.60,19.40
+Rialto,Escort,rialto,Winston,TANK,45.00,8.50
+Rialto,Escort,rialto,Wrecking Ball,TANK,51.70,5.70
+Rialto,Escort,rialto,Zarya,TANK,50.40,5.70
+Rialto,Escort,rialto,Ana,SUP,51.90,39.00
+Rialto,Escort,rialto,Baptiste,SUP,53.10,7.90
+Rialto,Escort,rialto,Brigitte,SUP,48.40,8.20
+Rialto,Escort,rialto,Illari,SUP,54.50,10.40
+Rialto,Escort,rialto,Jetpack Cat,SUP,54.50,6.10
+Rialto,Escort,rialto,Juno,SUP,43.90,13.40
+Rialto,Escort,rialto,Kiriko,SUP,44.50,45.20
+Rialto,Escort,rialto,Lifeweaver,SUP,49.50,7.90
+Rialto,Escort,rialto,Lúcio,SUP,51.90,4.20
+Rialto,Escort,rialto,Mercy,SUP,49.50,16.50
+Rialto,Escort,rialto,Mizuki,SUP,49.00,12.10
+Rialto,Escort,rialto,Moira,SUP,59.20,6.40
+Rialto,Escort,rialto,Wuyang,SUP,49.40,11.40
+Rialto,Escort,rialto,Zenyatta,SUP,53.00,11.40
+Route 66,Escort,route-66,Anran,DPS,62.10,3.30
+Route 66,Escort,route-66,Ashe,DPS,54.30,13.00
+Route 66,Escort,route-66,Bastion,DPS,46.90,6.10
+Route 66,Escort,route-66,Cassidy,DPS,45.60,21.60
+Route 66,Escort,route-66,Echo,DPS,51.60,4.40
+Route 66,Escort,route-66,Emre,DPS,56.90,8.20
+Route 66,Escort,route-66,Freja,DPS,47.80,4.90
+Route 66,Escort,route-66,Genji,DPS,53.00,14.10
+Route 66,Escort,route-66,Hanzo,DPS,51.00,6.30
+Route 66,Escort,route-66,Junkrat,DPS,56.30,3.90
+Route 66,Escort,route-66,Mei,DPS,50.00,5.20
+Route 66,Escort,route-66,Pharah,DPS,51.90,3.70
+Route 66,Escort,route-66,Reaper,DPS,52.50,5.00
+Route 66,Escort,route-66,Shion,DPS,51.40,35.80
+Route 66,Escort,route-66,Sierra,DPS,32.50,2.40
+Route 66,Escort,route-66,Sojourn,DPS,47.90,19.30
+Route 66,Escort,route-66,Soldier: 76,DPS,45.90,8.30
+Route 66,Escort,route-66,Sombra,DPS,41.70,1.50
+Route 66,Escort,route-66,Symmetra,DPS,36.80,1.90
+Route 66,Escort,route-66,Torbjörn,DPS,44.20,3.10
+Route 66,Escort,route-66,Tracer,DPS,41.70,13.30
+Route 66,Escort,route-66,Vendetta,DPS,86.70,1.50
+Route 66,Escort,route-66,Venture,DPS,48.60,2.90
+Route 66,Escort,route-66,Widowmaker,DPS,53.30,10.20
+Route 66,Escort,route-66,D.Va,TANK,51.50,6.10
+Route 66,Escort,route-66,Domina,TANK,52.30,2.40
+Route 66,Escort,route-66,Doomfist,TANK,57.90,8.00
+Route 66,Escort,route-66,Hazard,TANK,49.70,7.30
+Route 66,Escort,route-66,Junker Queen,TANK,29.50,1.70
+Route 66,Escort,route-66,Mauga,TANK,59.80,4.50
+Route 66,Escort,route-66,Orisa,TANK,34.60,5.00
+Route 66,Escort,route-66,Ramattra,TANK,41.90,2.90
+Route 66,Escort,route-66,Reinhardt,TANK,51.00,7.40
+Route 66,Escort,route-66,Roadhog,TANK,47.10,9.20
+Route 66,Escort,route-66,Sigma,TANK,50.90,20.30
+Route 66,Escort,route-66,Winston,TANK,46.80,11.10
+Route 66,Escort,route-66,Wrecking Ball,TANK,51.80,7.60
+Route 66,Escort,route-66,Zarya,TANK,57.30,6.60
+Route 66,Escort,route-66,Ana,SUP,46.90,33.50
+Route 66,Escort,route-66,Baptiste,SUP,58.50,8.60
+Route 66,Escort,route-66,Brigitte,SUP,49.30,11.00
+Route 66,Escort,route-66,Illari,SUP,57.90,10.90
+Route 66,Escort,route-66,Jetpack Cat,SUP,65.20,4.30
+Route 66,Escort,route-66,Juno,SUP,53.20,15.70
+Route 66,Escort,route-66,Kiriko,SUP,47.40,46.60
+Route 66,Escort,route-66,Lifeweaver,SUP,34.00,7.50
+Route 66,Escort,route-66,Lúcio,SUP,56.50,4.80
+Route 66,Escort,route-66,Mercy,SUP,50.80,15.80
+Route 66,Escort,route-66,Mizuki,SUP,54.20,14.80
+Route 66,Escort,route-66,Moira,SUP,36.40,5.50
+Route 66,Escort,route-66,Wuyang,SUP,50.90,11.20
+Route 66,Escort,route-66,Zenyatta,SUP,45.70,9.90
+Shambali Monastery,Escort,shambali-monastery,Anran,DPS,37.80,3.50
+Shambali Monastery,Escort,shambali-monastery,Ashe,DPS,49.60,10.50
+Shambali Monastery,Escort,shambali-monastery,Bastion,DPS,46.70,4.30
+Shambali Monastery,Escort,shambali-monastery,Cassidy,DPS,46.90,22.30
+Shambali Monastery,Escort,shambali-monastery,Echo,DPS,40.00,7.90
+Shambali Monastery,Escort,shambali-monastery,Emre,DPS,52.90,5.40
+Shambali Monastery,Escort,shambali-monastery,Freja,DPS,45.10,3.90
+Shambali Monastery,Escort,shambali-monastery,Genji,DPS,52.10,11.00
+Shambali Monastery,Escort,shambali-monastery,Hanzo,DPS,58.70,6.70
+Shambali Monastery,Escort,shambali-monastery,Junkrat,DPS,57.20,3.10
+Shambali Monastery,Escort,shambali-monastery,Mei,DPS,67.80,7.30
+Shambali Monastery,Escort,shambali-monastery,Pharah,DPS,60.10,7.10
+Shambali Monastery,Escort,shambali-monastery,Reaper,DPS,61.00,5.40
+Shambali Monastery,Escort,shambali-monastery,Shion,DPS,54.40,39.10
+Shambali Monastery,Escort,shambali-monastery,Sierra,DPS,48.20,1.60
+Shambali Monastery,Escort,shambali-monastery,Sojourn,DPS,40.50,25.60
+Shambali Monastery,Escort,shambali-monastery,Soldier: 76,DPS,51.60,7.80
+Shambali Monastery,Escort,shambali-monastery,Sombra,DPS,51.60,1.20
+Shambali Monastery,Escort,shambali-monastery,Symmetra,DPS,50.30,2.10
+Shambali Monastery,Escort,shambali-monastery,Torbjörn,DPS,44.90,3.50
+Shambali Monastery,Escort,shambali-monastery,Tracer,DPS,49.50,11.40
+Shambali Monastery,Escort,shambali-monastery,Vendetta,DPS,29.50,1.10
+Shambali Monastery,Escort,shambali-monastery,Venture,DPS,60.10,1.30
+Shambali Monastery,Escort,shambali-monastery,Widowmaker,DPS,36.30,6.60
+Shambali Monastery,Escort,shambali-monastery,D.Va,TANK,31.10,3.60
+Shambali Monastery,Escort,shambali-monastery,Domina,TANK,60.20,3.90
+Shambali Monastery,Escort,shambali-monastery,Doomfist,TANK,46.30,9.00
+Shambali Monastery,Escort,shambali-monastery,Hazard,TANK,50.60,3.90
+Shambali Monastery,Escort,shambali-monastery,Junker Queen,TANK,44.70,2.70
+Shambali Monastery,Escort,shambali-monastery,Mauga,TANK,45.00,6.10
+Shambali Monastery,Escort,shambali-monastery,Orisa,TANK,47.20,9.40
+Shambali Monastery,Escort,shambali-monastery,Ramattra,TANK,36.00,7.30
+Shambali Monastery,Escort,shambali-monastery,Reinhardt,TANK,65.30,12.60
+Shambali Monastery,Escort,shambali-monastery,Roadhog,TANK,47.00,6.70
+Shambali Monastery,Escort,shambali-monastery,Sigma,TANK,50.40,19.10
+Shambali Monastery,Escort,shambali-monastery,Winston,TANK,38.10,4.70
+Shambali Monastery,Escort,shambali-monastery,Wrecking Ball,TANK,63.90,3.90
+Shambali Monastery,Escort,shambali-monastery,Zarya,TANK,61.90,7.30
+Shambali Monastery,Escort,shambali-monastery,Ana,SUP,56.50,30.40
+Shambali Monastery,Escort,shambali-monastery,Baptiste,SUP,45.90,9.00
+Shambali Monastery,Escort,shambali-monastery,Brigitte,SUP,46.50,8.60
+Shambali Monastery,Escort,shambali-monastery,Illari,SUP,38.60,8.90
+Shambali Monastery,Escort,shambali-monastery,Jetpack Cat,SUP,52.60,4.70
+Shambali Monastery,Escort,shambali-monastery,Juno,SUP,44.30,15.60
+Shambali Monastery,Escort,shambali-monastery,Kiriko,SUP,48.80,49.80
+Shambali Monastery,Escort,shambali-monastery,Lifeweaver,SUP,57.70,6.70
+Shambali Monastery,Escort,shambali-monastery,Lúcio,SUP,50.70,5.80
+Shambali Monastery,Escort,shambali-monastery,Mercy,SUP,48.40,14.40
+Shambali Monastery,Escort,shambali-monastery,Mizuki,SUP,58.70,12.20
+Shambali Monastery,Escort,shambali-monastery,Moira,SUP,49.20,8.10
+Shambali Monastery,Escort,shambali-monastery,Wuyang,SUP,48.40,12.00
+Shambali Monastery,Escort,shambali-monastery,Zenyatta,SUP,51.30,13.80
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Anran,DPS,63.80,3.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ashe,DPS,55.60,14.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Bastion,DPS,63.20,4.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Cassidy,DPS,52.60,18.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Echo,DPS,50.40,5.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Emre,DPS,60.50,7.10
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Freja,DPS,40.90,5.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Genji,DPS,56.10,15.80
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Hanzo,DPS,57.00,6.20
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Junkrat,DPS,43.60,2.80
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mei,DPS,42.50,2.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Pharah,DPS,48.20,2.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Reaper,DPS,33.60,7.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Shion,DPS,49.20,34.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sierra,DPS,42.70,2.10
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sojourn,DPS,37.60,10.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Soldier: 76,DPS,49.80,10.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sombra,DPS,44.40,1.50
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Symmetra,DPS,42.70,1.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Torbjörn,DPS,44.60,2.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Tracer,DPS,55.10,21.50
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Vendetta,DPS,24.90,1.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Venture,DPS,45.50,4.20
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Widowmaker,DPS,48.20,11.20
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,D.Va,TANK,48.10,8.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Domina,TANK,42.90,0.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Doomfist,TANK,42.80,13.10
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Hazard,TANK,57.90,10.70
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Junker Queen,TANK,32.80,2.10
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mauga,TANK,40.40,4.00
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Orisa,TANK,44.80,3.60
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ramattra,TANK,50.70,1.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Reinhardt,TANK,41.40,4.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Roadhog,TANK,59.20,6.30
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sigma,TANK,52.50,7.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Winston,TANK,54.40,27.30
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Wrecking Ball,TANK,55.30,7.70
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Zarya,TANK,59.20,2.20
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ana,SUP,54.00,41.70
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Baptiste,SUP,52.10,5.10
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Brigitte,SUP,46.10,16.50
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Illari,SUP,51.20,8.50
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Jetpack Cat,SUP,53.00,5.10
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Juno,SUP,52.60,12.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Kiriko,SUP,48.10,45.80
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Lifeweaver,SUP,35.00,10.40
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Lúcio,SUP,38.50,5.00
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mercy,SUP,46.30,13.40
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mizuki,SUP,52.60,12.60
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Moira,SUP,65.70,6.50
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Wuyang,SUP,50.30,8.50
-Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Zenyatta,SUP,55.60,8.10
-Blizzard World,Hybrid,blizzard-world,Anran,DPS,40.80,3.50
-Blizzard World,Hybrid,blizzard-world,Ashe,DPS,47.20,11.70
-Blizzard World,Hybrid,blizzard-world,Bastion,DPS,34.50,5.00
-Blizzard World,Hybrid,blizzard-world,Cassidy,DPS,54.10,17.20
-Blizzard World,Hybrid,blizzard-world,Echo,DPS,57.20,4.00
-Blizzard World,Hybrid,blizzard-world,Emre,DPS,47.40,7.30
-Blizzard World,Hybrid,blizzard-world,Freja,DPS,46.30,3.30
-Blizzard World,Hybrid,blizzard-world,Genji,DPS,48.20,10.60
-Blizzard World,Hybrid,blizzard-world,Hanzo,DPS,63.80,5.80
-Blizzard World,Hybrid,blizzard-world,Junkrat,DPS,49.60,3.00
-Blizzard World,Hybrid,blizzard-world,Mei,DPS,43.60,4.10
-Blizzard World,Hybrid,blizzard-world,Pharah,DPS,37.30,3.00
-Blizzard World,Hybrid,blizzard-world,Reaper,DPS,52.70,4.60
-Blizzard World,Hybrid,blizzard-world,Shion,DPS,50.20,38.30
-Blizzard World,Hybrid,blizzard-world,Sierra,DPS,41.70,2.00
-Blizzard World,Hybrid,blizzard-world,Sojourn,DPS,46.00,24.30
-Blizzard World,Hybrid,blizzard-world,Soldier: 76,DPS,54.50,10.90
-Blizzard World,Hybrid,blizzard-world,Sombra,DPS,23.50,2.20
-Blizzard World,Hybrid,blizzard-world,Symmetra,DPS,60.20,2.60
-Blizzard World,Hybrid,blizzard-world,Torbjörn,DPS,42.90,3.50
-Blizzard World,Hybrid,blizzard-world,Tracer,DPS,49.60,15.10
-Blizzard World,Hybrid,blizzard-world,Vendetta,DPS,20.90,1.80
-Blizzard World,Hybrid,blizzard-world,Venture,DPS,68.70,1.80
-Blizzard World,Hybrid,blizzard-world,Widowmaker,DPS,51.20,14.60
-Blizzard World,Hybrid,blizzard-world,D.Va,TANK,49.80,6.00
-Blizzard World,Hybrid,blizzard-world,Domina,TANK,66.50,4.70
-Blizzard World,Hybrid,blizzard-world,Doomfist,TANK,56.50,8.30
-Blizzard World,Hybrid,blizzard-world,Hazard,TANK,44.30,6.90
-Blizzard World,Hybrid,blizzard-world,Junker Queen,TANK,51.40,3.00
-Blizzard World,Hybrid,blizzard-world,Mauga,TANK,47.70,5.90
-Blizzard World,Hybrid,blizzard-world,Orisa,TANK,53.90,7.00
-Blizzard World,Hybrid,blizzard-world,Ramattra,TANK,27.40,4.10
-Blizzard World,Hybrid,blizzard-world,Reinhardt,TANK,50.60,6.80
-Blizzard World,Hybrid,blizzard-world,Roadhog,TANK,36.30,6.40
-Blizzard World,Hybrid,blizzard-world,Sigma,TANK,43.40,14.50
-Blizzard World,Hybrid,blizzard-world,Winston,TANK,51.50,11.70
-Blizzard World,Hybrid,blizzard-world,Wrecking Ball,TANK,52.00,8.80
-Blizzard World,Hybrid,blizzard-world,Zarya,TANK,52.90,5.70
-Blizzard World,Hybrid,blizzard-world,Ana,SUP,48.70,33.50
-Blizzard World,Hybrid,blizzard-world,Baptiste,SUP,50.30,7.00
-Blizzard World,Hybrid,blizzard-world,Brigitte,SUP,64.00,10.50
-Blizzard World,Hybrid,blizzard-world,Illari,SUP,47.50,10.10
-Blizzard World,Hybrid,blizzard-world,Jetpack Cat,SUP,64.10,5.60
-Blizzard World,Hybrid,blizzard-world,Juno,SUP,47.70,13.20
-Blizzard World,Hybrid,blizzard-world,Kiriko,SUP,48.60,53.10
-Blizzard World,Hybrid,blizzard-world,Lifeweaver,SUP,37.60,6.80
-Blizzard World,Hybrid,blizzard-world,Lúcio,SUP,27.10,4.80
-Blizzard World,Hybrid,blizzard-world,Mercy,SUP,50.80,15.60
-Blizzard World,Hybrid,blizzard-world,Mizuki,SUP,42.50,11.80
-Blizzard World,Hybrid,blizzard-world,Moira,SUP,42.00,7.20
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mauga,TANK,43.00,3.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Orisa,TANK,42.60,3.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ramattra,TANK,50.50,1.00
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Reinhardt,TANK,39.90,4.00
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Roadhog,TANK,54.70,6.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Sigma,TANK,53.10,7.80
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Winston,TANK,55.40,26.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Wrecking Ball,TANK,51.30,8.50
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Zarya,TANK,51.80,2.40
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Ana,SUP,54.20,41.50
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Baptiste,SUP,53.20,5.20
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Brigitte,SUP,44.60,16.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Illari,SUP,48.30,8.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Jetpack Cat,SUP,58.30,5.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Juno,SUP,49.50,12.00
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Kiriko,SUP,49.80,46.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Lifeweaver,SUP,38.10,9.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Lúcio,SUP,42.70,4.90
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mercy,SUP,46.70,13.50
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Mizuki,SUP,54.50,12.60
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Moira,SUP,58.60,6.70
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Wuyang,SUP,48.60,8.30
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Zenyatta,SUP,54.60,8.10
+Blizzard World,Hybrid,blizzard-world,Anran,DPS,37.20,3.40
+Blizzard World,Hybrid,blizzard-world,Ashe,DPS,47.30,12.10
+Blizzard World,Hybrid,blizzard-world,Bastion,DPS,34.30,5.20
+Blizzard World,Hybrid,blizzard-world,Cassidy,DPS,53.40,17.40
+Blizzard World,Hybrid,blizzard-world,Echo,DPS,56.80,3.50
+Blizzard World,Hybrid,blizzard-world,Emre,DPS,50.10,7.30
+Blizzard World,Hybrid,blizzard-world,Freja,DPS,48.40,3.40
+Blizzard World,Hybrid,blizzard-world,Genji,DPS,49.40,10.30
+Blizzard World,Hybrid,blizzard-world,Hanzo,DPS,64.90,5.80
+Blizzard World,Hybrid,blizzard-world,Junkrat,DPS,47.70,2.70
+Blizzard World,Hybrid,blizzard-world,Mei,DPS,49.60,4.70
+Blizzard World,Hybrid,blizzard-world,Pharah,DPS,37.20,3.20
+Blizzard World,Hybrid,blizzard-world,Reaper,DPS,50.10,4.40
+Blizzard World,Hybrid,blizzard-world,Shion,DPS,49.90,36.50
+Blizzard World,Hybrid,blizzard-world,Sierra,DPS,34.50,2.40
+Blizzard World,Hybrid,blizzard-world,Sojourn,DPS,47.50,24.30
+Blizzard World,Hybrid,blizzard-world,Soldier: 76,DPS,54.00,11.10
+Blizzard World,Hybrid,blizzard-world,Sombra,DPS,21.60,2.10
+Blizzard World,Hybrid,blizzard-world,Symmetra,DPS,57.10,2.40
+Blizzard World,Hybrid,blizzard-world,Torbjörn,DPS,40.90,3.90
+Blizzard World,Hybrid,blizzard-world,Tracer,DPS,51.50,15.70
+Blizzard World,Hybrid,blizzard-world,Vendetta,DPS,27.50,1.80
+Blizzard World,Hybrid,blizzard-world,Venture,DPS,65.10,1.60
+Blizzard World,Hybrid,blizzard-world,Widowmaker,DPS,50.90,14.50
+Blizzard World,Hybrid,blizzard-world,D.Va,TANK,45.80,5.70
+Blizzard World,Hybrid,blizzard-world,Domina,TANK,65.10,4.70
+Blizzard World,Hybrid,blizzard-world,Doomfist,TANK,55.20,7.90
+Blizzard World,Hybrid,blizzard-world,Hazard,TANK,41.60,6.80
+Blizzard World,Hybrid,blizzard-world,Junker Queen,TANK,41.50,3.60
+Blizzard World,Hybrid,blizzard-world,Mauga,TANK,49.90,6.00
+Blizzard World,Hybrid,blizzard-world,Orisa,TANK,55.40,6.80
+Blizzard World,Hybrid,blizzard-world,Ramattra,TANK,25.40,3.90
+Blizzard World,Hybrid,blizzard-world,Reinhardt,TANK,55.40,7.10
+Blizzard World,Hybrid,blizzard-world,Roadhog,TANK,37.50,6.20
+Blizzard World,Hybrid,blizzard-world,Sigma,TANK,45.20,14.50
+Blizzard World,Hybrid,blizzard-world,Winston,TANK,52.10,11.70
+Blizzard World,Hybrid,blizzard-world,Wrecking Ball,TANK,52.80,9.50
+Blizzard World,Hybrid,blizzard-world,Zarya,TANK,54.60,5.70
+Blizzard World,Hybrid,blizzard-world,Ana,SUP,48.40,32.70
+Blizzard World,Hybrid,blizzard-world,Baptiste,SUP,52.80,7.40
+Blizzard World,Hybrid,blizzard-world,Brigitte,SUP,60.90,9.90
+Blizzard World,Hybrid,blizzard-world,Illari,SUP,46.20,9.50
+Blizzard World,Hybrid,blizzard-world,Jetpack Cat,SUP,62.60,5.80
+Blizzard World,Hybrid,blizzard-world,Juno,SUP,45.30,13.90
+Blizzard World,Hybrid,blizzard-world,Kiriko,SUP,50.30,52.70
+Blizzard World,Hybrid,blizzard-world,Lifeweaver,SUP,36.60,6.80
+Blizzard World,Hybrid,blizzard-world,Lúcio,SUP,26.70,4.60
+Blizzard World,Hybrid,blizzard-world,Mercy,SUP,54.60,15.40
+Blizzard World,Hybrid,blizzard-world,Mizuki,SUP,45.10,12.20
+Blizzard World,Hybrid,blizzard-world,Moira,SUP,44.00,7.90
 Blizzard World,Hybrid,blizzard-world,Wuyang,SUP,43.60,11.00
-Blizzard World,Hybrid,blizzard-world,Zenyatta,SUP,61.00,9.90
-Eichenwalde,Hybrid,eichenwalde,Anran,DPS,42.70,3.40
-Eichenwalde,Hybrid,eichenwalde,Ashe,DPS,54.90,6.80
-Eichenwalde,Hybrid,eichenwalde,Bastion,DPS,41.00,4.90
-Eichenwalde,Hybrid,eichenwalde,Cassidy,DPS,45.70,24.40
-Eichenwalde,Hybrid,eichenwalde,Echo,DPS,46.50,7.60
-Eichenwalde,Hybrid,eichenwalde,Emre,DPS,35.50,4.40
-Eichenwalde,Hybrid,eichenwalde,Freja,DPS,44.30,3.60
-Eichenwalde,Hybrid,eichenwalde,Genji,DPS,53.70,13.80
-Eichenwalde,Hybrid,eichenwalde,Hanzo,DPS,47.40,5.50
-Eichenwalde,Hybrid,eichenwalde,Junkrat,DPS,52.80,6.20
-Eichenwalde,Hybrid,eichenwalde,Mei,DPS,49.20,6.80
-Eichenwalde,Hybrid,eichenwalde,Pharah,DPS,46.80,7.30
-Eichenwalde,Hybrid,eichenwalde,Reaper,DPS,41.20,7.20
-Eichenwalde,Hybrid,eichenwalde,Shion,DPS,61.70,41.10
-Eichenwalde,Hybrid,eichenwalde,Sierra,DPS,39.80,2.50
-Eichenwalde,Hybrid,eichenwalde,Sojourn,DPS,37.90,15.80
-Eichenwalde,Hybrid,eichenwalde,Soldier: 76,DPS,54.30,7.90
-Eichenwalde,Hybrid,eichenwalde,Sombra,DPS,45.40,1.40
-Eichenwalde,Hybrid,eichenwalde,Symmetra,DPS,62.90,2.40
-Eichenwalde,Hybrid,eichenwalde,Torbjörn,DPS,40.80,4.50
-Eichenwalde,Hybrid,eichenwalde,Tracer,DPS,50.60,12.50
-Eichenwalde,Hybrid,eichenwalde,Vendetta,DPS,38.50,1.10
-Eichenwalde,Hybrid,eichenwalde,Venture,DPS,51.50,3.00
-Eichenwalde,Hybrid,eichenwalde,Widowmaker,DPS,47.50,5.80
-Eichenwalde,Hybrid,eichenwalde,D.Va,TANK,41.60,5.20
-Eichenwalde,Hybrid,eichenwalde,Domina,TANK,39.70,2.90
-Eichenwalde,Hybrid,eichenwalde,Doomfist,TANK,48.60,10.20
-Eichenwalde,Hybrid,eichenwalde,Hazard,TANK,52.60,5.60
-Eichenwalde,Hybrid,eichenwalde,Junker Queen,TANK,38.50,3.60
-Eichenwalde,Hybrid,eichenwalde,Mauga,TANK,52.50,5.20
-Eichenwalde,Hybrid,eichenwalde,Orisa,TANK,51.40,8.20
-Eichenwalde,Hybrid,eichenwalde,Ramattra,TANK,48.60,6.90
-Eichenwalde,Hybrid,eichenwalde,Reinhardt,TANK,61.00,10.60
-Eichenwalde,Hybrid,eichenwalde,Roadhog,TANK,54.10,8.10
-Eichenwalde,Hybrid,eichenwalde,Sigma,TANK,41.60,14.90
-Eichenwalde,Hybrid,eichenwalde,Winston,TANK,43.70,5.00
-Eichenwalde,Hybrid,eichenwalde,Wrecking Ball,TANK,45.30,5.00
-Eichenwalde,Hybrid,eichenwalde,Zarya,TANK,49.10,8.70
-Eichenwalde,Hybrid,eichenwalde,Ana,SUP,52.30,27.70
-Eichenwalde,Hybrid,eichenwalde,Baptiste,SUP,45.40,8.80
-Eichenwalde,Hybrid,eichenwalde,Brigitte,SUP,45.20,9.00
-Eichenwalde,Hybrid,eichenwalde,Illari,SUP,46.50,8.00
-Eichenwalde,Hybrid,eichenwalde,Jetpack Cat,SUP,57.80,5.60
-Eichenwalde,Hybrid,eichenwalde,Juno,SUP,51.90,14.80
-Eichenwalde,Hybrid,eichenwalde,Kiriko,SUP,46.60,50.30
-Eichenwalde,Hybrid,eichenwalde,Lifeweaver,SUP,41.40,6.50
-Eichenwalde,Hybrid,eichenwalde,Lúcio,SUP,52.60,7.10
-Eichenwalde,Hybrid,eichenwalde,Mercy,SUP,49.10,15.20
-Eichenwalde,Hybrid,eichenwalde,Mizuki,SUP,44.30,17.00
-Eichenwalde,Hybrid,eichenwalde,Moira,SUP,40.60,9.50
-Eichenwalde,Hybrid,eichenwalde,Wuyang,SUP,53.00,11.20
-Eichenwalde,Hybrid,eichenwalde,Zenyatta,SUP,60.00,9.20
-Hollywood,Hybrid,hollywood,Anran,DPS,53.80,3.40
-Hollywood,Hybrid,hollywood,Ashe,DPS,56.50,11.80
-Hollywood,Hybrid,hollywood,Bastion,DPS,36.30,5.70
-Hollywood,Hybrid,hollywood,Cassidy,DPS,45.00,21.30
-Hollywood,Hybrid,hollywood,Echo,DPS,58.70,5.10
-Hollywood,Hybrid,hollywood,Emre,DPS,43.90,7.10
-Hollywood,Hybrid,hollywood,Freja,DPS,34.10,3.10
-Hollywood,Hybrid,hollywood,Genji,DPS,53.30,10.80
-Hollywood,Hybrid,hollywood,Hanzo,DPS,42.10,7.70
-Hollywood,Hybrid,hollywood,Junkrat,DPS,42.70,4.10
-Hollywood,Hybrid,hollywood,Mei,DPS,40.80,6.20
-Hollywood,Hybrid,hollywood,Pharah,DPS,57.20,4.90
-Hollywood,Hybrid,hollywood,Reaper,DPS,30.30,7.70
-Hollywood,Hybrid,hollywood,Shion,DPS,53.50,37.10
-Hollywood,Hybrid,hollywood,Sierra,DPS,56.60,1.40
-Hollywood,Hybrid,hollywood,Sojourn,DPS,51.50,18.80
-Hollywood,Hybrid,hollywood,Soldier: 76,DPS,45.30,8.30
-Hollywood,Hybrid,hollywood,Sombra,DPS,76.80,2.70
-Hollywood,Hybrid,hollywood,Symmetra,DPS,32.60,2.20
-Hollywood,Hybrid,hollywood,Torbjörn,DPS,61.90,5.30
-Hollywood,Hybrid,hollywood,Tracer,DPS,52.20,11.90
-Hollywood,Hybrid,hollywood,Vendetta,DPS,31.70,1.30
-Hollywood,Hybrid,hollywood,Venture,DPS,42.60,1.90
-Hollywood,Hybrid,hollywood,Widowmaker,DPS,47.60,10.10
-Hollywood,Hybrid,hollywood,D.Va,TANK,47.90,6.70
-Hollywood,Hybrid,hollywood,Domina,TANK,32.40,1.80
-Hollywood,Hybrid,hollywood,Doomfist,TANK,57.00,9.70
-Hollywood,Hybrid,hollywood,Hazard,TANK,48.20,9.60
-Hollywood,Hybrid,hollywood,Junker Queen,TANK,54.30,3.10
-Hollywood,Hybrid,hollywood,Mauga,TANK,44.60,3.90
-Hollywood,Hybrid,hollywood,Orisa,TANK,36.50,6.40
-Hollywood,Hybrid,hollywood,Ramattra,TANK,42.10,3.30
-Hollywood,Hybrid,hollywood,Reinhardt,TANK,42.20,7.30
-Hollywood,Hybrid,hollywood,Roadhog,TANK,63.60,7.60
-Hollywood,Hybrid,hollywood,Sigma,TANK,52.70,16.30
-Hollywood,Hybrid,hollywood,Winston,TANK,49.80,12.90
-Hollywood,Hybrid,hollywood,Wrecking Ball,TANK,53.80,5.00
-Hollywood,Hybrid,hollywood,Zarya,TANK,37.20,6.50
-Hollywood,Hybrid,hollywood,Ana,SUP,45.70,36.40
-Hollywood,Hybrid,hollywood,Baptiste,SUP,56.90,9.40
-Hollywood,Hybrid,hollywood,Brigitte,SUP,50.10,10.20
-Hollywood,Hybrid,hollywood,Illari,SUP,53.40,9.50
-Hollywood,Hybrid,hollywood,Jetpack Cat,SUP,44.30,3.70
-Hollywood,Hybrid,hollywood,Juno,SUP,45.10,12.10
-Hollywood,Hybrid,hollywood,Kiriko,SUP,48.00,48.30
-Hollywood,Hybrid,hollywood,Lifeweaver,SUP,42.10,5.70
-Hollywood,Hybrid,hollywood,Lúcio,SUP,38.80,5.30
-Hollywood,Hybrid,hollywood,Mercy,SUP,59.80,13.20
-Hollywood,Hybrid,hollywood,Mizuki,SUP,48.80,12.70
-Hollywood,Hybrid,hollywood,Moira,SUP,43.70,8.50
-Hollywood,Hybrid,hollywood,Wuyang,SUP,44.80,12.30
-Hollywood,Hybrid,hollywood,Zenyatta,SUP,53.80,12.80
-King's Row,Hybrid,kings-row,Anran,DPS,59.50,3.40
-King's Row,Hybrid,kings-row,Ashe,DPS,52.90,7.80
-King's Row,Hybrid,kings-row,Bastion,DPS,47.30,6.30
-King's Row,Hybrid,kings-row,Cassidy,DPS,45.70,19.00
-King's Row,Hybrid,kings-row,Echo,DPS,47.70,5.10
-King's Row,Hybrid,kings-row,Emre,DPS,48.90,5.60
-King's Row,Hybrid,kings-row,Freja,DPS,49.80,3.10
-King's Row,Hybrid,kings-row,Genji,DPS,51.60,12.20
-King's Row,Hybrid,kings-row,Hanzo,DPS,46.60,8.80
-King's Row,Hybrid,kings-row,Junkrat,DPS,63.00,5.40
-King's Row,Hybrid,kings-row,Mei,DPS,44.50,8.40
-King's Row,Hybrid,kings-row,Pharah,DPS,47.40,8.00
-King's Row,Hybrid,kings-row,Reaper,DPS,48.50,6.50
-King's Row,Hybrid,kings-row,Shion,DPS,52.00,38.40
-King's Row,Hybrid,kings-row,Sierra,DPS,55.70,2.10
-King's Row,Hybrid,kings-row,Sojourn,DPS,46.70,22.10
-King's Row,Hybrid,kings-row,Soldier: 76,DPS,51.10,7.10
-King's Row,Hybrid,kings-row,Sombra,DPS,31.90,1.20
-King's Row,Hybrid,kings-row,Symmetra,DPS,48.70,2.50
-King's Row,Hybrid,kings-row,Torbjörn,DPS,46.90,4.00
-King's Row,Hybrid,kings-row,Tracer,DPS,46.90,9.30
-King's Row,Hybrid,kings-row,Vendetta,DPS,38.40,1.40
-King's Row,Hybrid,kings-row,Venture,DPS,56.50,3.10
-King's Row,Hybrid,kings-row,Widowmaker,DPS,46.90,9.50
-King's Row,Hybrid,kings-row,D.Va,TANK,41.70,4.10
-King's Row,Hybrid,kings-row,Domina,TANK,48.60,3.40
-King's Row,Hybrid,kings-row,Doomfist,TANK,52.40,9.50
-King's Row,Hybrid,kings-row,Hazard,TANK,46.70,5.90
+Blizzard World,Hybrid,blizzard-world,Zenyatta,SUP,58.60,10.10
+Eichenwalde,Hybrid,eichenwalde,Anran,DPS,39.30,3.60
+Eichenwalde,Hybrid,eichenwalde,Ashe,DPS,54.20,7.00
+Eichenwalde,Hybrid,eichenwalde,Bastion,DPS,42.40,4.80
+Eichenwalde,Hybrid,eichenwalde,Cassidy,DPS,45.50,24.20
+Eichenwalde,Hybrid,eichenwalde,Echo,DPS,45.30,7.30
+Eichenwalde,Hybrid,eichenwalde,Emre,DPS,36.10,4.50
+Eichenwalde,Hybrid,eichenwalde,Freja,DPS,45.10,3.50
+Eichenwalde,Hybrid,eichenwalde,Genji,DPS,53.70,14.40
+Eichenwalde,Hybrid,eichenwalde,Hanzo,DPS,47.50,5.70
+Eichenwalde,Hybrid,eichenwalde,Junkrat,DPS,52.30,5.90
+Eichenwalde,Hybrid,eichenwalde,Mei,DPS,51.10,6.90
+Eichenwalde,Hybrid,eichenwalde,Pharah,DPS,51.20,7.50
+Eichenwalde,Hybrid,eichenwalde,Reaper,DPS,45.20,7.50
+Eichenwalde,Hybrid,eichenwalde,Shion,DPS,60.60,39.10
+Eichenwalde,Hybrid,eichenwalde,Sierra,DPS,39.70,2.40
+Eichenwalde,Hybrid,eichenwalde,Sojourn,DPS,40.90,16.50
+Eichenwalde,Hybrid,eichenwalde,Soldier: 76,DPS,51.80,8.10
+Eichenwalde,Hybrid,eichenwalde,Sombra,DPS,50.70,1.50
+Eichenwalde,Hybrid,eichenwalde,Symmetra,DPS,62.00,2.40
+Eichenwalde,Hybrid,eichenwalde,Torbjörn,DPS,41.20,4.40
+Eichenwalde,Hybrid,eichenwalde,Tracer,DPS,49.90,13.00
+Eichenwalde,Hybrid,eichenwalde,Vendetta,DPS,44.90,1.50
+Eichenwalde,Hybrid,eichenwalde,Venture,DPS,47.60,2.80
+Eichenwalde,Hybrid,eichenwalde,Widowmaker,DPS,45.80,5.60
+Eichenwalde,Hybrid,eichenwalde,D.Va,TANK,41.20,5.10
+Eichenwalde,Hybrid,eichenwalde,Domina,TANK,39.20,2.70
+Eichenwalde,Hybrid,eichenwalde,Doomfist,TANK,47.70,9.50
+Eichenwalde,Hybrid,eichenwalde,Hazard,TANK,48.50,5.50
+Eichenwalde,Hybrid,eichenwalde,Junker Queen,TANK,39.50,3.50
+Eichenwalde,Hybrid,eichenwalde,Mauga,TANK,50.70,5.40
+Eichenwalde,Hybrid,eichenwalde,Orisa,TANK,51.70,8.20
+Eichenwalde,Hybrid,eichenwalde,Ramattra,TANK,46.10,6.90
+Eichenwalde,Hybrid,eichenwalde,Reinhardt,TANK,60.30,10.80
+Eichenwalde,Hybrid,eichenwalde,Roadhog,TANK,56.00,8.00
+Eichenwalde,Hybrid,eichenwalde,Sigma,TANK,42.40,15.00
+Eichenwalde,Hybrid,eichenwalde,Winston,TANK,47.00,5.30
+Eichenwalde,Hybrid,eichenwalde,Wrecking Ball,TANK,46.90,5.70
+Eichenwalde,Hybrid,eichenwalde,Zarya,TANK,51.50,8.60
+Eichenwalde,Hybrid,eichenwalde,Ana,SUP,52.90,27.90
+Eichenwalde,Hybrid,eichenwalde,Baptiste,SUP,47.40,8.40
+Eichenwalde,Hybrid,eichenwalde,Brigitte,SUP,44.20,8.50
+Eichenwalde,Hybrid,eichenwalde,Illari,SUP,46.70,7.80
+Eichenwalde,Hybrid,eichenwalde,Jetpack Cat,SUP,60.30,6.60
+Eichenwalde,Hybrid,eichenwalde,Juno,SUP,53.60,14.30
+Eichenwalde,Hybrid,eichenwalde,Kiriko,SUP,46.60,50.50
+Eichenwalde,Hybrid,eichenwalde,Lifeweaver,SUP,39.50,6.70
+Eichenwalde,Hybrid,eichenwalde,Lúcio,SUP,45.70,7.50
+Eichenwalde,Hybrid,eichenwalde,Mercy,SUP,49.60,15.40
+Eichenwalde,Hybrid,eichenwalde,Mizuki,SUP,46.00,17.50
+Eichenwalde,Hybrid,eichenwalde,Moira,SUP,40.70,9.50
+Eichenwalde,Hybrid,eichenwalde,Wuyang,SUP,51.90,10.50
+Eichenwalde,Hybrid,eichenwalde,Zenyatta,SUP,59.90,8.90
+Hollywood,Hybrid,hollywood,Anran,DPS,53.40,3.30
+Hollywood,Hybrid,hollywood,Ashe,DPS,55.40,12.00
+Hollywood,Hybrid,hollywood,Bastion,DPS,40.30,5.50
+Hollywood,Hybrid,hollywood,Cassidy,DPS,45.50,21.20
+Hollywood,Hybrid,hollywood,Echo,DPS,62.20,5.30
+Hollywood,Hybrid,hollywood,Emre,DPS,47.30,6.90
+Hollywood,Hybrid,hollywood,Freja,DPS,40.90,3.30
+Hollywood,Hybrid,hollywood,Genji,DPS,51.10,11.50
+Hollywood,Hybrid,hollywood,Hanzo,DPS,46.80,8.10
+Hollywood,Hybrid,hollywood,Junkrat,DPS,41.80,4.20
+Hollywood,Hybrid,hollywood,Mei,DPS,41.00,5.90
+Hollywood,Hybrid,hollywood,Pharah,DPS,58.30,4.40
+Hollywood,Hybrid,hollywood,Reaper,DPS,29.70,7.20
+Hollywood,Hybrid,hollywood,Shion,DPS,52.00,34.50
+Hollywood,Hybrid,hollywood,Sierra,DPS,64.00,1.60
+Hollywood,Hybrid,hollywood,Sojourn,DPS,47.50,19.40
+Hollywood,Hybrid,hollywood,Soldier: 76,DPS,45.80,8.70
+Hollywood,Hybrid,hollywood,Sombra,DPS,72.70,2.50
+Hollywood,Hybrid,hollywood,Symmetra,DPS,30.80,2.10
+Hollywood,Hybrid,hollywood,Torbjörn,DPS,61.30,5.00
+Hollywood,Hybrid,hollywood,Tracer,DPS,54.30,14.10
+Hollywood,Hybrid,hollywood,Vendetta,DPS,35.00,1.30
+Hollywood,Hybrid,hollywood,Venture,DPS,38.90,2.00
+Hollywood,Hybrid,hollywood,Widowmaker,DPS,48.50,10.00
+Hollywood,Hybrid,hollywood,D.Va,TANK,48.00,6.40
+Hollywood,Hybrid,hollywood,Domina,TANK,31.10,1.80
+Hollywood,Hybrid,hollywood,Doomfist,TANK,56.90,9.50
+Hollywood,Hybrid,hollywood,Hazard,TANK,47.30,9.40
+Hollywood,Hybrid,hollywood,Junker Queen,TANK,53.80,2.80
+Hollywood,Hybrid,hollywood,Mauga,TANK,41.20,4.20
+Hollywood,Hybrid,hollywood,Orisa,TANK,36.70,6.20
+Hollywood,Hybrid,hollywood,Ramattra,TANK,39.50,3.30
+Hollywood,Hybrid,hollywood,Reinhardt,TANK,48.00,7.80
+Hollywood,Hybrid,hollywood,Roadhog,TANK,63.10,7.90
+Hollywood,Hybrid,hollywood,Sigma,TANK,55.90,16.10
+Hollywood,Hybrid,hollywood,Winston,TANK,50.50,12.50
+Hollywood,Hybrid,hollywood,Wrecking Ball,TANK,48.20,5.60
+Hollywood,Hybrid,hollywood,Zarya,TANK,35.60,6.50
+Hollywood,Hybrid,hollywood,Ana,SUP,45.00,36.70
+Hollywood,Hybrid,hollywood,Baptiste,SUP,57.20,8.80
+Hollywood,Hybrid,hollywood,Brigitte,SUP,50.40,10.30
+Hollywood,Hybrid,hollywood,Illari,SUP,54.90,9.30
+Hollywood,Hybrid,hollywood,Jetpack Cat,SUP,46.80,3.70
+Hollywood,Hybrid,hollywood,Juno,SUP,47.60,12.50
+Hollywood,Hybrid,hollywood,Kiriko,SUP,46.00,49.40
+Hollywood,Hybrid,hollywood,Lifeweaver,SUP,43.90,5.90
+Hollywood,Hybrid,hollywood,Lúcio,SUP,37.60,4.90
+Hollywood,Hybrid,hollywood,Mercy,SUP,56.00,12.70
+Hollywood,Hybrid,hollywood,Mizuki,SUP,49.90,12.80
+Hollywood,Hybrid,hollywood,Moira,SUP,44.70,8.20
+Hollywood,Hybrid,hollywood,Wuyang,SUP,47.60,11.80
+Hollywood,Hybrid,hollywood,Zenyatta,SUP,55.20,13.00
+King's Row,Hybrid,kings-row,Anran,DPS,57.70,3.40
+King's Row,Hybrid,kings-row,Ashe,DPS,51.90,7.80
+King's Row,Hybrid,kings-row,Bastion,DPS,46.50,6.40
+King's Row,Hybrid,kings-row,Cassidy,DPS,47.00,19.70
+King's Row,Hybrid,kings-row,Echo,DPS,48.30,4.90
+King's Row,Hybrid,kings-row,Emre,DPS,47.60,5.60
+King's Row,Hybrid,kings-row,Freja,DPS,50.80,2.90
+King's Row,Hybrid,kings-row,Genji,DPS,51.40,12.50
+King's Row,Hybrid,kings-row,Hanzo,DPS,47.50,8.80
+King's Row,Hybrid,kings-row,Junkrat,DPS,62.20,5.20
+King's Row,Hybrid,kings-row,Mei,DPS,44.70,8.60
+King's Row,Hybrid,kings-row,Pharah,DPS,49.40,7.90
+King's Row,Hybrid,kings-row,Reaper,DPS,48.50,6.80
+King's Row,Hybrid,kings-row,Shion,DPS,52.00,36.30
+King's Row,Hybrid,kings-row,Sierra,DPS,53.80,2.00
+King's Row,Hybrid,kings-row,Sojourn,DPS,46.70,22.40
+King's Row,Hybrid,kings-row,Soldier: 76,DPS,50.20,7.20
+King's Row,Hybrid,kings-row,Sombra,DPS,32.50,1.10
+King's Row,Hybrid,kings-row,Symmetra,DPS,46.10,2.70
+King's Row,Hybrid,kings-row,Torbjörn,DPS,45.40,4.00
+King's Row,Hybrid,kings-row,Tracer,DPS,46.70,9.60
+King's Row,Hybrid,kings-row,Vendetta,DPS,39.50,1.50
+King's Row,Hybrid,kings-row,Venture,DPS,54.10,2.90
+King's Row,Hybrid,kings-row,Widowmaker,DPS,48.90,9.80
+King's Row,Hybrid,kings-row,D.Va,TANK,41.80,4.20
+King's Row,Hybrid,kings-row,Domina,TANK,48.80,3.20
+King's Row,Hybrid,kings-row,Doomfist,TANK,52.30,9.40
+King's Row,Hybrid,kings-row,Hazard,TANK,47.00,5.80
 King's Row,Hybrid,kings-row,Junker Queen,TANK,41.80,3.20
-King's Row,Hybrid,kings-row,Mauga,TANK,45.70,6.20
-King's Row,Hybrid,kings-row,Orisa,TANK,52.40,8.40
-King's Row,Hybrid,kings-row,Ramattra,TANK,42.90,6.60
-King's Row,Hybrid,kings-row,Reinhardt,TANK,48.70,11.50
-King's Row,Hybrid,kings-row,Roadhog,TANK,50.70,5.70
-King's Row,Hybrid,kings-row,Sigma,TANK,56.60,17.30
-King's Row,Hybrid,kings-row,Winston,TANK,45.00,4.50
-King's Row,Hybrid,kings-row,Wrecking Ball,TANK,45.60,3.50
-King's Row,Hybrid,kings-row,Zarya,TANK,51.50,10.00
-King's Row,Hybrid,kings-row,Ana,SUP,48.50,30.60
-King's Row,Hybrid,kings-row,Baptiste,SUP,49.10,9.30
-King's Row,Hybrid,kings-row,Brigitte,SUP,45.30,7.70
-King's Row,Hybrid,kings-row,Illari,SUP,44.30,7.70
-King's Row,Hybrid,kings-row,Jetpack Cat,SUP,49.20,3.90
-King's Row,Hybrid,kings-row,Juno,SUP,46.90,16.30
-King's Row,Hybrid,kings-row,Kiriko,SUP,50.60,50.00
-King's Row,Hybrid,kings-row,Lifeweaver,SUP,47.60,6.50
-King's Row,Hybrid,kings-row,Lúcio,SUP,43.10,7.10
-King's Row,Hybrid,kings-row,Mercy,SUP,52.90,12.60
-King's Row,Hybrid,kings-row,Mizuki,SUP,56.80,15.60
-King's Row,Hybrid,kings-row,Moira,SUP,49.10,10.60
-King's Row,Hybrid,kings-row,Wuyang,SUP,48.20,10.60
-King's Row,Hybrid,kings-row,Zenyatta,SUP,49.70,11.50
-Midtown,Hybrid,midtown,Anran,DPS,72.70,3.70
-Midtown,Hybrid,midtown,Ashe,DPS,40.80,11.60
-Midtown,Hybrid,midtown,Bastion,DPS,36.90,5.30
-Midtown,Hybrid,midtown,Cassidy,DPS,46.20,17.00
-Midtown,Hybrid,midtown,Echo,DPS,37.20,4.10
-Midtown,Hybrid,midtown,Emre,DPS,51.30,7.90
-Midtown,Hybrid,midtown,Freja,DPS,35.10,1.70
-Midtown,Hybrid,midtown,Genji,DPS,57.00,11.50
-Midtown,Hybrid,midtown,Hanzo,DPS,52.90,6.10
-Midtown,Hybrid,midtown,Junkrat,DPS,51.20,3.90
-Midtown,Hybrid,midtown,Mei,DPS,42.40,6.00
-Midtown,Hybrid,midtown,Pharah,DPS,55.20,4.60
-Midtown,Hybrid,midtown,Reaper,DPS,34.70,5.40
-Midtown,Hybrid,midtown,Shion,DPS,47.50,39.20
-Midtown,Hybrid,midtown,Sierra,DPS,23.70,2.70
-Midtown,Hybrid,midtown,Sojourn,DPS,46.90,25.10
-Midtown,Hybrid,midtown,Soldier: 76,DPS,49.60,8.90
-Midtown,Hybrid,midtown,Sombra,DPS,35.50,1.60
-Midtown,Hybrid,midtown,Symmetra,DPS,59.70,2.50
-Midtown,Hybrid,midtown,Torbjörn,DPS,48.50,2.70
-Midtown,Hybrid,midtown,Tracer,DPS,50.10,9.90
-Midtown,Hybrid,midtown,Vendetta,DPS,52.70,1.20
-Midtown,Hybrid,midtown,Venture,DPS,58.70,4.30
-Midtown,Hybrid,midtown,Widowmaker,DPS,51.90,12.90
-Midtown,Hybrid,midtown,D.Va,TANK,56.50,4.60
-Midtown,Hybrid,midtown,Domina,TANK,41.60,5.90
-Midtown,Hybrid,midtown,Doomfist,TANK,51.30,7.90
-Midtown,Hybrid,midtown,Hazard,TANK,31.00,3.30
-Midtown,Hybrid,midtown,Junker Queen,TANK,45.30,3.60
-Midtown,Hybrid,midtown,Mauga,TANK,48.20,5.40
-Midtown,Hybrid,midtown,Orisa,TANK,45.60,7.80
-Midtown,Hybrid,midtown,Ramattra,TANK,44.00,8.00
-Midtown,Hybrid,midtown,Reinhardt,TANK,46.00,8.30
-Midtown,Hybrid,midtown,Roadhog,TANK,60.90,5.20
-Midtown,Hybrid,midtown,Sigma,TANK,54.50,22.30
-Midtown,Hybrid,midtown,Winston,TANK,42.00,4.30
-Midtown,Hybrid,midtown,Wrecking Ball,TANK,34.90,3.20
-Midtown,Hybrid,midtown,Zarya,TANK,53.40,10.30
-Midtown,Hybrid,midtown,Ana,SUP,47.50,32.00
-Midtown,Hybrid,midtown,Baptiste,SUP,48.40,8.40
-Midtown,Hybrid,midtown,Brigitte,SUP,43.40,6.90
-Midtown,Hybrid,midtown,Illari,SUP,48.60,10.00
-Midtown,Hybrid,midtown,Jetpack Cat,SUP,26.40,3.50
-Midtown,Hybrid,midtown,Juno,SUP,47.10,15.90
-Midtown,Hybrid,midtown,Kiriko,SUP,47.30,48.50
-Midtown,Hybrid,midtown,Lifeweaver,SUP,54.00,7.50
-Midtown,Hybrid,midtown,Lúcio,SUP,33.30,5.80
-Midtown,Hybrid,midtown,Mercy,SUP,45.50,12.20
-Midtown,Hybrid,midtown,Mizuki,SUP,54.60,12.70
-Midtown,Hybrid,midtown,Moira,SUP,50.00,11.50
-Midtown,Hybrid,midtown,Wuyang,SUP,48.10,13.20
-Midtown,Hybrid,midtown,Zenyatta,SUP,63.80,12.10
-Numbani,Hybrid,numbani,Anran,DPS,43.90,2.80
-Numbani,Hybrid,numbani,Ashe,DPS,47.50,14.40
-Numbani,Hybrid,numbani,Bastion,DPS,65.60,5.50
-Numbani,Hybrid,numbani,Cassidy,DPS,53.30,21.70
-Numbani,Hybrid,numbani,Echo,DPS,58.60,9.30
-Numbani,Hybrid,numbani,Emre,DPS,38.90,8.80
-Numbani,Hybrid,numbani,Freja,DPS,52.20,3.40
-Numbani,Hybrid,numbani,Genji,DPS,44.80,12.40
-Numbani,Hybrid,numbani,Hanzo,DPS,40.30,4.30
-Numbani,Hybrid,numbani,Junkrat,DPS,47.90,3.50
-Numbani,Hybrid,numbani,Mei,DPS,53.60,3.30
-Numbani,Hybrid,numbani,Pharah,DPS,54.30,4.80
-Numbani,Hybrid,numbani,Reaper,DPS,41.30,8.00
-Numbani,Hybrid,numbani,Shion,DPS,51.10,37.60
-Numbani,Hybrid,numbani,Sierra,DPS,6.50,1.40
-Numbani,Hybrid,numbani,Sojourn,DPS,40.50,13.30
-Numbani,Hybrid,numbani,Soldier: 76,DPS,53.80,10.80
-Numbani,Hybrid,numbani,Sombra,DPS,37.90,2.90
-Numbani,Hybrid,numbani,Symmetra,DPS,73.30,1.70
-Numbani,Hybrid,numbani,Torbjörn,DPS,46.70,4.10
-Numbani,Hybrid,numbani,Tracer,DPS,53.20,19.30
-Numbani,Hybrid,numbani,Vendetta,DPS,73.20,0.40
-Numbani,Hybrid,numbani,Venture,DPS,26.60,1.50
-Numbani,Hybrid,numbani,Widowmaker,DPS,30.90,4.60
-Numbani,Hybrid,numbani,D.Va,TANK,62.80,6.80
-Numbani,Hybrid,numbani,Domina,TANK,38.50,0.60
-Numbani,Hybrid,numbani,Doomfist,TANK,24.80,13.10
-Numbani,Hybrid,numbani,Hazard,TANK,62.00,9.40
-Numbani,Hybrid,numbani,Junker Queen,TANK,24.60,1.70
-Numbani,Hybrid,numbani,Mauga,TANK,46.90,6.60
-Numbani,Hybrid,numbani,Orisa,TANK,53.60,4.70
-Numbani,Hybrid,numbani,Ramattra,TANK,36.80,1.30
-Numbani,Hybrid,numbani,Reinhardt,TANK,62.10,5.90
-Numbani,Hybrid,numbani,Roadhog,TANK,34.90,6.30
-Numbani,Hybrid,numbani,Sigma,TANK,54.80,16.00
-Numbani,Hybrid,numbani,Winston,TANK,51.10,17.50
-Numbani,Hybrid,numbani,Wrecking Ball,TANK,43.00,6.10
-Numbani,Hybrid,numbani,Zarya,TANK,62.10,4.00
-Numbani,Hybrid,numbani,Ana,SUP,51.20,34.70
-Numbani,Hybrid,numbani,Baptiste,SUP,65.60,6.90
-Numbani,Hybrid,numbani,Brigitte,SUP,48.40,12.20
-Numbani,Hybrid,numbani,Illari,SUP,46.20,9.60
-Numbani,Hybrid,numbani,Jetpack Cat,SUP,65.20,4.00
-Numbani,Hybrid,numbani,Juno,SUP,40.50,15.20
-Numbani,Hybrid,numbani,Kiriko,SUP,49.30,48.30
-Numbani,Hybrid,numbani,Lifeweaver,SUP,36.40,7.50
-Numbani,Hybrid,numbani,Lúcio,SUP,45.10,6.40
-Numbani,Hybrid,numbani,Mercy,SUP,41.50,19.70
-Numbani,Hybrid,numbani,Mizuki,SUP,59.80,11.60
-Numbani,Hybrid,numbani,Moira,SUP,52.50,6.30
-Numbani,Hybrid,numbani,Wuyang,SUP,45.70,9.40
-Numbani,Hybrid,numbani,Zenyatta,SUP,47.30,8.40
-Paraíso,Hybrid,paraiso,Anran,DPS,31.50,3.90
-Paraíso,Hybrid,paraiso,Ashe,DPS,55.10,16.10
-Paraíso,Hybrid,paraiso,Bastion,DPS,55.60,4.30
-Paraíso,Hybrid,paraiso,Cassidy,DPS,54.70,16.10
-Paraíso,Hybrid,paraiso,Echo,DPS,51.50,8.70
-Paraíso,Hybrid,paraiso,Emre,DPS,59.30,8.40
-Paraíso,Hybrid,paraiso,Freja,DPS,42.40,6.40
-Paraíso,Hybrid,paraiso,Genji,DPS,53.40,16.50
-Paraíso,Hybrid,paraiso,Hanzo,DPS,48.40,4.50
-Paraíso,Hybrid,paraiso,Junkrat,DPS,81.10,3.10
-Paraíso,Hybrid,paraiso,Mei,DPS,22.50,2.40
-Paraíso,Hybrid,paraiso,Pharah,DPS,40.40,6.80
-Paraíso,Hybrid,paraiso,Reaper,DPS,52.90,4.50
-Paraíso,Hybrid,paraiso,Shion,DPS,43.60,36.30
-Paraíso,Hybrid,paraiso,Sierra,DPS,14.70,3.10
-Paraíso,Hybrid,paraiso,Sojourn,DPS,41.10,13.40
-Paraíso,Hybrid,paraiso,Soldier: 76,DPS,59.80,13.50
-Paraíso,Hybrid,paraiso,Sombra,DPS,28.70,2.20
-Paraíso,Hybrid,paraiso,Symmetra,DPS,6.70,0.50
-Paraíso,Hybrid,paraiso,Torbjörn,DPS,56.20,5.70
-Paraíso,Hybrid,paraiso,Tracer,DPS,54.40,8.50
-Paraíso,Hybrid,paraiso,Vendetta,DPS,20.40,2.70
-Paraíso,Hybrid,paraiso,Venture,DPS,64.10,2.40
-Paraíso,Hybrid,paraiso,Widowmaker,DPS,45.60,9.50
-Paraíso,Hybrid,paraiso,D.Va,TANK,58.80,9.40
-Paraíso,Hybrid,paraiso,Domina,TANK,75.80,2.60
-Paraíso,Hybrid,paraiso,Doomfist,TANK,51.90,9.90
-Paraíso,Hybrid,paraiso,Hazard,TANK,37.50,12.50
-Paraíso,Hybrid,paraiso,Junker Queen,TANK,6.20,0.80
-Paraíso,Hybrid,paraiso,Mauga,TANK,61.90,8.70
-Paraíso,Hybrid,paraiso,Orisa,TANK,35.60,3.70
-Paraíso,Hybrid,paraiso,Ramattra,TANK,88.80,1.20
-Paraíso,Hybrid,paraiso,Reinhardt,TANK,34.90,8.30
-Paraíso,Hybrid,paraiso,Roadhog,TANK,41.50,6.70
-Paraíso,Hybrid,paraiso,Sigma,TANK,43.90,10.60
-Paraíso,Hybrid,paraiso,Winston,TANK,49.80,16.90
-Paraíso,Hybrid,paraiso,Wrecking Ball,TANK,63.10,6.40
-Paraíso,Hybrid,paraiso,Zarya,TANK,58.80,2.60
-Paraíso,Hybrid,paraiso,Ana,SUP,52.40,34.50
-Paraíso,Hybrid,paraiso,Baptiste,SUP,35.00,4.30
-Paraíso,Hybrid,paraiso,Brigitte,SUP,54.70,11.40
-Paraíso,Hybrid,paraiso,Illari,SUP,39.10,10.60
-Paraíso,Hybrid,paraiso,Jetpack Cat,SUP,42.40,4.80
-Paraíso,Hybrid,paraiso,Juno,SUP,49.20,18.60
-Paraíso,Hybrid,paraiso,Kiriko,SUP,45.90,45.00
-Paraíso,Hybrid,paraiso,Lifeweaver,SUP,58.90,10.60
-Paraíso,Hybrid,paraiso,Lúcio,SUP,25.70,5.60
-Paraíso,Hybrid,paraiso,Mercy,SUP,49.10,10.20
-Paraíso,Hybrid,paraiso,Mizuki,SUP,61.70,16.80
-Paraíso,Hybrid,paraiso,Moira,SUP,32.00,6.20
-Paraíso,Hybrid,paraiso,Wuyang,SUP,67.10,10.50
-Paraíso,Hybrid,paraiso,Zenyatta,SUP,35.60,11.00
-Colosseo,Push,colosseo,Anran,DPS,55.00,3.90
-Colosseo,Push,colosseo,Ashe,DPS,51.10,6.20
-Colosseo,Push,colosseo,Bastion,DPS,43.80,4.00
-Colosseo,Push,colosseo,Cassidy,DPS,47.10,21.20
-Colosseo,Push,colosseo,Echo,DPS,55.70,4.90
-Colosseo,Push,colosseo,Emre,DPS,43.40,6.20
-Colosseo,Push,colosseo,Freja,DPS,38.10,1.70
-Colosseo,Push,colosseo,Genji,DPS,45.00,12.70
-Colosseo,Push,colosseo,Hanzo,DPS,55.40,3.20
-Colosseo,Push,colosseo,Junkrat,DPS,52.30,3.10
-Colosseo,Push,colosseo,Mei,DPS,45.50,4.00
-Colosseo,Push,colosseo,Pharah,DPS,58.80,3.90
-Colosseo,Push,colosseo,Reaper,DPS,44.90,5.40
-Colosseo,Push,colosseo,Shion,DPS,55.80,45.90
-Colosseo,Push,colosseo,Sierra,DPS,61.10,2.20
-Colosseo,Push,colosseo,Sojourn,DPS,46.40,23.70
-Colosseo,Push,colosseo,Soldier: 76,DPS,54.30,13.10
-Colosseo,Push,colosseo,Sombra,DPS,42.20,2.40
-Colosseo,Push,colosseo,Symmetra,DPS,49.90,1.40
-Colosseo,Push,colosseo,Torbjörn,DPS,48.40,3.70
-Colosseo,Push,colosseo,Tracer,DPS,50.10,17.60
-Colosseo,Push,colosseo,Vendetta,DPS,57.40,1.60
-Colosseo,Push,colosseo,Venture,DPS,65.90,1.70
-Colosseo,Push,colosseo,Widowmaker,DPS,45.90,6.20
-Colosseo,Push,colosseo,D.Va,TANK,36.70,5.10
-Colosseo,Push,colosseo,Domina,TANK,44.20,2.80
-Colosseo,Push,colosseo,Doomfist,TANK,46.80,10.70
+King's Row,Hybrid,kings-row,Mauga,TANK,46.10,6.10
+King's Row,Hybrid,kings-row,Orisa,TANK,51.90,8.60
+King's Row,Hybrid,kings-row,Ramattra,TANK,41.50,6.80
+King's Row,Hybrid,kings-row,Reinhardt,TANK,49.40,11.40
+King's Row,Hybrid,kings-row,Roadhog,TANK,50.50,5.70
+King's Row,Hybrid,kings-row,Sigma,TANK,56.60,17.60
+King's Row,Hybrid,kings-row,Winston,TANK,45.80,4.30
+King's Row,Hybrid,kings-row,Wrecking Ball,TANK,46.10,3.70
+King's Row,Hybrid,kings-row,Zarya,TANK,50.50,10.00
+King's Row,Hybrid,kings-row,Ana,SUP,49.30,31.40
+King's Row,Hybrid,kings-row,Baptiste,SUP,49.90,9.10
+King's Row,Hybrid,kings-row,Brigitte,SUP,45.80,7.80
+King's Row,Hybrid,kings-row,Illari,SUP,44.60,7.50
+King's Row,Hybrid,kings-row,Jetpack Cat,SUP,48.50,4.60
+King's Row,Hybrid,kings-row,Juno,SUP,46.60,16.10
+King's Row,Hybrid,kings-row,Kiriko,SUP,49.60,49.20
+King's Row,Hybrid,kings-row,Lifeweaver,SUP,46.50,6.20
+King's Row,Hybrid,kings-row,Lúcio,SUP,42.90,7.00
+King's Row,Hybrid,kings-row,Mercy,SUP,53.30,12.90
+King's Row,Hybrid,kings-row,Mizuki,SUP,56.50,15.60
+King's Row,Hybrid,kings-row,Moira,SUP,49.60,10.50
+King's Row,Hybrid,kings-row,Wuyang,SUP,46.80,10.60
+King's Row,Hybrid,kings-row,Zenyatta,SUP,50.80,11.60
+Midtown,Hybrid,midtown,Anran,DPS,67.30,3.70
+Midtown,Hybrid,midtown,Ashe,DPS,42.50,11.20
+Midtown,Hybrid,midtown,Bastion,DPS,40.10,5.80
+Midtown,Hybrid,midtown,Cassidy,DPS,47.60,17.90
+Midtown,Hybrid,midtown,Echo,DPS,37.80,4.40
+Midtown,Hybrid,midtown,Emre,DPS,51.80,8.00
+Midtown,Hybrid,midtown,Freja,DPS,35.10,1.80
+Midtown,Hybrid,midtown,Genji,DPS,55.50,11.10
+Midtown,Hybrid,midtown,Hanzo,DPS,52.10,5.90
+Midtown,Hybrid,midtown,Junkrat,DPS,56.70,4.20
+Midtown,Hybrid,midtown,Mei,DPS,41.40,5.80
+Midtown,Hybrid,midtown,Pharah,DPS,55.90,4.80
+Midtown,Hybrid,midtown,Reaper,DPS,31.60,5.60
+Midtown,Hybrid,midtown,Shion,DPS,48.20,37.40
+Midtown,Hybrid,midtown,Sierra,DPS,34.70,3.20
+Midtown,Hybrid,midtown,Sojourn,DPS,47.40,25.30
+Midtown,Hybrid,midtown,Soldier: 76,DPS,49.80,8.80
+Midtown,Hybrid,midtown,Sombra,DPS,38.80,1.70
+Midtown,Hybrid,midtown,Symmetra,DPS,60.20,2.40
+Midtown,Hybrid,midtown,Torbjörn,DPS,51.70,3.10
+Midtown,Hybrid,midtown,Tracer,DPS,48.50,9.90
+Midtown,Hybrid,midtown,Vendetta,DPS,52.70,1.00
+Midtown,Hybrid,midtown,Venture,DPS,56.50,4.00
+Midtown,Hybrid,midtown,Widowmaker,DPS,50.30,12.90
+Midtown,Hybrid,midtown,D.Va,TANK,56.50,4.20
+Midtown,Hybrid,midtown,Domina,TANK,48.70,6.20
+Midtown,Hybrid,midtown,Doomfist,TANK,48.40,7.80
+Midtown,Hybrid,midtown,Hazard,TANK,28.80,3.50
+Midtown,Hybrid,midtown,Junker Queen,TANK,46.10,3.80
+Midtown,Hybrid,midtown,Mauga,TANK,45.80,5.00
+Midtown,Hybrid,midtown,Orisa,TANK,47.30,7.60
+Midtown,Hybrid,midtown,Ramattra,TANK,42.80,7.30
+Midtown,Hybrid,midtown,Reinhardt,TANK,44.50,8.90
+Midtown,Hybrid,midtown,Roadhog,TANK,59.00,5.40
+Midtown,Hybrid,midtown,Sigma,TANK,54.90,22.10
+Midtown,Hybrid,midtown,Winston,TANK,41.60,4.00
+Midtown,Hybrid,midtown,Wrecking Ball,TANK,41.30,3.70
+Midtown,Hybrid,midtown,Zarya,TANK,54.40,10.60
+Midtown,Hybrid,midtown,Ana,SUP,48.30,31.30
+Midtown,Hybrid,midtown,Baptiste,SUP,52.10,8.80
+Midtown,Hybrid,midtown,Brigitte,SUP,43.50,7.00
+Midtown,Hybrid,midtown,Illari,SUP,49.50,10.40
+Midtown,Hybrid,midtown,Jetpack Cat,SUP,29.90,3.80
+Midtown,Hybrid,midtown,Juno,SUP,46.70,15.80
+Midtown,Hybrid,midtown,Kiriko,SUP,47.80,48.70
+Midtown,Hybrid,midtown,Lifeweaver,SUP,50.80,7.50
+Midtown,Hybrid,midtown,Lúcio,SUP,32.20,5.50
+Midtown,Hybrid,midtown,Mercy,SUP,48.40,12.90
+Midtown,Hybrid,midtown,Mizuki,SUP,55.70,12.20
+Midtown,Hybrid,midtown,Moira,SUP,46.70,11.20
+Midtown,Hybrid,midtown,Wuyang,SUP,49.70,13.00
+Midtown,Hybrid,midtown,Zenyatta,SUP,59.70,12.10
+Numbani,Hybrid,numbani,Anran,DPS,41.90,3.50
+Numbani,Hybrid,numbani,Ashe,DPS,46.70,15.30
+Numbani,Hybrid,numbani,Bastion,DPS,62.40,5.10
+Numbani,Hybrid,numbani,Cassidy,DPS,56.00,21.50
+Numbani,Hybrid,numbani,Echo,DPS,54.40,9.00
+Numbani,Hybrid,numbani,Emre,DPS,39.10,8.40
+Numbani,Hybrid,numbani,Freja,DPS,50.50,3.80
+Numbani,Hybrid,numbani,Genji,DPS,47.60,12.80
+Numbani,Hybrid,numbani,Hanzo,DPS,39.20,4.50
+Numbani,Hybrid,numbani,Junkrat,DPS,45.90,3.70
+Numbani,Hybrid,numbani,Mei,DPS,55.90,3.20
+Numbani,Hybrid,numbani,Pharah,DPS,54.70,4.80
+Numbani,Hybrid,numbani,Reaper,DPS,40.50,7.20
+Numbani,Hybrid,numbani,Shion,DPS,52.70,36.00
+Numbani,Hybrid,numbani,Sierra,DPS,20.60,2.60
+Numbani,Hybrid,numbani,Sojourn,DPS,40.20,12.70
+Numbani,Hybrid,numbani,Soldier: 76,DPS,53.10,11.00
+Numbani,Hybrid,numbani,Sombra,DPS,33.00,3.00
+Numbani,Hybrid,numbani,Symmetra,DPS,57.00,1.90
+Numbani,Hybrid,numbani,Torbjörn,DPS,49.70,4.00
+Numbani,Hybrid,numbani,Tracer,DPS,50.40,19.30
+Numbani,Hybrid,numbani,Vendetta,DPS,80.80,0.60
+Numbani,Hybrid,numbani,Venture,DPS,25.00,1.40
+Numbani,Hybrid,numbani,Widowmaker,DPS,34.10,4.70
+Numbani,Hybrid,numbani,D.Va,TANK,56.90,6.70
+Numbani,Hybrid,numbani,Domina,TANK,31.50,0.70
+Numbani,Hybrid,numbani,Doomfist,TANK,24.00,12.80
+Numbani,Hybrid,numbani,Hazard,TANK,60.90,9.40
+Numbani,Hybrid,numbani,Junker Queen,TANK,31.80,1.70
+Numbani,Hybrid,numbani,Mauga,TANK,50.80,6.90
+Numbani,Hybrid,numbani,Orisa,TANK,47.30,5.00
+Numbani,Hybrid,numbani,Ramattra,TANK,48.30,1.40
+Numbani,Hybrid,numbani,Reinhardt,TANK,64.30,5.90
+Numbani,Hybrid,numbani,Roadhog,TANK,39.70,6.60
+Numbani,Hybrid,numbani,Sigma,TANK,54.30,15.80
+Numbani,Hybrid,numbani,Winston,TANK,51.40,17.60
+Numbani,Hybrid,numbani,Wrecking Ball,TANK,44.60,5.70
+Numbani,Hybrid,numbani,Zarya,TANK,59.60,3.90
+Numbani,Hybrid,numbani,Ana,SUP,49.10,34.20
+Numbani,Hybrid,numbani,Baptiste,SUP,66.60,7.40
+Numbani,Hybrid,numbani,Brigitte,SUP,47.80,12.00
+Numbani,Hybrid,numbani,Illari,SUP,49.20,9.50
+Numbani,Hybrid,numbani,Jetpack Cat,SUP,62.50,4.00
+Numbani,Hybrid,numbani,Juno,SUP,37.00,15.10
+Numbani,Hybrid,numbani,Kiriko,SUP,49.80,49.20
+Numbani,Hybrid,numbani,Lifeweaver,SUP,41.10,7.50
+Numbani,Hybrid,numbani,Lúcio,SUP,45.90,5.70
+Numbani,Hybrid,numbani,Mercy,SUP,43.90,18.50
+Numbani,Hybrid,numbani,Mizuki,SUP,56.40,11.70
+Numbani,Hybrid,numbani,Moira,SUP,46.50,7.70
+Numbani,Hybrid,numbani,Wuyang,SUP,49.00,9.60
+Numbani,Hybrid,numbani,Zenyatta,SUP,47.40,7.90
+Paraíso,Hybrid,paraiso,Anran,DPS,40.70,3.90
+Paraíso,Hybrid,paraiso,Ashe,DPS,51.90,15.70
+Paraíso,Hybrid,paraiso,Bastion,DPS,45.20,5.20
+Paraíso,Hybrid,paraiso,Cassidy,DPS,53.50,16.80
+Paraíso,Hybrid,paraiso,Echo,DPS,51.60,7.70
+Paraíso,Hybrid,paraiso,Emre,DPS,62.20,8.40
+Paraíso,Hybrid,paraiso,Freja,DPS,48.10,6.00
+Paraíso,Hybrid,paraiso,Genji,DPS,56.50,16.50
+Paraíso,Hybrid,paraiso,Hanzo,DPS,46.90,4.30
+Paraíso,Hybrid,paraiso,Junkrat,DPS,83.30,3.00
+Paraíso,Hybrid,paraiso,Mei,DPS,30.40,2.80
+Paraíso,Hybrid,paraiso,Pharah,DPS,48.70,6.70
+Paraíso,Hybrid,paraiso,Reaper,DPS,53.80,5.40
+Paraíso,Hybrid,paraiso,Shion,DPS,45.40,33.80
+Paraíso,Hybrid,paraiso,Sierra,DPS,17.50,2.90
+Paraíso,Hybrid,paraiso,Sojourn,DPS,42.90,13.20
+Paraíso,Hybrid,paraiso,Soldier: 76,DPS,51.00,15.90
+Paraíso,Hybrid,paraiso,Sombra,DPS,23.90,2.20
+Paraíso,Hybrid,paraiso,Symmetra,DPS,19.50,0.60
+Paraíso,Hybrid,paraiso,Torbjörn,DPS,54.20,5.00
+Paraíso,Hybrid,paraiso,Tracer,DPS,49.60,9.70
+Paraíso,Hybrid,paraiso,Vendetta,DPS,19.00,2.40
+Paraíso,Hybrid,paraiso,Venture,DPS,65.90,2.10
+Paraíso,Hybrid,paraiso,Widowmaker,DPS,45.30,9.50
+Paraíso,Hybrid,paraiso,D.Va,TANK,55.80,9.40
+Paraíso,Hybrid,paraiso,Domina,TANK,65.90,2.50
+Paraíso,Hybrid,paraiso,Doomfist,TANK,53.70,10.10
+Paraíso,Hybrid,paraiso,Hazard,TANK,40.80,12.30
+Paraíso,Hybrid,paraiso,Junker Queen,TANK,6.20,0.70
+Paraíso,Hybrid,paraiso,Mauga,TANK,58.20,8.40
+Paraíso,Hybrid,paraiso,Orisa,TANK,39.80,4.10
+Paraíso,Hybrid,paraiso,Ramattra,TANK,80.60,1.10
+Paraíso,Hybrid,paraiso,Reinhardt,TANK,35.00,7.00
+Paraíso,Hybrid,paraiso,Roadhog,TANK,36.40,7.60
+Paraíso,Hybrid,paraiso,Sigma,TANK,45.80,11.00
+Paraíso,Hybrid,paraiso,Winston,TANK,53.70,16.80
+Paraíso,Hybrid,paraiso,Wrecking Ball,TANK,58.10,6.40
+Paraíso,Hybrid,paraiso,Zarya,TANK,60.90,2.80
+Paraíso,Hybrid,paraiso,Ana,SUP,55.50,34.80
+Paraíso,Hybrid,paraiso,Baptiste,SUP,29.00,4.40
+Paraíso,Hybrid,paraiso,Brigitte,SUP,55.40,10.80
+Paraíso,Hybrid,paraiso,Illari,SUP,42.20,9.90
+Paraíso,Hybrid,paraiso,Jetpack Cat,SUP,41.90,5.90
+Paraíso,Hybrid,paraiso,Juno,SUP,49.10,17.20
+Paraíso,Hybrid,paraiso,Kiriko,SUP,44.90,47.10
+Paraíso,Hybrid,paraiso,Lifeweaver,SUP,56.70,9.90
+Paraíso,Hybrid,paraiso,Lúcio,SUP,30.40,5.50
+Paraíso,Hybrid,paraiso,Mercy,SUP,52.60,12.70
+Paraíso,Hybrid,paraiso,Mizuki,SUP,58.90,15.80
+Paraíso,Hybrid,paraiso,Moira,SUP,30.30,6.50
+Paraíso,Hybrid,paraiso,Wuyang,SUP,65.80,9.60
+Paraíso,Hybrid,paraiso,Zenyatta,SUP,38.50,10.00
+Colosseo,Push,colosseo,Anran,DPS,55.00,3.70
+Colosseo,Push,colosseo,Ashe,DPS,51.90,6.20
+Colosseo,Push,colosseo,Bastion,DPS,47.40,4.30
+Colosseo,Push,colosseo,Cassidy,DPS,47.30,21.80
+Colosseo,Push,colosseo,Echo,DPS,54.00,4.90
+Colosseo,Push,colosseo,Emre,DPS,45.10,6.20
+Colosseo,Push,colosseo,Freja,DPS,36.80,1.60
+Colosseo,Push,colosseo,Genji,DPS,45.30,12.80
+Colosseo,Push,colosseo,Hanzo,DPS,54.50,3.30
+Colosseo,Push,colosseo,Junkrat,DPS,54.80,3.20
+Colosseo,Push,colosseo,Mei,DPS,47.50,4.00
+Colosseo,Push,colosseo,Pharah,DPS,59.00,4.10
+Colosseo,Push,colosseo,Reaper,DPS,47.20,5.60
+Colosseo,Push,colosseo,Shion,DPS,55.10,44.10
+Colosseo,Push,colosseo,Sierra,DPS,58.80,2.20
+Colosseo,Push,colosseo,Sojourn,DPS,44.60,23.70
+Colosseo,Push,colosseo,Soldier: 76,DPS,53.40,12.90
+Colosseo,Push,colosseo,Sombra,DPS,41.70,2.20
+Colosseo,Push,colosseo,Symmetra,DPS,55.80,1.40
+Colosseo,Push,colosseo,Torbjörn,DPS,47.10,3.80
+Colosseo,Push,colosseo,Tracer,DPS,50.80,18.20
+Colosseo,Push,colosseo,Vendetta,DPS,57.10,1.50
+Colosseo,Push,colosseo,Venture,DPS,66.40,1.80
+Colosseo,Push,colosseo,Widowmaker,DPS,46.10,6.40
+Colosseo,Push,colosseo,D.Va,TANK,37.10,5.00
+Colosseo,Push,colosseo,Domina,TANK,44.40,2.60
+Colosseo,Push,colosseo,Doomfist,TANK,46.90,10.30
 Colosseo,Push,colosseo,Hazard,TANK,51.00,8.30
-Colosseo,Push,colosseo,Junker Queen,TANK,56.20,4.70
-Colosseo,Push,colosseo,Mauga,TANK,54.60,7.10
-Colosseo,Push,colosseo,Orisa,TANK,50.80,6.70
-Colosseo,Push,colosseo,Ramattra,TANK,50.30,3.50
-Colosseo,Push,colosseo,Reinhardt,TANK,48.20,8.60
-Colosseo,Push,colosseo,Roadhog,TANK,47.30,6.10
-Colosseo,Push,colosseo,Sigma,TANK,53.60,12.50
-Colosseo,Push,colosseo,Winston,TANK,59.40,8.30
-Colosseo,Push,colosseo,Wrecking Ball,TANK,48.70,8.90
-Colosseo,Push,colosseo,Zarya,TANK,44.80,6.50
-Colosseo,Push,colosseo,Ana,SUP,48.50,26.60
-Colosseo,Push,colosseo,Baptiste,SUP,41.90,5.20
-Colosseo,Push,colosseo,Brigitte,SUP,57.10,10.20
-Colosseo,Push,colosseo,Illari,SUP,49.50,7.60
-Colosseo,Push,colosseo,Jetpack Cat,SUP,54.00,5.60
-Colosseo,Push,colosseo,Juno,SUP,51.80,16.90
-Colosseo,Push,colosseo,Kiriko,SUP,52.60,54.40
-Colosseo,Push,colosseo,Lifeweaver,SUP,41.40,5.50
-Colosseo,Push,colosseo,Lúcio,SUP,58.90,11.70
-Colosseo,Push,colosseo,Mercy,SUP,47.80,12.50
-Colosseo,Push,colosseo,Mizuki,SUP,53.40,15.80
-Colosseo,Push,colosseo,Moira,SUP,40.50,10.70
-Colosseo,Push,colosseo,Wuyang,SUP,46.60,10.20
-Colosseo,Push,colosseo,Zenyatta,SUP,46.00,7.10
-Esperança,Push,esperanca,Anran,DPS,55.30,3.50
-Esperança,Push,esperanca,Ashe,DPS,58.20,5.10
-Esperança,Push,esperanca,Bastion,DPS,51.20,2.90
-Esperança,Push,esperanca,Cassidy,DPS,44.80,22.00
-Esperança,Push,esperanca,Echo,DPS,63.20,4.40
-Esperança,Push,esperanca,Emre,DPS,44.80,6.60
-Esperança,Push,esperanca,Freja,DPS,49.30,2.80
-Esperança,Push,esperanca,Genji,DPS,48.50,10.00
-Esperança,Push,esperanca,Hanzo,DPS,40.60,2.00
-Esperança,Push,esperanca,Junkrat,DPS,49.90,3.10
-Esperança,Push,esperanca,Mei,DPS,61.60,3.70
-Esperança,Push,esperanca,Pharah,DPS,42.30,4.50
-Esperança,Push,esperanca,Reaper,DPS,39.40,6.70
-Esperança,Push,esperanca,Shion,DPS,52.00,47.80
-Esperança,Push,esperanca,Sierra,DPS,31.30,2.10
-Esperança,Push,esperanca,Sojourn,DPS,49.80,22.30
-Esperança,Push,esperanca,Soldier: 76,DPS,53.40,16.30
-Esperança,Push,esperanca,Sombra,DPS,52.00,2.50
-Esperança,Push,esperanca,Symmetra,DPS,64.20,1.60
-Esperança,Push,esperanca,Torbjörn,DPS,61.70,4.00
-Esperança,Push,esperanca,Tracer,DPS,54.70,19.30
-Esperança,Push,esperanca,Vendetta,DPS,33.10,1.60
-Esperança,Push,esperanca,Venture,DPS,50.60,1.90
-Esperança,Push,esperanca,Widowmaker,DPS,29.70,3.30
-Esperança,Push,esperanca,D.Va,TANK,43.90,6.20
-Esperança,Push,esperanca,Domina,TANK,57.70,2.10
-Esperança,Push,esperanca,Doomfist,TANK,49.20,10.60
-Esperança,Push,esperanca,Hazard,TANK,54.80,9.60
-Esperança,Push,esperanca,Junker Queen,TANK,48.10,4.10
-Esperança,Push,esperanca,Mauga,TANK,49.70,8.80
-Esperança,Push,esperanca,Orisa,TANK,47.90,6.20
-Esperança,Push,esperanca,Ramattra,TANK,41.20,2.90
-Esperança,Push,esperanca,Reinhardt,TANK,51.80,7.00
-Esperança,Push,esperanca,Roadhog,TANK,46.50,8.50
-Esperança,Push,esperanca,Sigma,TANK,47.50,7.10
-Esperança,Push,esperanca,Winston,TANK,50.80,10.50
-Esperança,Push,esperanca,Wrecking Ball,TANK,51.40,10.10
-Esperança,Push,esperanca,Zarya,TANK,59.40,6.20
-Esperança,Push,esperanca,Ana,SUP,43.80,20.80
-Esperança,Push,esperanca,Baptiste,SUP,57.90,4.50
-Esperança,Push,esperanca,Brigitte,SUP,52.80,12.30
-Esperança,Push,esperanca,Illari,SUP,61.30,7.50
-Esperança,Push,esperanca,Jetpack Cat,SUP,56.10,5.20
-Esperança,Push,esperanca,Juno,SUP,50.00,18.20
-Esperança,Push,esperanca,Kiriko,SUP,51.50,58.70
-Esperança,Push,esperanca,Lifeweaver,SUP,44.80,5.40
-Esperança,Push,esperanca,Lúcio,SUP,51.30,13.50
-Esperança,Push,esperanca,Mercy,SUP,46.80,13.10
-Esperança,Push,esperanca,Mizuki,SUP,44.20,15.30
-Esperança,Push,esperanca,Moira,SUP,50.10,10.40
-Esperança,Push,esperanca,Wuyang,SUP,50.40,9.90
-Esperança,Push,esperanca,Zenyatta,SUP,50.10,5.30
-New Queen Street,Push,new-queen-street,Anran,DPS,45.00,3.70
-New Queen Street,Push,new-queen-street,Ashe,DPS,52.70,5.20
-New Queen Street,Push,new-queen-street,Bastion,DPS,46.20,3.50
-New Queen Street,Push,new-queen-street,Cassidy,DPS,48.70,19.00
-New Queen Street,Push,new-queen-street,Echo,DPS,49.90,3.70
-New Queen Street,Push,new-queen-street,Emre,DPS,35.20,5.30
-New Queen Street,Push,new-queen-street,Freja,DPS,30.70,1.60
-New Queen Street,Push,new-queen-street,Genji,DPS,53.60,10.40
-New Queen Street,Push,new-queen-street,Hanzo,DPS,55.80,1.80
-New Queen Street,Push,new-queen-street,Junkrat,DPS,42.70,2.30
-New Queen Street,Push,new-queen-street,Mei,DPS,37.40,3.50
-New Queen Street,Push,new-queen-street,Pharah,DPS,38.10,3.10
-New Queen Street,Push,new-queen-street,Reaper,DPS,55.30,5.50
-New Queen Street,Push,new-queen-street,Shion,DPS,58.90,46.70
-New Queen Street,Push,new-queen-street,Sierra,DPS,42.40,2.10
-New Queen Street,Push,new-queen-street,Sojourn,DPS,45.50,22.30
-New Queen Street,Push,new-queen-street,Soldier: 76,DPS,53.70,25.00
-New Queen Street,Push,new-queen-street,Sombra,DPS,45.90,2.60
-New Queen Street,Push,new-queen-street,Symmetra,DPS,49.40,1.20
-New Queen Street,Push,new-queen-street,Torbjörn,DPS,46.70,4.30
-New Queen Street,Push,new-queen-street,Tracer,DPS,55.40,20.40
-New Queen Street,Push,new-queen-street,Vendetta,DPS,32.80,0.90
-New Queen Street,Push,new-queen-street,Venture,DPS,60.20,1.80
-New Queen Street,Push,new-queen-street,Widowmaker,DPS,49.60,4.00
-New Queen Street,Push,new-queen-street,D.Va,TANK,47.50,6.40
-New Queen Street,Push,new-queen-street,Domina,TANK,38.80,2.70
-New Queen Street,Push,new-queen-street,Doomfist,TANK,45.90,11.40
-New Queen Street,Push,new-queen-street,Hazard,TANK,47.20,7.20
-New Queen Street,Push,new-queen-street,Junker Queen,TANK,46.70,3.90
-New Queen Street,Push,new-queen-street,Mauga,TANK,52.40,9.30
-New Queen Street,Push,new-queen-street,Orisa,TANK,45.50,6.80
-New Queen Street,Push,new-queen-street,Ramattra,TANK,51.50,2.40
-New Queen Street,Push,new-queen-street,Reinhardt,TANK,55.60,7.80
-New Queen Street,Push,new-queen-street,Roadhog,TANK,53.80,7.00
-New Queen Street,Push,new-queen-street,Sigma,TANK,50.10,9.60
-New Queen Street,Push,new-queen-street,Winston,TANK,51.30,8.00
-New Queen Street,Push,new-queen-street,Wrecking Ball,TANK,55.70,12.50
-New Queen Street,Push,new-queen-street,Zarya,TANK,48.40,5.00
-New Queen Street,Push,new-queen-street,Ana,SUP,43.80,25.50
-New Queen Street,Push,new-queen-street,Baptiste,SUP,41.70,4.70
-New Queen Street,Push,new-queen-street,Brigitte,SUP,49.10,13.40
-New Queen Street,Push,new-queen-street,Illari,SUP,48.60,8.00
-New Queen Street,Push,new-queen-street,Jetpack Cat,SUP,54.80,4.30
-New Queen Street,Push,new-queen-street,Juno,SUP,44.60,13.80
-New Queen Street,Push,new-queen-street,Kiriko,SUP,56.90,56.60
-New Queen Street,Push,new-queen-street,Lifeweaver,SUP,47.50,5.30
-New Queen Street,Push,new-queen-street,Lúcio,SUP,52.50,12.50
-New Queen Street,Push,new-queen-street,Mercy,SUP,43.60,13.60
-New Queen Street,Push,new-queen-street,Mizuki,SUP,57.70,15.80
-New Queen Street,Push,new-queen-street,Moira,SUP,53.20,10.60
-New Queen Street,Push,new-queen-street,Wuyang,SUP,48.40,10.20
-New Queen Street,Push,new-queen-street,Zenyatta,SUP,55.90,5.70
-Runasapi,Push,runasapi,Anran,DPS,55.10,2.60
-Runasapi,Push,runasapi,Ashe,DPS,47.80,4.10
-Runasapi,Push,runasapi,Bastion,DPS,48.90,3.60
-Runasapi,Push,runasapi,Cassidy,DPS,41.80,25.00
-Runasapi,Push,runasapi,Echo,DPS,33.00,2.80
-Runasapi,Push,runasapi,Emre,DPS,46.40,4.60
-Runasapi,Push,runasapi,Freja,DPS,45.70,1.90
-Runasapi,Push,runasapi,Genji,DPS,50.20,9.60
-Runasapi,Push,runasapi,Hanzo,DPS,41.80,2.30
-Runasapi,Push,runasapi,Junkrat,DPS,61.10,2.70
-Runasapi,Push,runasapi,Mei,DPS,60.90,4.60
-Runasapi,Push,runasapi,Pharah,DPS,53.30,4.10
-Runasapi,Push,runasapi,Reaper,DPS,50.70,6.20
-Runasapi,Push,runasapi,Shion,DPS,54.40,48.80
-Runasapi,Push,runasapi,Sierra,DPS,46.50,1.60
-Runasapi,Push,runasapi,Sojourn,DPS,41.90,24.30
-Runasapi,Push,runasapi,Soldier: 76,DPS,56.90,17.20
-Runasapi,Push,runasapi,Sombra,DPS,57.10,2.50
-Runasapi,Push,runasapi,Symmetra,DPS,52.30,1.80
-Runasapi,Push,runasapi,Torbjörn,DPS,59.90,3.90
-Runasapi,Push,runasapi,Tracer,DPS,53.20,19.90
-Runasapi,Push,runasapi,Vendetta,DPS,55.00,1.30
-Runasapi,Push,runasapi,Venture,DPS,56.60,1.50
-Runasapi,Push,runasapi,Widowmaker,DPS,35.80,2.90
-Runasapi,Push,runasapi,D.Va,TANK,38.60,5.00
-Runasapi,Push,runasapi,Domina,TANK,52.70,2.70
-Runasapi,Push,runasapi,Doomfist,TANK,42.80,10.30
-Runasapi,Push,runasapi,Hazard,TANK,55.10,7.80
-Runasapi,Push,runasapi,Junker Queen,TANK,55.30,4.60
-Runasapi,Push,runasapi,Mauga,TANK,54.80,8.70
-Runasapi,Push,runasapi,Orisa,TANK,43.60,8.40
-Runasapi,Push,runasapi,Ramattra,TANK,46.10,3.60
-Runasapi,Push,runasapi,Reinhardt,TANK,52.40,8.50
-Runasapi,Push,runasapi,Roadhog,TANK,52.10,7.20
-Runasapi,Push,runasapi,Sigma,TANK,46.70,10.70
-Runasapi,Push,runasapi,Winston,TANK,45.30,5.60
-Runasapi,Push,runasapi,Wrecking Ball,TANK,54.40,9.40
-Runasapi,Push,runasapi,Zarya,TANK,62.30,7.60
-Runasapi,Push,runasapi,Ana,SUP,43.30,19.60
-Runasapi,Push,runasapi,Baptiste,SUP,56.10,4.80
-Runasapi,Push,runasapi,Brigitte,SUP,49.50,11.70
-Runasapi,Push,runasapi,Illari,SUP,52.20,8.40
-Runasapi,Push,runasapi,Jetpack Cat,SUP,51.50,4.60
-Runasapi,Push,runasapi,Juno,SUP,50.00,18.70
-Runasapi,Push,runasapi,Kiriko,SUP,47.90,59.10
-Runasapi,Push,runasapi,Lifeweaver,SUP,45.20,5.20
-Runasapi,Push,runasapi,Lúcio,SUP,51.40,13.10
-Runasapi,Push,runasapi,Mercy,SUP,51.10,12.40
-Runasapi,Push,runasapi,Mizuki,SUP,58.10,17.00
-Runasapi,Push,runasapi,Moira,SUP,47.00,10.50
-Runasapi,Push,runasapi,Wuyang,SUP,49.60,10.20
-Runasapi,Push,runasapi,Zenyatta,SUP,54.70,4.80
-New Junk City,Flashpoint,new-junk-city,Anran,DPS,57.30,4.60
-New Junk City,Flashpoint,new-junk-city,Ashe,DPS,51.20,1.90
-New Junk City,Flashpoint,new-junk-city,Bastion,DPS,49.50,3.60
-New Junk City,Flashpoint,new-junk-city,Cassidy,DPS,46.90,28.00
-New Junk City,Flashpoint,new-junk-city,Echo,DPS,58.00,2.70
-New Junk City,Flashpoint,new-junk-city,Emre,DPS,38.00,2.80
+Colosseo,Push,colosseo,Junker Queen,TANK,57.40,4.50
+Colosseo,Push,colosseo,Mauga,TANK,55.50,7.00
+Colosseo,Push,colosseo,Orisa,TANK,51.50,6.90
+Colosseo,Push,colosseo,Ramattra,TANK,50.10,3.50
+Colosseo,Push,colosseo,Reinhardt,TANK,46.60,8.30
+Colosseo,Push,colosseo,Roadhog,TANK,47.30,6.40
+Colosseo,Push,colosseo,Sigma,TANK,51.30,12.70
+Colosseo,Push,colosseo,Winston,TANK,59.30,8.70
+Colosseo,Push,colosseo,Wrecking Ball,TANK,50.50,9.00
+Colosseo,Push,colosseo,Zarya,TANK,45.50,6.90
+Colosseo,Push,colosseo,Ana,SUP,46.70,26.40
+Colosseo,Push,colosseo,Baptiste,SUP,42.30,5.30
+Colosseo,Push,colosseo,Brigitte,SUP,58.20,10.20
+Colosseo,Push,colosseo,Illari,SUP,49.10,7.50
+Colosseo,Push,colosseo,Jetpack Cat,SUP,53.60,6.00
+Colosseo,Push,colosseo,Juno,SUP,50.80,16.60
+Colosseo,Push,colosseo,Kiriko,SUP,52.60,54.90
+Colosseo,Push,colosseo,Lifeweaver,SUP,40.80,5.30
+Colosseo,Push,colosseo,Lúcio,SUP,57.70,11.40
+Colosseo,Push,colosseo,Mercy,SUP,50.60,12.90
+Colosseo,Push,colosseo,Mizuki,SUP,54.20,16.00
+Colosseo,Push,colosseo,Moira,SUP,40.80,10.00
+Colosseo,Push,colosseo,Wuyang,SUP,46.70,10.40
+Colosseo,Push,colosseo,Zenyatta,SUP,46.20,6.80
+Esperança,Push,esperanca,Anran,DPS,55.20,3.60
+Esperança,Push,esperanca,Ashe,DPS,56.50,5.10
+Esperança,Push,esperanca,Bastion,DPS,52.80,3.20
+Esperança,Push,esperanca,Cassidy,DPS,46.20,22.10
+Esperança,Push,esperanca,Echo,DPS,62.50,4.10
+Esperança,Push,esperanca,Emre,DPS,45.00,6.30
+Esperança,Push,esperanca,Freja,DPS,48.90,2.70
+Esperança,Push,esperanca,Genji,DPS,47.00,10.20
+Esperança,Push,esperanca,Hanzo,DPS,39.90,2.00
+Esperança,Push,esperanca,Junkrat,DPS,52.00,3.10
+Esperança,Push,esperanca,Mei,DPS,60.20,3.70
+Esperança,Push,esperanca,Pharah,DPS,42.40,4.40
+Esperança,Push,esperanca,Reaper,DPS,40.90,6.90
+Esperança,Push,esperanca,Shion,DPS,53.10,46.40
+Esperança,Push,esperanca,Sierra,DPS,30.80,2.20
+Esperança,Push,esperanca,Sojourn,DPS,48.40,22.50
+Esperança,Push,esperanca,Soldier: 76,DPS,53.30,16.60
+Esperança,Push,esperanca,Sombra,DPS,49.10,2.40
+Esperança,Push,esperanca,Symmetra,DPS,60.80,1.60
+Esperança,Push,esperanca,Torbjörn,DPS,60.40,4.10
+Esperança,Push,esperanca,Tracer,DPS,54.60,19.90
+Esperança,Push,esperanca,Vendetta,DPS,38.90,1.60
+Esperança,Push,esperanca,Venture,DPS,51.70,1.80
+Esperança,Push,esperanca,Widowmaker,DPS,31.10,3.50
+Esperança,Push,esperanca,D.Va,TANK,43.60,6.40
+Esperança,Push,esperanca,Domina,TANK,57.50,2.00
+Esperança,Push,esperanca,Doomfist,TANK,49.90,10.70
+Esperança,Push,esperanca,Hazard,TANK,55.10,9.30
+Esperança,Push,esperanca,Junker Queen,TANK,47.50,3.90
+Esperança,Push,esperanca,Mauga,TANK,50.10,8.80
+Esperança,Push,esperanca,Orisa,TANK,50.00,6.60
+Esperança,Push,esperanca,Ramattra,TANK,42.10,2.90
+Esperança,Push,esperanca,Reinhardt,TANK,50.30,7.00
+Esperança,Push,esperanca,Roadhog,TANK,46.20,8.20
+Esperança,Push,esperanca,Sigma,TANK,48.90,7.40
+Esperança,Push,esperanca,Winston,TANK,50.30,10.50
+Esperança,Push,esperanca,Wrecking Ball,TANK,50.80,10.20
+Esperança,Push,esperanca,Zarya,TANK,58.20,6.10
+Esperança,Push,esperanca,Ana,SUP,43.50,20.70
+Esperança,Push,esperanca,Baptiste,SUP,60.60,4.50
+Esperança,Push,esperanca,Brigitte,SUP,52.50,12.60
+Esperança,Push,esperanca,Illari,SUP,62.90,7.60
+Esperança,Push,esperanca,Jetpack Cat,SUP,54.00,5.50
+Esperança,Push,esperanca,Juno,SUP,51.20,18.20
+Esperança,Push,esperanca,Kiriko,SUP,51.50,58.80
+Esperança,Push,esperanca,Lifeweaver,SUP,40.50,5.30
+Esperança,Push,esperanca,Lúcio,SUP,51.00,13.30
+Esperança,Push,esperanca,Mercy,SUP,48.90,12.90
+Esperança,Push,esperanca,Mizuki,SUP,43.80,15.40
+Esperança,Push,esperanca,Moira,SUP,49.20,10.20
+Esperança,Push,esperanca,Wuyang,SUP,51.60,9.80
+Esperança,Push,esperanca,Zenyatta,SUP,46.00,5.40
+New Queen Street,Push,new-queen-street,Anran,DPS,45.50,3.90
+New Queen Street,Push,new-queen-street,Ashe,DPS,52.20,5.00
+New Queen Street,Push,new-queen-street,Bastion,DPS,47.60,3.60
+New Queen Street,Push,new-queen-street,Cassidy,DPS,48.90,19.00
+New Queen Street,Push,new-queen-street,Echo,DPS,49.30,3.50
+New Queen Street,Push,new-queen-street,Emre,DPS,39.60,5.70
+New Queen Street,Push,new-queen-street,Freja,DPS,32.30,1.60
+New Queen Street,Push,new-queen-street,Genji,DPS,53.10,10.70
+New Queen Street,Push,new-queen-street,Hanzo,DPS,56.00,2.00
+New Queen Street,Push,new-queen-street,Junkrat,DPS,48.10,2.40
+New Queen Street,Push,new-queen-street,Mei,DPS,37.20,3.50
+New Queen Street,Push,new-queen-street,Pharah,DPS,38.90,3.20
+New Queen Street,Push,new-queen-street,Reaper,DPS,52.90,5.60
+New Queen Street,Push,new-queen-street,Shion,DPS,58.20,45.10
+New Queen Street,Push,new-queen-street,Sierra,DPS,40.50,2.20
+New Queen Street,Push,new-queen-street,Sojourn,DPS,44.90,22.10
+New Queen Street,Push,new-queen-street,Soldier: 76,DPS,53.30,25.10
+New Queen Street,Push,new-queen-street,Sombra,DPS,46.30,2.70
+New Queen Street,Push,new-queen-street,Symmetra,DPS,48.70,1.20
+New Queen Street,Push,new-queen-street,Torbjörn,DPS,47.80,4.40
+New Queen Street,Push,new-queen-street,Tracer,DPS,55.20,20.40
+New Queen Street,Push,new-queen-street,Vendetta,DPS,32.30,0.90
+New Queen Street,Push,new-queen-street,Venture,DPS,58.10,1.70
+New Queen Street,Push,new-queen-street,Widowmaker,DPS,51.20,4.20
+New Queen Street,Push,new-queen-street,D.Va,TANK,49.20,6.30
+New Queen Street,Push,new-queen-street,Domina,TANK,37.90,2.60
+New Queen Street,Push,new-queen-street,Doomfist,TANK,46.50,11.50
+New Queen Street,Push,new-queen-street,Hazard,TANK,46.70,7.10
+New Queen Street,Push,new-queen-street,Junker Queen,TANK,45.90,4.00
+New Queen Street,Push,new-queen-street,Mauga,TANK,52.90,9.20
+New Queen Street,Push,new-queen-street,Orisa,TANK,47.70,6.90
+New Queen Street,Push,new-queen-street,Ramattra,TANK,48.80,2.30
+New Queen Street,Push,new-queen-street,Reinhardt,TANK,54.90,7.60
+New Queen Street,Push,new-queen-street,Roadhog,TANK,53.70,6.70
+New Queen Street,Push,new-queen-street,Sigma,TANK,51.80,9.60
+New Queen Street,Push,new-queen-street,Winston,TANK,52.90,8.20
+New Queen Street,Push,new-queen-street,Wrecking Ball,TANK,52.70,12.90
+New Queen Street,Push,new-queen-street,Zarya,TANK,46.30,5.10
+New Queen Street,Push,new-queen-street,Ana,SUP,44.10,25.30
+New Queen Street,Push,new-queen-street,Baptiste,SUP,40.90,4.80
+New Queen Street,Push,new-queen-street,Brigitte,SUP,50.00,13.40
+New Queen Street,Push,new-queen-street,Illari,SUP,48.00,7.70
+New Queen Street,Push,new-queen-street,Jetpack Cat,SUP,56.50,4.60
+New Queen Street,Push,new-queen-street,Juno,SUP,44.00,14.10
+New Queen Street,Push,new-queen-street,Kiriko,SUP,57.50,56.80
+New Queen Street,Push,new-queen-street,Lifeweaver,SUP,47.90,5.10
+New Queen Street,Push,new-queen-street,Lúcio,SUP,51.60,12.30
+New Queen Street,Push,new-queen-street,Mercy,SUP,44.10,13.80
+New Queen Street,Push,new-queen-street,Mizuki,SUP,58.10,15.80
+New Queen Street,Push,new-queen-street,Moira,SUP,51.90,10.30
+New Queen Street,Push,new-queen-street,Wuyang,SUP,47.70,10.40
+New Queen Street,Push,new-queen-street,Zenyatta,SUP,55.10,5.80
+Runasapi,Push,runasapi,Anran,DPS,56.20,2.80
+Runasapi,Push,runasapi,Ashe,DPS,47.20,3.90
+Runasapi,Push,runasapi,Bastion,DPS,50.50,3.60
+Runasapi,Push,runasapi,Cassidy,DPS,43.40,25.60
+Runasapi,Push,runasapi,Echo,DPS,34.90,2.70
+Runasapi,Push,runasapi,Emre,DPS,47.60,4.70
+Runasapi,Push,runasapi,Freja,DPS,42.90,1.70
+Runasapi,Push,runasapi,Genji,DPS,46.70,10.10
+Runasapi,Push,runasapi,Hanzo,DPS,47.20,2.30
+Runasapi,Push,runasapi,Junkrat,DPS,62.40,2.60
+Runasapi,Push,runasapi,Mei,DPS,59.30,4.50
+Runasapi,Push,runasapi,Pharah,DPS,52.30,4.10
+Runasapi,Push,runasapi,Reaper,DPS,51.20,6.40
+Runasapi,Push,runasapi,Shion,DPS,53.90,46.20
+Runasapi,Push,runasapi,Sierra,DPS,50.50,1.60
+Runasapi,Push,runasapi,Sojourn,DPS,42.30,24.50
+Runasapi,Push,runasapi,Soldier: 76,DPS,57.00,17.80
+Runasapi,Push,runasapi,Sombra,DPS,56.20,2.40
+Runasapi,Push,runasapi,Symmetra,DPS,52.10,2.00
+Runasapi,Push,runasapi,Torbjörn,DPS,56.90,3.90
+Runasapi,Push,runasapi,Tracer,DPS,52.80,20.50
+Runasapi,Push,runasapi,Vendetta,DPS,52.60,1.40
+Runasapi,Push,runasapi,Venture,DPS,56.80,1.60
+Runasapi,Push,runasapi,Widowmaker,DPS,39.00,3.10
+Runasapi,Push,runasapi,D.Va,TANK,38.10,5.00
+Runasapi,Push,runasapi,Domina,TANK,52.80,2.60
+Runasapi,Push,runasapi,Doomfist,TANK,46.00,10.10
+Runasapi,Push,runasapi,Hazard,TANK,54.90,7.70
+Runasapi,Push,runasapi,Junker Queen,TANK,56.50,4.70
+Runasapi,Push,runasapi,Mauga,TANK,53.60,8.60
+Runasapi,Push,runasapi,Orisa,TANK,41.60,8.90
+Runasapi,Push,runasapi,Ramattra,TANK,49.30,3.60
+Runasapi,Push,runasapi,Reinhardt,TANK,52.40,8.30
+Runasapi,Push,runasapi,Roadhog,TANK,52.30,7.20
+Runasapi,Push,runasapi,Sigma,TANK,47.00,10.80
+Runasapi,Push,runasapi,Winston,TANK,45.40,5.70
+Runasapi,Push,runasapi,Wrecking Ball,TANK,53.90,9.10
+Runasapi,Push,runasapi,Zarya,TANK,60.20,7.70
+Runasapi,Push,runasapi,Ana,SUP,45.10,19.70
+Runasapi,Push,runasapi,Baptiste,SUP,57.50,5.00
+Runasapi,Push,runasapi,Brigitte,SUP,49.30,12.00
+Runasapi,Push,runasapi,Illari,SUP,53.00,8.00
+Runasapi,Push,runasapi,Jetpack Cat,SUP,51.30,5.00
+Runasapi,Push,runasapi,Juno,SUP,50.30,19.40
+Runasapi,Push,runasapi,Kiriko,SUP,47.90,58.60
+Runasapi,Push,runasapi,Lifeweaver,SUP,44.80,5.00
+Runasapi,Push,runasapi,Lúcio,SUP,51.40,13.20
+Runasapi,Push,runasapi,Mercy,SUP,49.60,12.20
+Runasapi,Push,runasapi,Mizuki,SUP,57.90,17.00
+Runasapi,Push,runasapi,Moira,SUP,46.10,10.30
+Runasapi,Push,runasapi,Wuyang,SUP,49.60,9.90
+Runasapi,Push,runasapi,Zenyatta,SUP,52.00,4.80
+New Junk City,Flashpoint,new-junk-city,Anran,DPS,58.20,4.70
+New Junk City,Flashpoint,new-junk-city,Ashe,DPS,51.10,1.70
+New Junk City,Flashpoint,new-junk-city,Bastion,DPS,50.20,3.60
+New Junk City,Flashpoint,new-junk-city,Cassidy,DPS,47.20,28.80
+New Junk City,Flashpoint,new-junk-city,Echo,DPS,54.70,2.50
+New Junk City,Flashpoint,new-junk-city,Emre,DPS,38.60,2.70
 New Junk City,Flashpoint,new-junk-city,Freja,DPS,40.40,0.70
-New Junk City,Flashpoint,new-junk-city,Genji,DPS,50.30,11.80
-New Junk City,Flashpoint,new-junk-city,Hanzo,DPS,50.50,2.60
-New Junk City,Flashpoint,new-junk-city,Junkrat,DPS,48.70,3.90
-New Junk City,Flashpoint,new-junk-city,Mei,DPS,51.80,6.30
-New Junk City,Flashpoint,new-junk-city,Pharah,DPS,48.30,3.50
-New Junk City,Flashpoint,new-junk-city,Reaper,DPS,49.20,9.10
-New Junk City,Flashpoint,new-junk-city,Shion,DPS,53.80,51.00
-New Junk City,Flashpoint,new-junk-city,Sierra,DPS,51.40,1.70
-New Junk City,Flashpoint,new-junk-city,Sojourn,DPS,45.70,22.70
-New Junk City,Flashpoint,new-junk-city,Soldier: 76,DPS,51.00,10.00
-New Junk City,Flashpoint,new-junk-city,Sombra,DPS,41.50,1.20
-New Junk City,Flashpoint,new-junk-city,Symmetra,DPS,69.80,2.90
-New Junk City,Flashpoint,new-junk-city,Torbjörn,DPS,44.10,4.30
-New Junk City,Flashpoint,new-junk-city,Tracer,DPS,50.60,19.20
-New Junk City,Flashpoint,new-junk-city,Vendetta,DPS,63.40,1.60
-New Junk City,Flashpoint,new-junk-city,Venture,DPS,52.70,3.20
-New Junk City,Flashpoint,new-junk-city,Widowmaker,DPS,32.30,0.80
-New Junk City,Flashpoint,new-junk-city,D.Va,TANK,38.50,3.90
-New Junk City,Flashpoint,new-junk-city,Domina,TANK,64.00,2.30
-New Junk City,Flashpoint,new-junk-city,Doomfist,TANK,44.80,10.50
-New Junk City,Flashpoint,new-junk-city,Hazard,TANK,56.20,7.10
-New Junk City,Flashpoint,new-junk-city,Junker Queen,TANK,52.90,7.90
-New Junk City,Flashpoint,new-junk-city,Mauga,TANK,53.00,9.00
-New Junk City,Flashpoint,new-junk-city,Orisa,TANK,44.10,10.50
-New Junk City,Flashpoint,new-junk-city,Ramattra,TANK,53.40,6.30
-New Junk City,Flashpoint,new-junk-city,Reinhardt,TANK,52.10,10.40
-New Junk City,Flashpoint,new-junk-city,Roadhog,TANK,49.90,6.40
-New Junk City,Flashpoint,new-junk-city,Sigma,TANK,43.50,8.60
-New Junk City,Flashpoint,new-junk-city,Winston,TANK,50.10,2.90
-New Junk City,Flashpoint,new-junk-city,Wrecking Ball,TANK,52.90,4.70
-New Junk City,Flashpoint,new-junk-city,Zarya,TANK,55.40,9.40
-New Junk City,Flashpoint,new-junk-city,Ana,SUP,45.40,16.20
-New Junk City,Flashpoint,new-junk-city,Baptiste,SUP,48.90,5.20
-New Junk City,Flashpoint,new-junk-city,Brigitte,SUP,55.00,12.70
-New Junk City,Flashpoint,new-junk-city,Illari,SUP,46.70,4.40
-New Junk City,Flashpoint,new-junk-city,Jetpack Cat,SUP,54.40,4.10
-New Junk City,Flashpoint,new-junk-city,Juno,SUP,49.40,16.40
-New Junk City,Flashpoint,new-junk-city,Kiriko,SUP,48.40,58.90
-New Junk City,Flashpoint,new-junk-city,Lifeweaver,SUP,42.40,4.00
-New Junk City,Flashpoint,new-junk-city,Lúcio,SUP,51.90,17.10
-New Junk City,Flashpoint,new-junk-city,Mercy,SUP,43.10,8.90
-New Junk City,Flashpoint,new-junk-city,Mizuki,SUP,57.90,20.00
-New Junk City,Flashpoint,new-junk-city,Moira,SUP,48.90,16.40
-New Junk City,Flashpoint,new-junk-city,Wuyang,SUP,53.20,10.90
-New Junk City,Flashpoint,new-junk-city,Zenyatta,SUP,44.60,4.60
-Suravasa,Flashpoint,suravasa,Anran,DPS,51.70,4.30
-Suravasa,Flashpoint,suravasa,Ashe,DPS,52.30,3.50
-Suravasa,Flashpoint,suravasa,Bastion,DPS,38.90,3.30
-Suravasa,Flashpoint,suravasa,Cassidy,DPS,44.80,23.80
-Suravasa,Flashpoint,suravasa,Echo,DPS,54.50,4.20
-Suravasa,Flashpoint,suravasa,Emre,DPS,48.50,4.70
-Suravasa,Flashpoint,suravasa,Freja,DPS,58.50,1.30
-Suravasa,Flashpoint,suravasa,Genji,DPS,50.10,12.10
-Suravasa,Flashpoint,suravasa,Hanzo,DPS,47.40,2.70
-Suravasa,Flashpoint,suravasa,Junkrat,DPS,57.70,3.30
-Suravasa,Flashpoint,suravasa,Mei,DPS,59.60,5.50
-Suravasa,Flashpoint,suravasa,Pharah,DPS,52.10,4.40
-Suravasa,Flashpoint,suravasa,Reaper,DPS,42.60,7.60
-Suravasa,Flashpoint,suravasa,Shion,DPS,58.50,47.20
-Suravasa,Flashpoint,suravasa,Sierra,DPS,45.30,1.50
-Suravasa,Flashpoint,suravasa,Sojourn,DPS,48.20,24.40
-Suravasa,Flashpoint,suravasa,Soldier: 76,DPS,53.30,14.10
-Suravasa,Flashpoint,suravasa,Sombra,DPS,42.90,2.10
-Suravasa,Flashpoint,suravasa,Symmetra,DPS,56.50,2.40
-Suravasa,Flashpoint,suravasa,Torbjörn,DPS,46.90,3.70
-Suravasa,Flashpoint,suravasa,Tracer,DPS,43.20,18.50
-Suravasa,Flashpoint,suravasa,Vendetta,DPS,44.90,1.70
-Suravasa,Flashpoint,suravasa,Venture,DPS,59.40,2.00
-Suravasa,Flashpoint,suravasa,Widowmaker,DPS,35.40,1.60
-Suravasa,Flashpoint,suravasa,D.Va,TANK,40.20,4.80
-Suravasa,Flashpoint,suravasa,Domina,TANK,50.50,2.20
-Suravasa,Flashpoint,suravasa,Doomfist,TANK,48.90,10.20
-Suravasa,Flashpoint,suravasa,Hazard,TANK,55.00,8.80
-Suravasa,Flashpoint,suravasa,Junker Queen,TANK,49.70,5.10
-Suravasa,Flashpoint,suravasa,Mauga,TANK,52.10,8.00
-Suravasa,Flashpoint,suravasa,Orisa,TANK,51.10,8.20
+New Junk City,Flashpoint,new-junk-city,Genji,DPS,50.60,12.10
+New Junk City,Flashpoint,new-junk-city,Hanzo,DPS,50.80,2.70
+New Junk City,Flashpoint,new-junk-city,Junkrat,DPS,50.20,3.70
+New Junk City,Flashpoint,new-junk-city,Mei,DPS,51.60,6.50
+New Junk City,Flashpoint,new-junk-city,Pharah,DPS,49.60,3.50
+New Junk City,Flashpoint,new-junk-city,Reaper,DPS,48.40,9.60
+New Junk City,Flashpoint,new-junk-city,Shion,DPS,52.90,48.80
+New Junk City,Flashpoint,new-junk-city,Sierra,DPS,52.70,1.70
+New Junk City,Flashpoint,new-junk-city,Sojourn,DPS,45.50,22.90
+New Junk City,Flashpoint,new-junk-city,Soldier: 76,DPS,49.60,10.30
+New Junk City,Flashpoint,new-junk-city,Sombra,DPS,41.00,1.30
+New Junk City,Flashpoint,new-junk-city,Symmetra,DPS,71.90,2.80
+New Junk City,Flashpoint,new-junk-city,Torbjörn,DPS,46.30,4.50
+New Junk City,Flashpoint,new-junk-city,Tracer,DPS,50.60,19.70
+New Junk City,Flashpoint,new-junk-city,Vendetta,DPS,66.30,1.50
+New Junk City,Flashpoint,new-junk-city,Venture,DPS,53.30,2.90
+New Junk City,Flashpoint,new-junk-city,Widowmaker,DPS,34.30,0.80
+New Junk City,Flashpoint,new-junk-city,D.Va,TANK,40.10,4.10
+New Junk City,Flashpoint,new-junk-city,Domina,TANK,62.00,2.30
+New Junk City,Flashpoint,new-junk-city,Doomfist,TANK,43.80,10.40
+New Junk City,Flashpoint,new-junk-city,Hazard,TANK,55.50,7.50
+New Junk City,Flashpoint,new-junk-city,Junker Queen,TANK,53.80,7.70
+New Junk City,Flashpoint,new-junk-city,Mauga,TANK,52.90,8.90
+New Junk City,Flashpoint,new-junk-city,Orisa,TANK,43.30,10.10
+New Junk City,Flashpoint,new-junk-city,Ramattra,TANK,55.20,6.40
+New Junk City,Flashpoint,new-junk-city,Reinhardt,TANK,51.70,10.10
+New Junk City,Flashpoint,new-junk-city,Roadhog,TANK,48.30,6.20
+New Junk City,Flashpoint,new-junk-city,Sigma,TANK,45.90,8.90
+New Junk City,Flashpoint,new-junk-city,Winston,TANK,46.70,2.90
+New Junk City,Flashpoint,new-junk-city,Wrecking Ball,TANK,54.90,4.70
+New Junk City,Flashpoint,new-junk-city,Zarya,TANK,55.30,9.90
+New Junk City,Flashpoint,new-junk-city,Ana,SUP,45.20,16.00
+New Junk City,Flashpoint,new-junk-city,Baptiste,SUP,49.60,5.30
+New Junk City,Flashpoint,new-junk-city,Brigitte,SUP,54.60,12.40
+New Junk City,Flashpoint,new-junk-city,Illari,SUP,46.70,4.50
+New Junk City,Flashpoint,new-junk-city,Jetpack Cat,SUP,54.40,4.80
+New Junk City,Flashpoint,new-junk-city,Juno,SUP,48.90,16.30
+New Junk City,Flashpoint,new-junk-city,Kiriko,SUP,48.30,59.10
+New Junk City,Flashpoint,new-junk-city,Lifeweaver,SUP,41.80,4.10
+New Junk City,Flashpoint,new-junk-city,Lúcio,SUP,52.90,17.20
+New Junk City,Flashpoint,new-junk-city,Mercy,SUP,42.20,9.00
+New Junk City,Flashpoint,new-junk-city,Mizuki,SUP,58.00,19.90
+New Junk City,Flashpoint,new-junk-city,Moira,SUP,49.60,16.20
+New Junk City,Flashpoint,new-junk-city,Wuyang,SUP,52.90,10.80
+New Junk City,Flashpoint,new-junk-city,Zenyatta,SUP,45.10,4.60
+Suravasa,Flashpoint,suravasa,Anran,DPS,51.50,4.60
+Suravasa,Flashpoint,suravasa,Ashe,DPS,52.90,3.50
+Suravasa,Flashpoint,suravasa,Bastion,DPS,39.70,3.30
+Suravasa,Flashpoint,suravasa,Cassidy,DPS,45.00,24.60
+Suravasa,Flashpoint,suravasa,Echo,DPS,52.30,4.00
+Suravasa,Flashpoint,suravasa,Emre,DPS,49.70,4.50
+Suravasa,Flashpoint,suravasa,Freja,DPS,56.40,1.30
+Suravasa,Flashpoint,suravasa,Genji,DPS,49.90,12.20
+Suravasa,Flashpoint,suravasa,Hanzo,DPS,49.10,2.70
+Suravasa,Flashpoint,suravasa,Junkrat,DPS,56.10,3.30
+Suravasa,Flashpoint,suravasa,Mei,DPS,58.30,5.50
+Suravasa,Flashpoint,suravasa,Pharah,DPS,54.30,4.40
+Suravasa,Flashpoint,suravasa,Reaper,DPS,45.40,7.90
+Suravasa,Flashpoint,suravasa,Shion,DPS,57.40,45.40
+Suravasa,Flashpoint,suravasa,Sierra,DPS,44.10,1.50
+Suravasa,Flashpoint,suravasa,Sojourn,DPS,48.10,24.60
+Suravasa,Flashpoint,suravasa,Soldier: 76,DPS,54.00,14.10
+Suravasa,Flashpoint,suravasa,Sombra,DPS,41.30,2.10
+Suravasa,Flashpoint,suravasa,Symmetra,DPS,58.20,2.50
+Suravasa,Flashpoint,suravasa,Torbjörn,DPS,47.50,3.70
+Suravasa,Flashpoint,suravasa,Tracer,DPS,43.20,19.10
+Suravasa,Flashpoint,suravasa,Vendetta,DPS,43.30,1.60
+Suravasa,Flashpoint,suravasa,Venture,DPS,61.00,2.00
+Suravasa,Flashpoint,suravasa,Widowmaker,DPS,34.20,1.70
+Suravasa,Flashpoint,suravasa,D.Va,TANK,41.70,4.90
+Suravasa,Flashpoint,suravasa,Domina,TANK,48.60,2.20
+Suravasa,Flashpoint,suravasa,Doomfist,TANK,48.70,10.00
+Suravasa,Flashpoint,suravasa,Hazard,TANK,55.10,8.60
+Suravasa,Flashpoint,suravasa,Junker Queen,TANK,49.40,5.10
+Suravasa,Flashpoint,suravasa,Mauga,TANK,50.90,8.30
+Suravasa,Flashpoint,suravasa,Orisa,TANK,51.40,8.20
 Suravasa,Flashpoint,suravasa,Ramattra,TANK,46.40,3.60
-Suravasa,Flashpoint,suravasa,Reinhardt,TANK,50.60,8.10
-Suravasa,Flashpoint,suravasa,Roadhog,TANK,49.30,6.40
-Suravasa,Flashpoint,suravasa,Sigma,TANK,53.20,9.20
-Suravasa,Flashpoint,suravasa,Winston,TANK,50.00,7.20
-Suravasa,Flashpoint,suravasa,Wrecking Ball,TANK,46.90,9.30
-Suravasa,Flashpoint,suravasa,Zarya,TANK,51.10,8.90
-Suravasa,Flashpoint,suravasa,Ana,SUP,44.70,17.90
-Suravasa,Flashpoint,suravasa,Baptiste,SUP,52.80,5.30
-Suravasa,Flashpoint,suravasa,Brigitte,SUP,51.90,13.00
-Suravasa,Flashpoint,suravasa,Illari,SUP,55.00,6.00
-Suravasa,Flashpoint,suravasa,Jetpack Cat,SUP,55.90,4.60
-Suravasa,Flashpoint,suravasa,Juno,SUP,45.80,17.70
-Suravasa,Flashpoint,suravasa,Kiriko,SUP,54.80,58.50
-Suravasa,Flashpoint,suravasa,Lifeweaver,SUP,48.60,4.70
-Suravasa,Flashpoint,suravasa,Lúcio,SUP,49.90,14.50
-Suravasa,Flashpoint,suravasa,Mercy,SUP,54.10,10.20
-Suravasa,Flashpoint,suravasa,Mizuki,SUP,51.50,20.20
-Suravasa,Flashpoint,suravasa,Moira,SUP,44.60,13.30
-Suravasa,Flashpoint,suravasa,Wuyang,SUP,50.00,8.50
-Suravasa,Flashpoint,suravasa,Zenyatta,SUP,43.40,5.80
-Neon Junction,Hybrid,neon-junction,Anran,DPS,47.10,2.60
-Neon Junction,Hybrid,neon-junction,Ashe,DPS,50.10,8.00
-Neon Junction,Hybrid,neon-junction,Bastion,DPS,51.60,6.30
-Neon Junction,Hybrid,neon-junction,Cassidy,DPS,52.80,21.70
-Neon Junction,Hybrid,neon-junction,Echo,DPS,55.70,3.70
-Neon Junction,Hybrid,neon-junction,Emre,DPS,45.10,6.70
-Neon Junction,Hybrid,neon-junction,Freja,DPS,42.50,2.40
-Neon Junction,Hybrid,neon-junction,Genji,DPS,50.00,10.80
-Neon Junction,Hybrid,neon-junction,Hanzo,DPS,45.80,5.90
-Neon Junction,Hybrid,neon-junction,Junkrat,DPS,44.40,3.40
-Neon Junction,Hybrid,neon-junction,Mei,DPS,50.10,7.30
-Neon Junction,Hybrid,neon-junction,Pharah,DPS,47.10,4.10
-Neon Junction,Hybrid,neon-junction,Reaper,DPS,38.70,5.90
-Neon Junction,Hybrid,neon-junction,Shion,DPS,56.40,43.40
-Neon Junction,Hybrid,neon-junction,Sierra,DPS,39.40,2.50
-Neon Junction,Hybrid,neon-junction,Sojourn,DPS,47.20,24.80
-Neon Junction,Hybrid,neon-junction,Soldier: 76,DPS,45.60,8.50
-Neon Junction,Hybrid,neon-junction,Sombra,DPS,48.50,1.70
-Neon Junction,Hybrid,neon-junction,Symmetra,DPS,49.50,2.20
-Neon Junction,Hybrid,neon-junction,Torbjörn,DPS,41.90,4.10
-Neon Junction,Hybrid,neon-junction,Tracer,DPS,48.60,11.40
-Neon Junction,Hybrid,neon-junction,Vendetta,DPS,55.40,1.50
-Neon Junction,Hybrid,neon-junction,Venture,DPS,48.50,2.40
-Neon Junction,Hybrid,neon-junction,Widowmaker,DPS,49.40,8.80
-Neon Junction,Hybrid,neon-junction,D.Va,TANK,45.90,2.90
-Neon Junction,Hybrid,neon-junction,Domina,TANK,47.20,3.90
-Neon Junction,Hybrid,neon-junction,Doomfist,TANK,49.20,8.80
-Neon Junction,Hybrid,neon-junction,Hazard,TANK,43.50,4.30
-Neon Junction,Hybrid,neon-junction,Junker Queen,TANK,50.00,2.90
-Neon Junction,Hybrid,neon-junction,Mauga,TANK,51.80,7.00
-Neon Junction,Hybrid,neon-junction,Orisa,TANK,53.10,8.70
-Neon Junction,Hybrid,neon-junction,Ramattra,TANK,42.10,7.20
-Neon Junction,Hybrid,neon-junction,Reinhardt,TANK,55.40,10.50
-Neon Junction,Hybrid,neon-junction,Roadhog,TANK,44.70,5.90
-Neon Junction,Hybrid,neon-junction,Sigma,TANK,51.70,20.50
-Neon Junction,Hybrid,neon-junction,Winston,TANK,40.80,3.90
-Neon Junction,Hybrid,neon-junction,Wrecking Ball,TANK,41.50,4.00
-Neon Junction,Hybrid,neon-junction,Zarya,TANK,50.90,9.40
-Neon Junction,Hybrid,neon-junction,Ana,SUP,50.00,30.80
+Suravasa,Flashpoint,suravasa,Reinhardt,TANK,49.70,8.10
+Suravasa,Flashpoint,suravasa,Roadhog,TANK,50.30,6.70
+Suravasa,Flashpoint,suravasa,Sigma,TANK,52.30,9.20
+Suravasa,Flashpoint,suravasa,Winston,TANK,48.60,6.90
+Suravasa,Flashpoint,suravasa,Wrecking Ball,TANK,48.80,9.50
+Suravasa,Flashpoint,suravasa,Zarya,TANK,52.10,8.70
+Suravasa,Flashpoint,suravasa,Ana,SUP,43.80,17.90
+Suravasa,Flashpoint,suravasa,Baptiste,SUP,51.70,5.20
+Suravasa,Flashpoint,suravasa,Brigitte,SUP,51.60,13.30
+Suravasa,Flashpoint,suravasa,Illari,SUP,54.90,5.80
+Suravasa,Flashpoint,suravasa,Jetpack Cat,SUP,56.30,4.90
+Suravasa,Flashpoint,suravasa,Juno,SUP,45.40,17.50
+Suravasa,Flashpoint,suravasa,Kiriko,SUP,54.80,58.70
+Suravasa,Flashpoint,suravasa,Lifeweaver,SUP,46.90,4.70
+Suravasa,Flashpoint,suravasa,Lúcio,SUP,49.60,14.70
+Suravasa,Flashpoint,suravasa,Mercy,SUP,55.10,10.50
+Suravasa,Flashpoint,suravasa,Mizuki,SUP,52.60,19.30
+Suravasa,Flashpoint,suravasa,Moira,SUP,45.60,13.20
+Suravasa,Flashpoint,suravasa,Wuyang,SUP,49.50,8.50
+Suravasa,Flashpoint,suravasa,Zenyatta,SUP,43.80,5.90
+Neon Junction,Hybrid,neon-junction,Anran,DPS,46.20,2.70
+Neon Junction,Hybrid,neon-junction,Ashe,DPS,48.90,8.00
+Neon Junction,Hybrid,neon-junction,Bastion,DPS,51.70,6.40
+Neon Junction,Hybrid,neon-junction,Cassidy,DPS,52.80,21.60
+Neon Junction,Hybrid,neon-junction,Echo,DPS,56.50,3.60
+Neon Junction,Hybrid,neon-junction,Emre,DPS,45.30,6.80
+Neon Junction,Hybrid,neon-junction,Freja,DPS,43.10,2.50
+Neon Junction,Hybrid,neon-junction,Genji,DPS,49.80,10.60
+Neon Junction,Hybrid,neon-junction,Hanzo,DPS,46.10,6.00
+Neon Junction,Hybrid,neon-junction,Junkrat,DPS,43.40,3.40
+Neon Junction,Hybrid,neon-junction,Mei,DPS,49.10,7.30
+Neon Junction,Hybrid,neon-junction,Pharah,DPS,48.10,4.20
+Neon Junction,Hybrid,neon-junction,Reaper,DPS,39.80,6.10
+Neon Junction,Hybrid,neon-junction,Shion,DPS,55.70,42.20
+Neon Junction,Hybrid,neon-junction,Sierra,DPS,39.80,2.50
+Neon Junction,Hybrid,neon-junction,Sojourn,DPS,47.60,25.10
+Neon Junction,Hybrid,neon-junction,Soldier: 76,DPS,46.10,8.70
+Neon Junction,Hybrid,neon-junction,Sombra,DPS,47.70,1.60
+Neon Junction,Hybrid,neon-junction,Symmetra,DPS,48.10,2.20
+Neon Junction,Hybrid,neon-junction,Torbjörn,DPS,44.50,4.20
+Neon Junction,Hybrid,neon-junction,Tracer,DPS,48.70,11.60
+Neon Junction,Hybrid,neon-junction,Vendetta,DPS,56.90,1.40
+Neon Junction,Hybrid,neon-junction,Venture,DPS,48.80,2.30
+Neon Junction,Hybrid,neon-junction,Widowmaker,DPS,49.60,9.00
+Neon Junction,Hybrid,neon-junction,D.Va,TANK,43.70,2.90
+Neon Junction,Hybrid,neon-junction,Domina,TANK,48.50,3.90
+Neon Junction,Hybrid,neon-junction,Doomfist,TANK,49.10,8.70
+Neon Junction,Hybrid,neon-junction,Hazard,TANK,43.30,4.20
+Neon Junction,Hybrid,neon-junction,Junker Queen,TANK,50.60,2.90
+Neon Junction,Hybrid,neon-junction,Mauga,TANK,51.50,6.90
+Neon Junction,Hybrid,neon-junction,Orisa,TANK,52.90,8.60
+Neon Junction,Hybrid,neon-junction,Ramattra,TANK,42.30,7.10
+Neon Junction,Hybrid,neon-junction,Reinhardt,TANK,54.80,10.50
+Neon Junction,Hybrid,neon-junction,Roadhog,TANK,44.20,6.00
+Neon Junction,Hybrid,neon-junction,Sigma,TANK,52.20,20.80
+Neon Junction,Hybrid,neon-junction,Winston,TANK,41.70,3.90
+Neon Junction,Hybrid,neon-junction,Wrecking Ball,TANK,41.10,3.90
+Neon Junction,Hybrid,neon-junction,Zarya,TANK,51.30,9.50
+Neon Junction,Hybrid,neon-junction,Ana,SUP,50.40,31.00
 Neon Junction,Hybrid,neon-junction,Baptiste,SUP,44.30,8.80
-Neon Junction,Hybrid,neon-junction,Brigitte,SUP,53.40,8.60
-Neon Junction,Hybrid,neon-junction,Illari,SUP,52.40,8.30
-Neon Junction,Hybrid,neon-junction,Jetpack Cat,SUP,44.80,3.60
-Neon Junction,Hybrid,neon-junction,Juno,SUP,47.00,15.70
-Neon Junction,Hybrid,neon-junction,Kiriko,SUP,49.10,49.70
-Neon Junction,Hybrid,neon-junction,Lifeweaver,SUP,45.60,6.60
-Neon Junction,Hybrid,neon-junction,Lúcio,SUP,52.40,7.10
-Neon Junction,Hybrid,neon-junction,Mercy,SUP,47.80,12.10
-Neon Junction,Hybrid,neon-junction,Mizuki,SUP,58.70,17.70
-Neon Junction,Hybrid,neon-junction,Moira,SUP,44.90,9.60
-Neon Junction,Hybrid,neon-junction,Wuyang,SUP,44.50,11.70
-Neon Junction,Hybrid,neon-junction,Zenyatta,SUP,46.30,9.70
+Neon Junction,Hybrid,neon-junction,Brigitte,SUP,54.10,8.60
+Neon Junction,Hybrid,neon-junction,Illari,SUP,52.00,8.10
+Neon Junction,Hybrid,neon-junction,Jetpack Cat,SUP,45.70,3.80
+Neon Junction,Hybrid,neon-junction,Juno,SUP,47.60,16.00
+Neon Junction,Hybrid,neon-junction,Kiriko,SUP,48.10,49.70
+Neon Junction,Hybrid,neon-junction,Lifeweaver,SUP,46.30,6.50
+Neon Junction,Hybrid,neon-junction,Lúcio,SUP,51.30,6.90
+Neon Junction,Hybrid,neon-junction,Mercy,SUP,47.90,12.10
+Neon Junction,Hybrid,neon-junction,Mizuki,SUP,59.00,17.60
+Neon Junction,Hybrid,neon-junction,Moira,SUP,45.30,9.60
+Neon Junction,Hybrid,neon-junction,Wuyang,SUP,44.70,11.80
+Neon Junction,Hybrid,neon-junction,Zenyatta,SUP,46.10,9.70
