@@ -1,5 +1,5 @@
 {
-    "version": "1.2.0",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.0/OWPick_v1.2.0.zip",
-    "notas": " Versão maior de reengenharia do OWPick. Reúne todo o trabalho das fases 0 a 8: higiene de código, rede de testes, refatoração arquitetural, performance, robustez de matching/OCR, dados versionáveis, settings/UX e build/release. ### Arquitetura e qualidade de código - **Reorganização em `src/owpick/` com três camadas** — `core/` (domínio puro, zero I/O), `infra/` (captura, matchin"
+    "version": "1.2.1",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.1/OWPick_v1.2.1.zip",
+    "notas": " ### Presets de pesos vinculados ao perfil - Nova **opção 8 do menu**: escolhe o preset de pesos do modelo (Equilibrado/Counter-first/Meta-first/Conforto+) direto do console, sem editar `settings.json` na mão. - A escolha fica **vinculada ao perfil ativo** (opção 7): trocar de perfil troca também o preset, e o preset volta ao valor salvo do perfil ao reativá-lo. Sem perfil ativo, a"
 }
