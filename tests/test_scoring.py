@@ -1,16 +1,9 @@
 """Testes do modelo de scoring (owpick.core.scoring) com dados sintéticos."""
 
-import math
-
 import pandas as pd
 import pytest
 
 from owpick.core import scoring
-
-
-def softplus(x: float) -> float:
-    return math.log1p(math.exp(x))
-
 
 # ---------------------------------------------------------------------------
 # load_meta_strength — DataFrame sintético com valores calculados à mão
@@ -58,8 +51,33 @@ class TestLoadMetaStrength:
 
 
 # ---------------------------------------------------------------------------
-# compute_threat_weights — softplus(1 + λ·ΣC(e,a) + μ·m(e,k))
+# threat_multiplier / compute_threat_weights — w = CAP ** tanh(raw / SCALE)
 # ---------------------------------------------------------------------------
+
+
+class TestThreatMultiplier:
+    def test_neutro_negativo_positivo(self):
+        # raw = 0 -> 1 exato; raw < 0 -> < 1; raw > 0 -> > 1.
+        assert scoring.threat_multiplier(0.0) == pytest.approx(1.0)
+        assert scoring.threat_multiplier(-1.0) < 1.0
+        assert scoring.threat_multiplier(1.0) > 1.0
+
+    def test_limites_e_log_simetria(self):
+        cap = scoring.THREAT_CAP
+        # No limite tanh -> ±1 o multiplicador satura EXATAMENTE nas assíntotas
+        # 1/CAP e CAP (nunca as ultrapassa) — em raw finito fica no interior.
+        assert scoring.threat_multiplier(-1000.0) == pytest.approx(1.0 / cap)
+        assert scoring.threat_multiplier(1000.0) == pytest.approx(cap)
+        assert scoring.threat_multiplier(-1000.0) < 1.0 < scoring.threat_multiplier(1000.0)
+        # Log-simetria: w(-raw) = 1 / w(raw).
+        assert scoring.threat_multiplier(-2.3) == pytest.approx(
+            1.0 / scoring.threat_multiplier(2.3)
+        )
+
+    def test_monotonica(self):
+        vals = [scoring.threat_multiplier(r) for r in (-6, -2, -0.5, 0, 0.5, 2, 6)]
+        assert vals == sorted(vals)
+        assert all(a < b for a, b in zip(vals, vals[1:], strict=False))
 
 
 class TestComputeThreatWeights:
@@ -69,19 +87,20 @@ class TestComputeThreatWeights:
         weights = scoring.compute_threat_weights(
             ["E1", "E2"], enemy_matrix, ["A1"], meta_strength=meta
         )
-        raw_e1 = 1.0 + scoring.LAMBDA * 2.0 + scoring.MU_THREAT * 1.0
-        assert weights["e1"] == pytest.approx(softplus(raw_e1))
-        assert weights["e2"] == pytest.approx(softplus(1.0))  # neutro
+        raw_e1 = scoring.LAMBDA * 2.0 + scoring.MU_THREAT * 1.0  # sem offset +1
+        assert weights["e1"] == pytest.approx(scoring.threat_multiplier(raw_e1))
+        assert weights["e2"] == pytest.approx(1.0)  # raw = 0 -> neutro
 
-    def test_softplus_sempre_positivo_e_monotonico(self):
+    def test_positivo_e_monotonico(self):
         enemy_matrix = {"fraco": {"a": -50.0}, "forte": {"a": 50.0}}
         w = scoring.compute_threat_weights(["fraco", "forte"], enemy_matrix, ["a"])
-        assert 0.0 < w["fraco"] < w["forte"]
+        # Limitado a (1/CAP, CAP) por construção e ordenado.
+        assert 1.0 / scoring.THREAT_CAP < w["fraco"] < 1.0 < w["forte"] < scoring.THREAT_CAP
 
     def test_nomes_normalizados(self):
         enemy_matrix = {"dva": {"soldier-76": 3.0}}
         w = scoring.compute_threat_weights(["D.Va"], enemy_matrix, ["Soldier: 76"])
-        assert w["dva"] == pytest.approx(softplus(1.0 + scoring.LAMBDA * 3.0))
+        assert w["dva"] == pytest.approx(scoring.threat_multiplier(scoring.LAMBDA * 3.0))
 
 
 # ---------------------------------------------------------------------------

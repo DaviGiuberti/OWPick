@@ -1,4 +1,4 @@
-"""scoring.py — Modelo de scoring e ranking (OWPick v1.2.0). Puro, zero I/O.
+"""scoring.py — Modelo de scoring e ranking (OWPick v1.2.2). Puro, zero I/O.
 
 Score final de cada herói candidato h:
 
@@ -12,8 +12,9 @@ onde:
                          z_role = (wr(h) − wr̄_role) / σ_role
                          conf   = pr / (pr + k0_role),  k0_role = pickrate neutra da role
     T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
-    w_e            = softplus(1 + λ · Σ_a C(e,a) + μ · m(e,k)) (peso de ameaça do inimigo e,
-                     inclui desempenho do inimigo no mapa atual; softplus > 0 sempre)
+    raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)               (sinal bruto de ameaça; 0 = neutro)
+    w_e            = CAP ** tanh(raw_e / SCALE)                (multiplicador de ameaça — ver
+                     threat_multiplier: w_e(0)=1, w_e ∈ (1/CAP, CAP), log-simétrico)
     T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
 
 As estatísticas (DataFrame de winrate/pickrate) e as matrizes já normalizadas
@@ -22,6 +23,7 @@ chegam POR PARÂMETRO — a leitura de xlsx/csv é responsabilidade da infra.
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, fields, replace
 
 import numpy as np
@@ -35,28 +37,45 @@ from owpick.log import get_logger
 log = get_logger("scoring")
 
 
-def _softplus(x: float) -> float:
-    """Softplus numericamente estável: ln(1 + e^x) == logaddexp(0, x).
-
-    Usa np.logaddexp para evitar overflow de e^x quando x é grande. O resultado
-    é sempre > 0 e monotônico em x, então preserva a ordenação das ameaças sem
-    precisar de um piso (W_MIN deixou de ser o mecanismo de não-negatividade).
-    """
-    return float(np.logaddexp(0.0, x))
-
-
 # ---------------------------------------------------------------------------
-# Parâmetros do modelo (ver §3.5 da especificação)
+# Parâmetros do modelo
 # ---------------------------------------------------------------------------
 EPS = 0.001  # piso numérico da pickrate (NÃO é proxy de amostra)
 MMAX = 3.0  # limite (clamp) do z-score em desvios-padrão
 ALPHA = 2.25  # escala FINAL do MetaStrength (multiplica conf·z já clampado)
 LAMBDA = 0.25  # intensidade do threat weighting (componente counter)
 MU_THREAT = 0.3  # intensidade do threat weighting (componente MetaStrength do inimigo no mapa)
-BETA_META = 1.0  # peso do MetaStrength no score
+BETA_META = 2.0  # peso do MetaStrength no score (preset "equilibrado"; era 1.0)
 BETA_CTR = 1.0  # peso do counter term no score
 BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
-NEUTRAL_WEIGHT = _softplus(1.0)  # ≈ 1.313 — peso de ameaça neutro (raw = 1)
+
+
+# ---------------------------------------------------------------------------
+# Enemy threat — transforma o sinal bruto (raw) em multiplicador de ameaça
+# ---------------------------------------------------------------------------
+# w(raw) = CAP ** tanh(raw / SCALE) = exp(ln(CAP) · tanh(raw / SCALE))
+#   • raw = λ·Σ C(e,a) + μ·m(e,k)      →  raw = 0  ⇔  ameaça neutra
+#   • w(0) = 1 exatamente; raw < 0 ⇒ w < 1; raw > 0 ⇒ w > 1
+#   • tanh ∈ (−1, 1)  ⇒  w ∈ (1/CAP, CAP): nunca ultrapassa CAP nem cai abaixo
+#     de 1/CAP, por construção (não explode, não fica não-positivo)
+#   • log-simétrica: w(−raw) = 1/w(raw) — down/upweight de mesma magnitude são
+#     recíprocos, o comportamento natural de um multiplicador
+THREAT_CAP = 2.5  # teto assintótico do multiplicador (piso = 1/2.5 = 0.4)
+THREAT_SCALE = 2.5  # escala do raw ("temperatura"): controla a diferenciação
+
+
+def threat_multiplier(raw: float, cap: float = THREAT_CAP, scale: float = THREAT_SCALE) -> float:
+    """Multiplicador de ameaça a partir do sinal bruto `raw` (0 = neutro).
+
+    w(raw) = cap ** tanh(raw / scale). Contínua, suave (C∞) e estritamente
+    monotônica em `raw` (preserva a ordenação das ameaças), com w(0) = 1 e
+    w ∈ (1/cap, cap) por construção — o multiplicador jamais explode nem fica
+    não-positivo, dispensando o antigo piso `W_MIN`.
+    """
+    return math.exp(math.log(cap) * math.tanh(raw / scale))
+
+
+NEUTRAL_WEIGHT = threat_multiplier(0.0)  # 1.0 — ameaça neutra (raw = 0)
 
 
 # ---------------------------------------------------------------------------
@@ -79,16 +98,17 @@ DEFAULT_WEIGHTS = ModelWeights()
 # Presets nomeados (settings.json: weights_preset). "equilibrado" = o modelo
 # atual; os demais reponderam os termos mantendo a mesma estrutura da fórmula.
 PRESETS: dict[str, ModelWeights] = {
-    # O modelo padrão, sem alterações.
+    # O modelo padrão (β_meta=2.0). Base dos demais presets.
     "equilibrado": DEFAULT_WEIGHTS,
-    # Prioriza counterar o time inimigo: counter term e threat weighting mais
-    # fortes; meta e sinergia recuam.
-    "counter-first": ModelWeights(lam=0.40, beta_meta=0.75, beta_ctr=1.50, beta_syn=0.50),
-    # Prioriza o desempenho estatístico no mapa atual (meta).
-    "meta-first": ModelWeights(beta_meta=1.50, beta_ctr=0.75, beta_syn=0.50),
-    # "Conforto+": valoriza jogar o que combina com o SEU time (sinergia),
-    # aceitando recomendações menos agressivas contra o time inimigo.
-    "conforto+": ModelWeights(beta_meta=0.85, beta_ctr=0.85, beta_syn=1.00),
+    # Prioriza counterar o time inimigo: threat weighting (λ) e counter term
+    # mais fortes; meta recua (β_meta=1.0) e sinergia também.
+    "counter-first": ModelWeights(lam=0.40, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50),
+    # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=4.0, com
+    # counter e sinergia nos valores do "equilibrado".
+    "meta-first": ModelWeights(beta_meta=4.0, beta_ctr=1.0, beta_syn=0.65),
+    # "Conforto+": "equilibrado" com mais sinergia (β_syn=1.25) — valoriza jogar
+    # o que combina com o SEU time.
+    "conforto+": ModelWeights(beta_syn=1.25),
 }
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
@@ -201,12 +221,13 @@ def compute_threat_weights(
 ) -> dict[str, float]:
     """
     Para cada inimigo e:
-        raw = 1 + λ · Σ_a C(e,a) + μ · m(e,k)
-        w_e = softplus(raw) = ln(1 + e^raw)
+        raw = λ · Σ_a C(e,a) + μ · m(e,k)       (sinal bruto; 0 = ameaça neutra)
+        w_e = threat_multiplier(raw) = CAP ** tanh(raw / SCALE)
 
-    O softplus é sempre > 0 e monotônico em `raw`, então preserva a ordenação
-    das ameaças (mais counter/mais meta -> maior w_e) sem colapsar ameaças
-    baixas num piso. Retorna {nome_normalizado_do_inimigo: w_e}.
+    `raw = 0` (inimigo que não countera ninguém e é neutro no mapa) dá w_e = 1
+    exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1. `threat_multiplier` é
+    contínuo, suave e monotônico em `raw` (preserva a ordenação das ameaças) e
+    limitado a (1/CAP, CAP). Retorna {nome_normalizado_do_inimigo: w_e}.
     """
     allies_norm = [normalize_hero_name(a) for a in allies if a]
     meta = meta_strength or {}
@@ -218,8 +239,8 @@ def compute_threat_weights(
         row = enemy_matrix.get(en, {})
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
-        raw = 1.0 + lam * counter_sum + mu * map_bonus
-        weights[en] = _softplus(raw)
+        raw = lam * counter_sum + mu * map_bonus
+        weights[en] = threat_multiplier(raw)
     return weights
 
 

@@ -1,5 +1,5 @@
 {
-    "version": "1.2.1",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.1/OWPick_v1.2.1.zip",
-    "notas": " ### Presets de pesos vinculados ao perfil - Nova **opção 8 do menu**: escolhe o preset de pesos do modelo (Equilibrado/Counter-first/Meta-first/Conforto+) direto do console, sem editar `settings.json` na mão. - A escolha fica **vinculada ao perfil ativo** (opção 7): trocar de perfil troca também o preset, e o preset volta ao valor salvo do perfil ao reativá-lo. Sem perfil ativo, a"
+    "version": "1.2.2",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.2/OWPick_v1.2.2.zip",
+    "notas": " ### Nova curva de Enemy Threat + presets - O multiplicador de ameaca agora usa w(raw)=CAP^tanh(raw/SCALE): raw=0 da peso exatamente 1 (antes ~1.3), raw negativo abaixa (<1) e raw positivo aumenta (>1), sempre limitado entre 0.40 e 2.50 - e so chega perto dessas pontas em casos extremos. Curva suave, monotonica e sem explodir. - Presets atualizados: Equilibrado beta_meta=2, Counter-first beta_meta=1, Meta-first beta_meta=4 (beta_ctr=1, beta_syn=0.65), Conforto+ beta_syn=1.25."
 }

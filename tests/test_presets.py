@@ -52,32 +52,35 @@ def test_preset_equilibrado_e_o_modelo_atual():
     # Sem weights explícito, calculate_hero_score usa os mesmos defaults.
     baseline = _totals(ModelWeights())
     assert baseline == pytest.approx(
-        {"sniper": 2.0, "anchor": 2.0, "buddy": 1.3}
-    )  # snapshot do modelo atual
+        {"sniper": 2.0, "anchor": 4.0, "buddy": 1.3}
+    )  # snapshot do modelo atual (β_meta=2.0)
 
 
 def test_snapshot_counter_first():
+    # β_meta=1.0, β_ctr=1.50, β_syn=0.50 -> counter domina.
     totals = _totals(resolve_weights("counter-first"))
-    assert totals == pytest.approx({"sniper": 3.0, "anchor": 1.5, "buddy": 1.0})
+    assert totals == pytest.approx({"sniper": 3.0, "anchor": 2.0, "buddy": 1.0})
     assert max(totals, key=lambda h: totals[h]) == "sniper"
 
 
 def test_snapshot_meta_first():
+    # β_meta=4.0 -> o herói forte no mapa dispara.
     totals = _totals(resolve_weights("meta-first"))
-    assert totals == pytest.approx({"sniper": 1.5, "anchor": 3.0, "buddy": 1.0})
+    assert totals == pytest.approx({"sniper": 2.0, "anchor": 8.0, "buddy": 1.3})
     assert max(totals, key=lambda h: totals[h]) == "anchor"
 
 
 def test_snapshot_conforto_mais():
+    # "equilibrado" com β_syn=1.25: a sinergia do "buddy" sobe (1.3 -> 2.5).
     totals = _totals(resolve_weights("conforto+"))
-    assert totals == pytest.approx({"sniper": 1.7, "anchor": 1.7, "buddy": 2.0})
-    assert max(totals, key=lambda h: totals[h]) == "buddy"
+    assert totals == pytest.approx({"sniper": 2.0, "anchor": 4.0, "buddy": 2.5})
+    assert totals["buddy"] > _totals(resolve_weights("equilibrado"))["buddy"]
 
 
 def test_custom_weights_sobrescreve_preset():
     w = resolve_weights("equilibrado", {"beta_syn": 2.0, "campo_invalido": 9.9})
     assert w.beta_syn == 2.0
-    assert w.beta_meta == 1.0  # demais campos do preset preservados
+    assert w.beta_meta == 2.0  # demais campos do preset preservados
 
 
 def test_preset_desconhecido_cai_para_equilibrado():

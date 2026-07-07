@@ -4,6 +4,52 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.2] — 2026-07-07
+
+### Nova curva do multiplicador de Enemy Threat
+
+- **Reformulação completa de como o sinal bruto de ameaça (`raw`) vira peso.**
+  O peso de cada inimigo passa a ser
+  `w(raw) = CAP ** tanh(raw / SCALE) = exp(ln(CAP) · tanh(raw / SCALE))`, com
+  `raw = λ · Σ_a C(e,a) + μ · m(e,k)` (o **offset `+1` foi removido**: agora
+  `raw = 0` é literalmente a ameaça neutra).
+- **Novo comportamento da curva:**
+  - `raw = 0` ⇒ `w = 1` **exatamente** (antes `raw = 0` dava ≈ 1.3 — o
+    comportamento que motivou a mudança).
+  - `raw < 0` ⇒ `w < 1` (inimigo pouco ameaçador é atenuado);
+    `raw > 0` ⇒ `w > 1` (inimigo perigoso é amplificado).
+  - **Contínua, suave (C∞) e estritamente monotônica** — preserva a ordenação
+    das ameaças.
+  - **Limitada a `(1/CAP, CAP) = (0.40, 2.50)` por construção**: `tanh ∈ (−1, 1)`,
+    então o peso **nunca explode** nem fica não-positivo. Ficar abaixo de 0.5 ou
+    acima de 2.5 exige `raw` extremo (fora da faixa observada nos dados reais),
+    representando casos "extremamente extremos".
+  - **Log-simétrica:** `w(−raw) = 1 / w(raw)` — um down/upweight de mesma
+    magnitude são recíprocos, o comportamento natural de um multiplicador.
+- **Escolha técnica** (`exp∘tanh` em vez de softplus/log/exponencial pura):
+  o softplus não tinha teto (podia explodir) e dava ≈ 1.3 em `raw = 0`; a
+  exponencial pura explode; o `exp(ln(CAP)·tanh(raw/SCALE))` é a única forma
+  simples que junta **f(0)=1 exato**, **limites rígidos** e **simetria
+  logarítmica** num só passo suave.
+- **Parâmetros** calibrados sobre a distribuição real de `raw`
+  (Monte Carlo com a matriz de counters + MetaStrength por mapa: `std ≈ 0.64`,
+  p1 ≈ −1.44, p99 ≈ +1.50): `THREAT_CAP = 2.5`, `THREAT_SCALE = 2.5`. Nessa
+  faixa o peso quase nunca sai de `[0.5, 2.5]`, com boa diferenciação
+  (`raw = ±1` ⇒ ≈ 1.42 / 0.71).
+- `NEUTRAL_WEIGHT` passou de `softplus(1) ≈ 1.313` para `1.0` (o peso de uma
+  ameaça neutra). `enemy_mult.py` (diagnóstico) e os testes foram sincronizados.
+
+### Presets de pesos reajustados
+
+- **Equilibrado:** `β_meta = 2` (era 1). Demais termos inalterados
+  (`α = 2.25`, `λ = 0.25`, `μ = 0.3`, `β_ctr = 1.0`, `β_syn = 0.65`).
+- **Counter-first:** `β_meta = 1`, mantendo o counter/threat reforçados
+  (`λ = 0.40`, `β_ctr = 1.50`, `β_syn = 0.50`).
+- **Meta-first:** `β_meta = 4`, `β_ctr = 1`, `β_syn = 0.65`.
+- **Conforto+:** parte do Equilibrado e só sobe a sinergia: `β_syn = 1.25`.
+
+---
+
 ## [v1.2.1] — 2026-07-06
 
 ### Presets de pesos vinculados ao perfil

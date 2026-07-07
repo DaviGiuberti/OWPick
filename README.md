@@ -204,7 +204,7 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 A versão pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/OWPick/releases).
 
-**Versão atual**: `1.2.0`
+**Versão atual**: `1.2.2`
 
 Para instalar:
 1. Baixe o arquivo **`OWPick Installer.exe`**
@@ -213,7 +213,7 @@ Para instalar:
 
 O programa é instalado em `%LOCALAPPDATA%\Programs\OWPick`. Python, dependências e Tesseract OCR já estão embutidos — nenhuma instalação adicional é necessária. A verificação de atualização roda em segundo plano no boot (sem travar a inicialização); havendo versão nova, o programa avisa e aplica a atualização de forma segura, com rollback automático caso a cópia falhe (você nunca fica sem app).
 
-> O arquivo `OWPick_v1.2.0.zip` também presente na Release é o pacote consumido pelo sistema de auto-atualização — usuários não precisam baixá-lo manualmente.
+> O arquivo `OWPick_v1.2.2.zip` também presente na Release é o pacote consumido pelo sistema de auto-atualização — usuários não precisam baixá-lo manualmente.
 
 ---
 

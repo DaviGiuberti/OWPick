@@ -17,7 +17,7 @@ _REPO_ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(_REPO_ROOT / "src"))
 
 from owpick.core.heroes import normalize_hero_name  # noqa: E402
-from owpick.core.scoring import _softplus  # noqa: E402
+from owpick.core.scoring import threat_multiplier  # noqa: E402
 from owpick.infra import datasource, storage  # noqa: E402
 
 LAMBDA = 0.25  # intensidade do threat weighting (espelha owpick.core.scoring)
@@ -30,13 +30,14 @@ def calculate_threat_weight(
     lam: float = LAMBDA,
 ) -> float:
     """
-    w_e = softplus(1 + λ · Σ_a C(hero, a)), a ∈ opponents_of_enemy (aliados do
-    jogador). C(hero, a) = quanto o herói inimigo countera o aliado a.
+    w_e = threat_multiplier(λ · Σ_a C(hero, a)), a ∈ opponents_of_enemy (aliados
+    do jogador). C(hero, a) = quanto o herói inimigo countera o aliado a. Sem o
+    termo de mapa (μ·m) — este utilitário inspeciona só a parte de counter.
     """
     hn = normalize_hero_name(hero)
     row = enemy_matrix.get(hn, {})
     threat_sum = sum(row.get(normalize_hero_name(a), 0.0) for a in opponents_of_enemy)
-    return _softplus(1.0 + lam * threat_sum)
+    return threat_multiplier(lam * threat_sum)
 
 
 def executar(hero: str, enemy_matrix: dict[str, dict[str, float]] | None = None) -> float:

@@ -300,16 +300,44 @@ S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
 m_scaled(h, k) = α · clamp( conf · (wr(h) - wr̄_role(k)) / σ_role(k), -Mmax, +Mmax )  [MetaStrength]
 conf           = pr / (pr + k0_role),   k0_role = pickrate neutra da role            [confiança da pickrate]
 T_ctr(h)       = Σ_e w_e · C(h, e)                                                    [counter com threat weighting]
-raw_e          = 1 + λ · Σ_a C(e,a) + μ · m(e,k)
-w_e            = softplus(raw_e) = ln(1 + e^{raw_e})                                  [peso de ameaça do inimigo e]
+raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)                                          [sinal bruto de ameaça; 0 = neutro]
+w_e            = CAP ** tanh(raw_e / SCALE) = exp( ln(CAP) · tanh(raw_e / SCALE) )    [multiplicador de ameaça ∈ (1/CAP, CAP)]
 T_syn(h)       = Σ_a Y(h, a) · β_syn                                                  [sinergia; diagonal h==a ignorada]
 ```
 
 O MetaStrength é o z-score da winrate **bruta por role** (DPS/TANK/SUP), atenuado
 pela confiança da pickrate (`conf ∈ [0, 1]`), **sem shrinkage**. Cada herói é
-comparado apenas com heróis da mesma função. O peso de ameaça usa `softplus`,
-que é sempre `> 0` e monotônico em `raw_e`, preservando a ordenação das ameaças
-baixas em vez de achatá-las num piso.
+comparado apenas com heróis da mesma função.
+
+#### Multiplicador de Enemy Threat — `w_e = CAP ** tanh(raw_e / SCALE)`
+
+O peso de ameaça de cada inimigo transforma o **sinal bruto**
+`raw_e = λ · Σ_a C(e,a) + μ · m(e,k)` (0 = inimigo que não countera ninguém e é
+neutro no mapa) em um multiplicador aplicado ao counter term. A transformação é
+`w(raw) = CAP ** tanh(raw / SCALE) = exp( ln(CAP) · tanh(raw / SCALE) )`, com as
+propriedades:
+
+- `w(0) = 1` **exatamente** (`tanh(0) = 0`); `raw < 0 ⇒ w < 1`; `raw > 0 ⇒ w > 1`.
+- **Contínua, suave (C∞) e estritamente monotônica** em `raw` — preserva a
+  ordenação das ameaças.
+- **Limitada a `(1/CAP, CAP) = (0.40, 2.50)` por construção** (`tanh ∈ (−1, 1)`):
+  o peso **nunca explode** nem fica não-positivo. Chegar abaixo de 0.5 ou acima de
+  2.5 exige `raw` extremo (fora da faixa observada nos dados reais) — casos
+  "extremamente extremos".
+- **Log-simétrica:** `w(−raw) = 1 / w(raw)` — down/upweight de mesma magnitude são
+  recíprocos, o comportamento natural de um multiplicador.
+
+Os parâmetros `CAP = 2.5` e `SCALE = 2.5` foram calibrados sobre a distribuição
+real de `raw` (Monte Carlo com a matriz de counters + MetaStrength por mapa:
+`std ≈ 0.64`, p1 ≈ −1.44, p99 ≈ +1.50). Comportamento da curva:
+
+| `raw` | −6 | −4 | −2 | −1 | −0.5 | 0 | 0.5 | 1 | 2 | 4 | 6 |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| `w` | 0.41 | 0.43 | 0.54 | 0.71 | 0.84 | **1.00** | 1.20 | 1.42 | 1.84 | 2.33 | 2.46 |
+
+> Substitui o `softplus(1 + …)` das versões anteriores, que dava `w ≈ 1.313` em
+> `raw = 0` (sem offset novo) e **não tinha teto** (podia explodir). O antigo piso
+> `W_min` deixou de existir: os limites agora são estruturais.
 
 **Parâmetros**:
 
@@ -321,15 +349,24 @@ baixas em vez de achatá-las num piso.
 | `k0_role` | pickrate neutra | Pseudo-contagem da confiança: `conf = pr/(pr+k0_role)` |
 | `λ` | 0.25 | Intensidade do threat weighting (componente counter) |
 | `μ` | 0.3 | Intensidade do threat weighting (componente mapa) |
-| `β_meta` | 1.0 | Peso do MetaStrength no score total |
+| `CAP` (`THREAT_CAP`) | 2.5 | Teto assintótico do multiplicador de ameaça (piso = `1/CAP` = 0.4) |
+| `SCALE` (`THREAT_SCALE`) | 2.5 | Escala do `raw` ("temperatura") — controla a diferenciação das ameaças |
+| `β_meta` | 2.0 | Peso do MetaStrength no score total (preset "equilibrado") |
 | `β_ctr` | 1.0 | Peso do counter term no score total |
 | `β_syn` | 0.65 | Peso da sinergia no score total |
-| `W_min` | 0.35 | (inerte) compat de assinatura; `softplus` garante `w_e > 0` |
 
 Os valores acima são o preset **"equilibrado"** (default). `core/scoring.py`
-expõe `ModelWeights` + `PRESETS` ("counter-first", "meta-first", "conforto+");
-o preset ativo vem de `settings.json` (`weights_preset`), com overrides
-individuais via `custom_weights` (modo avançado).
+expõe `ModelWeights` + `PRESETS`; o preset ativo vem de `settings.json`
+(`weights_preset`), com overrides individuais via `custom_weights` (modo
+avançado). Os quatro presets diferem apenas nos pesos abaixo (os demais
+parâmetros — `α`, `μ`, `CAP`, `SCALE` — são comuns):
+
+| Preset | `β_meta` | `λ` | `β_ctr` | `β_syn` | Prioriza |
+|---|---|---|---|---|---|
+| **Equilibrado** (padrão) | 2.0 | 0.25 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
+| **Counter-first** | 1.0 | 0.40 | 1.50 | 0.50 | counterar o time inimigo |
+| **Meta-first** | 4.0 | 0.25 | 1.0 | 0.65 | desempenho estatístico no mapa atual |
+| **Conforto+** | 2.0 | 0.25 | 1.0 | 1.25 | sinergia com o seu próprio time |
 
 Heróis já presentes no time aliado **e heróis banidos no competitivo** são
 **excluídos do ranking** (regra rígida — mesmo tratamento de indisponibilidade).
@@ -562,10 +599,11 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 
 | Item | Descrição |
 |---|---|
-| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` |
+| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_CAP`, `THREAT_SCALE`, `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` (= 1.0) |
+| `threat_multiplier(raw, cap, scale)` | Multiplicador de ameaça `CAP ** tanh(raw/SCALE)`; `w(0)=1`, `w ∈ (1/CAP, CAP)`, log-simétrico |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
-| `compute_threat_weights(...)` | `w_e = softplus(1 + λ·Σ C(e,a) + μ·m(e,k))` |
+| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k))` (sinal bruto sem offset; 0 = neutro) |
 | `calculate_hero_score(...)` | Componentes meta/ctr/syn + **acumula contribuições por origem em `reasons`** |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 
