@@ -1,5 +1,5 @@
 {
     "version": "1.2.2",
     "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.2/OWPick_v1.2.2.zip",
-    "notas": " ### Nova curva de Enemy Threat + presets - O multiplicador de ameaca agora usa w(raw)=CAP^tanh(raw/SCALE): raw=0 da peso exatamente 1 (antes ~1.3), raw negativo abaixa (<1) e raw positivo aumenta (>1), sempre limitado entre 0.40 e 2.50 - e so chega perto dessas pontas em casos extremos. Curva suave, monotonica e sem explodir. - Presets atualizados: Equilibrado beta_meta=2, Counter-first beta_meta=1, Meta-first beta_meta=4 (beta_ctr=1, beta_syn=0.65), Conforto+ beta_syn=1.25."
+    "notas": " ### Nova curva do multiplicador de Enemy Threat - **Reformulação completa de como o sinal bruto de ameaça (`raw`) vira peso.** O peso de cada inimigo passa a ser `w(raw) = CAP ** tanh(raw / SCALE) = exp(ln(CAP) · tanh(raw / SCALE))`, com `raw = λ · Σ_a C(e,a) + μ · m(e,k)` (o **offset `+1` foi removido**: agora `raw = 0` é literalmente a ameaça neutra). - **Novo comportamento "
 }
