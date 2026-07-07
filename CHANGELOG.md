@@ -4,6 +4,39 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.3] — 2026-07-07
+
+### Enemy Threat: curva re-ancorada em dois pontos escolhidos
+
+- A **forma** da curva do multiplicador de ameaça introduzida na v1.2.2
+  (`w(raw) = exp( A · tanh(raw / S) )`) **não muda**. O que muda é **como `A` e
+  `S` são obtidos**: em vez de calibrados por percentil sobre a distribuição
+  real de `raw` (`THREAT_CAP = 2.5`, `THREAT_SCALE = 2.5` fixados
+  diretamente), a curva agora é **ancorada em dois pontos exatos** escolhidos
+  — `w(−6) = 0.5` e `w(8) = 2.5` (`THREAT_ANCHOR_LOW`/`THREAT_ANCHOR_HIGH` em
+  `core/scoring.py`).
+- Como não há forma fechada para `A`/`S` a partir de dois pontos arbitrários,
+  eles são **derivados por bisseção** no import do módulo
+  (`_fit_log_symmetric`), resultando em `A ≈ 3.81` (`THREAT_LOG_CAP`) e
+  `S ≈ 32.6` (`THREAT_SCALE`).
+- `w(0) = 1` continua exato; a curva continua contínua, suave (C∞),
+  estritamente monotônica e log-simétrica (`w(−raw) = 1 / w(raw)`) — nenhuma
+  dessas propriedades muda, só os parâmetros numéricos.
+- **Efeito prático:** como o `raw` real observado fica em `~[−2.85, +2.71]`
+  (bem aquém da âncora `raw = 8`), a curva ficou **mais suave na faixa de
+  operação**: o peso de uma ameaça típica passa a ficar em `~[0.72, 1.37]`
+  (era mais agressiva na calibração da v1.2.2, com `raw = ±1` chegando a
+  `1.42`/`0.71`; agora `raw = ±1` dá `1.12`/`0.89`). `0.5` e `2.5` deixam de
+  ser alcançáveis por ameaças comuns e passam a marcar só os extremos
+  ancorados (`raw = −6` e `raw = 8`).
+- Curva atualizada:
+  `raw −8/−6/−4/−2/−1/0/1/2/4/6/8 → 0.40/0.50/0.63/0.79/0.89/1.00/1.12/1.26/1.59/2.00/2.50`.
+- `threat_multiplier` mantém a mesma assinatura; `tools/enemy_mult.py` e os
+  testes (`tests/test_scoring.py`) continuam consumindo-a sem alteração —
+  só os parâmetros internos (`A`/`S`) mudaram.
+
+---
+
 ## [v1.2.2] — 2026-07-07
 
 ### Nova curva do multiplicador de Enemy Threat

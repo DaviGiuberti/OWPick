@@ -301,7 +301,7 @@ m_scaled(h, k) = α · clamp( conf · (wr(h) - wr̄_role(k)) / σ_role(k), -Mmax
 conf           = pr / (pr + k0_role),   k0_role = pickrate neutra da role            [confiança da pickrate]
 T_ctr(h)       = Σ_e w_e · C(h, e)                                                    [counter com threat weighting]
 raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)                                          [sinal bruto de ameaça; 0 = neutro]
-w_e            = CAP ** tanh(raw_e / SCALE) = exp( ln(CAP) · tanh(raw_e / SCALE) )    [multiplicador de ameaça ∈ (1/CAP, CAP)]
+w_e            = exp( A · tanh(raw_e / S) )                                           [multiplicador de ameaça; log-simétrico]
 T_syn(h)       = Σ_a Y(h, a) · β_syn                                                  [sinergia; diagonal h==a ignorada]
 ```
 
@@ -309,35 +309,43 @@ O MetaStrength é o z-score da winrate **bruta por role** (DPS/TANK/SUP), atenua
 pela confiança da pickrate (`conf ∈ [0, 1]`), **sem shrinkage**. Cada herói é
 comparado apenas com heróis da mesma função.
 
-#### Multiplicador de Enemy Threat — `w_e = CAP ** tanh(raw_e / SCALE)`
+#### Multiplicador de Enemy Threat — `w_e = exp(A · tanh(raw_e / S))`
 
 O peso de ameaça de cada inimigo transforma o **sinal bruto**
 `raw_e = λ · Σ_a C(e,a) + μ · m(e,k)` (0 = inimigo que não countera ninguém e é
 neutro no mapa) em um multiplicador aplicado ao counter term. A transformação é
-`w(raw) = CAP ** tanh(raw / SCALE) = exp( ln(CAP) · tanh(raw / SCALE) )`, com as
-propriedades:
+`w(raw) = exp( A · tanh(raw / S) )`, com as propriedades:
 
 - `w(0) = 1` **exatamente** (`tanh(0) = 0`); `raw < 0 ⇒ w < 1`; `raw > 0 ⇒ w > 1`.
 - **Contínua, suave (C∞) e estritamente monotônica** em `raw` — preserva a
   ordenação das ameaças.
-- **Limitada a `(1/CAP, CAP) = (0.40, 2.50)` por construção** (`tanh ∈ (−1, 1)`):
-  o peso **nunca explode** nem fica não-positivo. Chegar abaixo de 0.5 ou acima de
-  2.5 exige `raw` extremo (fora da faixa observada nos dados reais) — casos
-  "extremamente extremos".
 - **Log-simétrica:** `w(−raw) = 1 / w(raw)` — down/upweight de mesma magnitude são
   recíprocos, o comportamento natural de um multiplicador.
+- **Limitada** por `tanh ∈ (−1, 1)`: `w ∈ (e^{−A}, e^{+A})`, então **nunca fica
+  não-positivo nem cresce sem limite**.
 
-Os parâmetros `CAP = 2.5` e `SCALE = 2.5` foram calibrados sobre a distribuição
-real de `raw` (Monte Carlo com a matriz de counters + MetaStrength por mapa:
-`std ≈ 0.64`, p1 ≈ −1.44, p99 ≈ +1.50). Comportamento da curva:
+A curva é **ancorada em dois pontos escolhidos** (fonte única de verdade, em
+`core/scoring.py`): passa **exatamente** por `w(−6) = 0.5` e `w(8) = 2.5`. Como
+não há forma fechada para `A` e `S`, eles são derivados desses dois pontos por
+bisseção no import (`_fit_log_symmetric`), resultando em `A ≈ 3.81` (⇒ teto
+assintótico `e^A ≈ 45`) e `S ≈ 32.6`. Comportamento da curva:
 
-| `raw` | −6 | −4 | −2 | −1 | −0.5 | 0 | 0.5 | 1 | 2 | 4 | 6 |
+| `raw` | −8 | −6 | −4 | −2 | −1 | 0 | 1 | 2 | 4 | 6 | 8 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `w` | 0.41 | 0.43 | 0.54 | 0.71 | 0.84 | **1.00** | 1.20 | 1.42 | 1.84 | 2.33 | 2.46 |
+| `w` | 0.40 | **0.50** | 0.63 | 0.79 | 0.89 | **1.00** | 1.12 | 1.26 | 1.59 | 2.00 | **2.50** |
+
+Como o `raw` real fica em `~[−2.85, +2.71]` (Monte Carlo com a matriz de counters
++ MetaStrength por mapa: `std ≈ 0.64`, p1 ≈ −1.44, p99 ≈ +1.50), na **faixa de
+operação** o peso fica em `~[0.72, 1.37]` — `0.5` e `2.5` só aparecem em `raw`
+extremo (`−6`/`+8`), representando casos "extremamente extremos".
 
 > Substitui o `softplus(1 + …)` das versões anteriores, que dava `w ≈ 1.313` em
-> `raw = 0` (sem offset novo) e **não tinha teto** (podia explodir). O antigo piso
-> `W_min` deixou de existir: os limites agora são estruturais.
+> `raw = 0` e **não tinha teto** (podia explodir). O antigo piso `W_min` deixou de
+> existir: o intervalo é estrutural (`tanh` limitado). A forma `exp(A·tanh(raw/S))`
+> foi introduzida na v1.2.2 (calibrada por percentil); a **v1.2.3** trocou a
+> calibração pela ancoragem em dois pontos (`w(−6)=0.5`, `w(8)=2.5`), o que deixa
+> a curva mais suave na faixa de operação real e move o teto prático de 2.5 para
+> além dela.
 
 **Parâmetros**:
 
@@ -349,8 +357,10 @@ real de `raw` (Monte Carlo com a matriz de counters + MetaStrength por mapa:
 | `k0_role` | pickrate neutra | Pseudo-contagem da confiança: `conf = pr/(pr+k0_role)` |
 | `λ` | 0.25 | Intensidade do threat weighting (componente counter) |
 | `μ` | 0.3 | Intensidade do threat weighting (componente mapa) |
-| `CAP` (`THREAT_CAP`) | 2.5 | Teto assintótico do multiplicador de ameaça (piso = `1/CAP` = 0.4) |
-| `SCALE` (`THREAT_SCALE`) | 2.5 | Escala do `raw` ("temperatura") — controla a diferenciação das ameaças |
+| `THREAT_ANCHOR_LOW` | `(−6, 0.5)` | Ponto-âncora negativo do multiplicador de ameaça `(raw, w)` |
+| `THREAT_ANCHOR_HIGH` | `(8, 2.5)` | Ponto-âncora positivo do multiplicador de ameaça `(raw, w)` |
+| `A` (`THREAT_LOG_CAP`) | ≈ 3.81 | ln do teto assintótico — **derivado** dos dois âncoras |
+| `S` (`THREAT_SCALE`) | ≈ 32.6 | Escala do `raw` — **derivada** dos dois âncoras |
 | `β_meta` | 2.0 | Peso do MetaStrength no score total (preset "equilibrado") |
 | `β_ctr` | 1.0 | Peso do counter term no score total |
 | `β_syn` | 0.65 | Peso da sinergia no score total |
@@ -359,7 +369,7 @@ Os valores acima são o preset **"equilibrado"** (default). `core/scoring.py`
 expõe `ModelWeights` + `PRESETS`; o preset ativo vem de `settings.json`
 (`weights_preset`), com overrides individuais via `custom_weights` (modo
 avançado). Os quatro presets diferem apenas nos pesos abaixo (os demais
-parâmetros — `α`, `μ`, `CAP`, `SCALE` — são comuns):
+parâmetros — `α`, `μ`, âncoras de ameaça — são comuns):
 
 | Preset | `β_meta` | `λ` | `β_ctr` | `β_syn` | Prioriza |
 |---|---|---|---|---|---|
@@ -599,8 +609,9 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 
 | Item | Descrição |
 |---|---|
-| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_CAP`, `THREAT_SCALE`, `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` (= 1.0) |
-| `threat_multiplier(raw, cap, scale)` | Multiplicador de ameaça `CAP ** tanh(raw/SCALE)`; `w(0)=1`, `w ∈ (1/CAP, CAP)`, log-simétrico |
+| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` (= 1.0) |
+| `threat_multiplier(raw, log_cap, scale)` | Multiplicador de ameaça `exp(A·tanh(raw/S))`; `w(0)=1`, log-simétrico, ancorado em `w(−6)=0.5` e `w(8)=2.5` |
+| `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
 | `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k))` (sinal bruto sem offset; 0 = neutro) |

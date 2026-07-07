@@ -13,8 +13,9 @@ onde:
                          conf   = pr / (pr + k0_role),  k0_role = pickrate neutra da role
     T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
     raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)               (sinal bruto de ameaça; 0 = neutro)
-    w_e            = CAP ** tanh(raw_e / SCALE)                (multiplicador de ameaça — ver
-                     threat_multiplier: w_e(0)=1, w_e ∈ (1/CAP, CAP), log-simétrico)
+    w_e            = exp(A · tanh(raw_e / S))                  (multiplicador de ameaça — ver
+                     threat_multiplier: w_e(0)=1, log-simétrico, ancorado em
+                     w(−6)=0.5 e w(8)=2.5)
     T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
 
 As estatísticas (DataFrame de winrate/pickrate) e as matrizes já normalizadas
@@ -53,26 +54,60 @@ BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
 # ---------------------------------------------------------------------------
 # Enemy threat — transforma o sinal bruto (raw) em multiplicador de ameaça
 # ---------------------------------------------------------------------------
-# w(raw) = CAP ** tanh(raw / SCALE) = exp(ln(CAP) · tanh(raw / SCALE))
+# w(raw) = exp(A · tanh(raw / S))   (A = ln do teto assintótico; S = escala)
 #   • raw = λ·Σ C(e,a) + μ·m(e,k)      →  raw = 0  ⇔  ameaça neutra
 #   • w(0) = 1 exatamente; raw < 0 ⇒ w < 1; raw > 0 ⇒ w > 1
-#   • tanh ∈ (−1, 1)  ⇒  w ∈ (1/CAP, CAP): nunca ultrapassa CAP nem cai abaixo
-#     de 1/CAP, por construção (não explode, não fica não-positivo)
-#   • log-simétrica: w(−raw) = 1/w(raw) — down/upweight de mesma magnitude são
-#     recíprocos, o comportamento natural de um multiplicador
-THREAT_CAP = 2.5  # teto assintótico do multiplicador (piso = 1/2.5 = 0.4)
-THREAT_SCALE = 2.5  # escala do raw ("temperatura"): controla a diferenciação
+#   • contínua, suave (C∞), estritamente monotônica (preserva a ordenação) e
+#     log-simétrica: w(−raw) = 1/w(raw); tanh ∈ (−1, 1) ⇒ w ∈ (e^−A, e^A),
+#     então NUNCA explode nem fica não-positivo
+#   • A curva é ANCORADA em dois pontos escolhidos (fonte única): passa
+#     EXATAMENTE por (raw, w) = (−6, 0.5) e (8, 2.5). Como o raw real fica em
+#     ~[−2.85, 2.71] (Monte Carlo: std≈0.64), 0.5 e 2.5 só aparecem em raw
+#     extremo; na faixa de operação w fica em ~[0.72, 1.37].
+THREAT_ANCHOR_LOW = (-6.0, 0.5)  # (raw, w) do lado negativo
+THREAT_ANCHOR_HIGH = (8.0, 2.5)  # (raw, w) do lado positivo
 
 
-def threat_multiplier(raw: float, cap: float = THREAT_CAP, scale: float = THREAT_SCALE) -> float:
+def _fit_log_symmetric(
+    anchor_lo: tuple[float, float], anchor_hi: tuple[float, float]
+) -> tuple[float, float]:
+    """Ajusta (A, S) de w(raw) = exp(A·tanh(raw/S)) para passar por dois pontos.
+
+    Não há forma fechada: `S` sai por bisseção (a razão
+    tanh(r_hi/S)/tanh(r_lo/S) é monotônica em S) e `A` do anchor positivo.
+    `w(0) = 1` é automático (tanh(0) = 0). Roda uma vez, no import.
+    """
+    (r_lo, w_lo), (r_hi, w_hi) = anchor_lo, anchor_hi
+    y_lo, y_hi = math.log(w_lo), math.log(w_hi)  # y_lo < 0 < y_hi
+    target = y_hi / y_lo  # = tanh(r_hi/S) / tanh(r_lo/S) (< 0)
+    lo, hi = 1e-6, 1e6  # bisseção geométrica (S varia em ordens de grandeza)
+    for _ in range(200):
+        mid = math.sqrt(lo * hi)
+        # a razão decresce em S; se está acima do alvo, S é pequeno demais
+        if math.tanh(r_hi / mid) / math.tanh(r_lo / mid) > target:
+            lo = mid
+        else:
+            hi = mid
+    scale = math.sqrt(lo * hi)
+    log_cap = y_hi / math.tanh(r_hi / scale)
+    return log_cap, scale
+
+
+THREAT_LOG_CAP, THREAT_SCALE = _fit_log_symmetric(THREAT_ANCHOR_LOW, THREAT_ANCHOR_HIGH)
+
+
+def threat_multiplier(
+    raw: float, log_cap: float = THREAT_LOG_CAP, scale: float = THREAT_SCALE
+) -> float:
     """Multiplicador de ameaça a partir do sinal bruto `raw` (0 = neutro).
 
-    w(raw) = cap ** tanh(raw / scale). Contínua, suave (C∞) e estritamente
-    monotônica em `raw` (preserva a ordenação das ameaças), com w(0) = 1 e
-    w ∈ (1/cap, cap) por construção — o multiplicador jamais explode nem fica
-    não-positivo, dispensando o antigo piso `W_MIN`.
+    w(raw) = exp(log_cap · tanh(raw / scale)). Contínua, suave (C∞) e
+    estritamente monotônica em `raw` (preserva a ordenação das ameaças), com
+    w(0) = 1 e w ∈ (e^−log_cap, e^+log_cap) por construção — o multiplicador
+    jamais explode nem fica não-positivo (o antigo piso `W_MIN` some por design).
+    Ancorada em w(−6) = 0.5 e w(8) = 2.5 (ver THREAT_ANCHOR_*).
     """
-    return math.exp(math.log(cap) * math.tanh(raw / scale))
+    return math.exp(log_cap * math.tanh(raw / scale))
 
 
 NEUTRAL_WEIGHT = threat_multiplier(0.0)  # 1.0 — ameaça neutra (raw = 0)
@@ -222,12 +257,12 @@ def compute_threat_weights(
     """
     Para cada inimigo e:
         raw = λ · Σ_a C(e,a) + μ · m(e,k)       (sinal bruto; 0 = ameaça neutra)
-        w_e = threat_multiplier(raw) = CAP ** tanh(raw / SCALE)
+        w_e = threat_multiplier(raw) = exp(A · tanh(raw / S))
 
     `raw = 0` (inimigo que não countera ninguém e é neutro no mapa) dá w_e = 1
     exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1. `threat_multiplier` é
-    contínuo, suave e monotônico em `raw` (preserva a ordenação das ameaças) e
-    limitado a (1/CAP, CAP). Retorna {nome_normalizado_do_inimigo: w_e}.
+    contínuo, suave, monotônico (preserva a ordenação das ameaças) e log-simétrico,
+    ancorado em w(−6)=0.5 e w(8)=2.5. Retorna {nome_normalizado_do_inimigo: w_e}.
     """
     allies_norm = [normalize_hero_name(a) for a in allies if a]
     meta = meta_strength or {}

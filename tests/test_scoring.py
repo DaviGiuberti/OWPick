@@ -1,5 +1,7 @@
 """Testes do modelo de scoring (owpick.core.scoring) com dados sintéticos."""
 
+import math
+
 import pandas as pd
 import pytest
 
@@ -56,26 +58,30 @@ class TestLoadMetaStrength:
 
 
 class TestThreatMultiplier:
+    def test_ancoras(self):
+        # A curva passa EXATAMENTE pelos dois pontos escolhidos + pelo neutro.
+        assert scoring.threat_multiplier(0.0) == pytest.approx(1.0)
+        assert scoring.threat_multiplier(-6.0) == pytest.approx(0.5)
+        assert scoring.threat_multiplier(8.0) == pytest.approx(2.5)
+
     def test_neutro_negativo_positivo(self):
         # raw = 0 -> 1 exato; raw < 0 -> < 1; raw > 0 -> > 1.
-        assert scoring.threat_multiplier(0.0) == pytest.approx(1.0)
-        assert scoring.threat_multiplier(-1.0) < 1.0
-        assert scoring.threat_multiplier(1.0) > 1.0
+        assert scoring.threat_multiplier(-1.0) < 1.0 < scoring.threat_multiplier(1.0)
 
     def test_limites_e_log_simetria(self):
-        cap = scoring.THREAT_CAP
-        # No limite tanh -> ±1 o multiplicador satura EXATAMENTE nas assíntotas
-        # 1/CAP e CAP (nunca as ultrapassa) — em raw finito fica no interior.
-        assert scoring.threat_multiplier(-1000.0) == pytest.approx(1.0 / cap)
-        assert scoring.threat_multiplier(1000.0) == pytest.approx(cap)
-        assert scoring.threat_multiplier(-1000.0) < 1.0 < scoring.threat_multiplier(1000.0)
+        cap = math.exp(scoring.THREAT_LOG_CAP)  # teto assintótico (e^A)
+        # No limite tanh -> ±1 o multiplicador satura nas assíntotas 1/cap e cap
+        # (nunca as ultrapassa) — em raw finito fica no interior.
+        assert scoring.threat_multiplier(-1e4) == pytest.approx(1.0 / cap)
+        assert scoring.threat_multiplier(1e4) == pytest.approx(cap)
+        assert scoring.threat_multiplier(-1e4) < 1.0 < scoring.threat_multiplier(1e4)
         # Log-simetria: w(-raw) = 1 / w(raw).
         assert scoring.threat_multiplier(-2.3) == pytest.approx(
             1.0 / scoring.threat_multiplier(2.3)
         )
 
     def test_monotonica(self):
-        vals = [scoring.threat_multiplier(r) for r in (-6, -2, -0.5, 0, 0.5, 2, 6)]
+        vals = [scoring.threat_multiplier(r) for r in (-8, -6, -2, -0.5, 0, 0.5, 2, 6, 8, 10)]
         assert vals == sorted(vals)
         assert all(a < b for a, b in zip(vals, vals[1:], strict=False))
 
@@ -94,8 +100,9 @@ class TestComputeThreatWeights:
     def test_positivo_e_monotonico(self):
         enemy_matrix = {"fraco": {"a": -50.0}, "forte": {"a": 50.0}}
         w = scoring.compute_threat_weights(["fraco", "forte"], enemy_matrix, ["a"])
-        # Limitado a (1/CAP, CAP) por construção e ordenado.
-        assert 1.0 / scoring.THREAT_CAP < w["fraco"] < 1.0 < w["forte"] < scoring.THREAT_CAP
+        # Limitado a (e^-A, e^A) por construção e ordenado.
+        cap = math.exp(scoring.THREAT_LOG_CAP)
+        assert 1.0 / cap < w["fraco"] < 1.0 < w["forte"] < cap
 
     def test_nomes_normalizados(self):
         enemy_matrix = {"dva": {"soldier-76": 3.0}}
