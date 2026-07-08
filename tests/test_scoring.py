@@ -109,6 +109,27 @@ class TestComputeThreatWeights:
         w = scoring.compute_threat_weights(["D.Va"], enemy_matrix, ["Soldier: 76"])
         assert w["dva"] == pytest.approx(scoring.threat_multiplier(scoring.LAMBDA * 3.0))
 
+    def test_sinergia_do_time_inimigo(self):
+        # Inimigo que sinergiza com o RESTO do time inimigo fica mais ameaçador;
+        # a diagonal (e' == e) é ignorada.
+        enemy_matrix: dict = {}
+        synergy_matrix = {"e1": {"e2": 2.0, "e3": 1.0, "e1": 9.0}}
+        w = scoring.compute_threat_weights(
+            ["E1", "E2", "E3"],
+            enemy_matrix,
+            allies=[],
+            synergy_matrix=synergy_matrix,
+        )
+        # raw_e1 = ν · (2.0 + 1.0), diagonal e1↔e1 (9.0) ignorada.
+        assert w["e1"] == pytest.approx(scoring.threat_multiplier(scoring.NU_THREAT * 3.0))
+        assert w["e2"] == pytest.approx(1.0)  # sem linha de sinergia -> neutro
+
+    def test_sinergia_ausente_e_compativel(self):
+        # Sem synergy_matrix o termo ν some (compatibilidade retroativa).
+        enemy_matrix = {"e1": {"a1": 2.0}}
+        w = scoring.compute_threat_weights(["E1", "E2"], enemy_matrix, ["A1"])
+        assert w["e1"] == pytest.approx(scoring.threat_multiplier(scoring.LAMBDA * 2.0))
+
 
 # ---------------------------------------------------------------------------
 # calculate_hero_score — lineup sintético, matriz de 3 heróis, valores à mão

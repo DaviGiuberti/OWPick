@@ -4,6 +4,69 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.5] — 2026-07-08
+
+### Enemy Threat agora considera a sinergia DENTRO do time inimigo
+
+- O sinal bruto de ameaça de cada inimigo ganhou um **terceiro componente**: além
+  de (1) quão bem ele countera o seu time e (2) sua força no mapa, entra agora
+  (3) a **sinergia dele com o resto do time inimigo**. A fórmula passa de
+  `raw = λ·Σ_a C(e,a) + μ·m(e,k)` para
+  **`raw = λ·Σ_a C(e,a) + μ·m(e,k) + ν·Σ_{e'≠e} Y(e,e')`**.
+- **Racional**: um inimigo inserido numa composição coesa (bons combos) é mais
+  perigoso; um inimigo em anti-sinergia com os companheiros é menos ameaçador. O
+  termo usa a **mesma matriz de sinergia `Y`** (`data/synergies.csv`) já usada
+  para os aliados, aplicada aos pares de inimigos, com a diagonal `e' == e`
+  ignorada.
+- **Novo parâmetro `ν` (`nu`)** em `ModelWeights`, diferenciado por preset (o
+  Enemy Threat continua obedecendo integralmente o preset ativo):
+
+  | Preset | `λ` | `μ` | `ν` |
+  |---|---|---|---|
+  | Equilibrado | 0.25 | 0.30 | 0.10 |
+  | Counter-first | 0.45 | 0.30 | 0.10 |
+  | Meta-first | 0.20 | 0.70 | **0.15** |
+  | Conforto+ | 0.18 | 0.20 | **0.06** |
+
+  "Meta-first" valoriza mais a comp coesa (comp forte no mapa é ameaça);
+  "Conforto+" de-enfatiza a sinergia inimiga junto com os demais eixos de ameaça.
+- `ν` também é ajustável no modo avançado via `custom_weights` no `settings.json`
+  (campo `nu`).
+- **Compatibilidade**: `compute_threat_weights` recebe a matriz de sinergia por
+  parâmetro (`synergy_matrix`, opcional); sem ela o termo `ν` some — os fluxos e
+  testes que não a fornecem seguem idênticos.
+- `tests/test_scoring.py` ganhou casos para o novo termo (com e sem sinergia).
+
+### Ajuste de peso do MapMeta (β_meta) em dois presets
+
+- **Equilibrado** (padrão): `β_meta` reduzido de **2.0 → 1.5**.
+- **Meta-first**: `β_meta` reduzido de **4.0 → 3.0**.
+- Nenhum outro peso foi alterado (`λ`, `μ`, `ν`, `β_ctr`, `β_syn` e `α`
+  permanecem idênticos). O objetivo é atenuar a influência do desempenho
+  estatístico por mapa no score final, mantendo a hierarquia entre presets.
+- Snapshots de `tests/test_presets.py` e `tests/test_explain.py` atualizados para
+  os novos valores.
+
+### Novo scraper `tools/coletar_stats2.py` (site oficial da Blizzard)
+
+- Ferramenta de desenvolvimento **independente** do `coletar_stats.py` (owtics.gg):
+  coleta winrate/pickrate por mapa direto do site OFICIAL da Blizzard
+  (`overwatch.blizzard.com/.../rates/`).
+- **Sem Playwright**: os dados já vêm embutidos no HTML entregue pelo servidor
+  (SSR), como JSON HTML-escapado (`"cells":{"name":...,"winrate":...,"pickrate":...}`).
+  Um GET com `urllib` (stdlib) + des-escape de entidades + regex/`json` basta —
+  abordagem mais rápida e simples que dirigir um navegador.
+- Usa o locale `en-us` para que os nomes de heróis batam com os nomes canônicos
+  do projeto (o PT-BR localiza "Soldado: 76"/"Rainha Junker"); percorre todos os
+  mapas suportados (`heroes.MAPS_DATA`, cujos slugs já coincidem com os da
+  Blizzard). Gera **exatamente** o mesmo formato de `stats_inputs.csv`.
+- Aceita `destino.csv`, `região` e `tier` por argv (com aliases dos códigos do
+  `settings.json`); detecta mudança de layout de forma robusta (página 200 sem
+  blocos reconhecidos vira aviso claro, sem derrubar a coleta dos demais mapas).
+- `banrate` é ignorado (o projeto usa apenas winrate e pickrate).
+
+---
+
 ## [v1.2.4] — 2026-07-07
 
 ### Correção: tabela de ranking inconsistente (TOTAL ≠ MAP META + COUNTER + SYNERGY)

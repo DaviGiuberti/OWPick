@@ -12,7 +12,10 @@ onde:
                          z_role = (wr(h) − wr̄_role) / σ_role
                          conf   = pr / (pr + k0_role),  k0_role = pickrate neutra da role
     T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
-    raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)               (sinal bruto de ameaça; 0 = neutro)
+    raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')
+                                                               (sinal bruto de ameaça; 0 = neutro:
+                                                                counters + força no mapa + sinergia
+                                                                do inimigo com o time inimigo)
     w_e            = exp(A · tanh(raw_e / S))                  (multiplicador de ameaça — ver
                      threat_multiplier: w_e(0)=1, log-simétrico, ancorado em
                      w(−6)=0.5 e w(8)=2.5)
@@ -46,7 +49,8 @@ MMAX = 3.0  # limite (clamp) do z-score em desvios-padrão
 ALPHA = 2.25  # escala FINAL do MetaStrength (multiplica conf·z já clampado)
 LAMBDA = 0.25  # intensidade do threat weighting (componente counter)
 MU_THREAT = 0.3  # intensidade do threat weighting (componente MetaStrength do inimigo no mapa)
-BETA_META = 2.0  # peso do MetaStrength no score (preset "equilibrado"; era 1.0)
+NU_THREAT = 0.10  # intensidade do threat weighting (componente sinergia DENTRO do time inimigo)
+BETA_META = 1.5  # peso do MetaStrength no score (preset "equilibrado"; era 2.0)
 BETA_CTR = 1.0  # peso do counter term no score
 BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
 
@@ -126,6 +130,7 @@ class ModelWeights:
     alpha: float = ALPHA  # escala do MetaStrength
     lam: float = LAMBDA  # threat weighting (componente counter)
     mu: float = MU_THREAT  # threat weighting (componente mapa)
+    nu: float = NU_THREAT  # threat weighting (componente sinergia do time inimigo)
     beta_meta: float = BETA_META  # peso do MetaStrength no score
     beta_ctr: float = BETA_CTR  # peso do counter term no score
     beta_syn: float = BETA_SYN  # peso da sinergia no score
@@ -136,17 +141,21 @@ DEFAULT_WEIGHTS = ModelWeights()
 # Presets nomeados (settings.json: weights_preset). "equilibrado" = o modelo
 # atual; os demais reponderam os termos mantendo a mesma estrutura da fórmula.
 PRESETS: dict[str, ModelWeights] = {
-    # O modelo padrão (β_meta=2.0). Base dos demais presets.
+    # O modelo padrão (β_meta=1.5). Base dos demais presets.
     "equilibrado": DEFAULT_WEIGHTS,
     # Prioriza counterar o time inimigo: threat weighting por COUNTERS mais forte
     # (λ=0.45) e counter term mais pesado; meta recua (β_meta=1.0) e sinergia também.
-    "counter-first": ModelWeights(lam=0.45, mu=0.30, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50),
-    # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=4.0. A ameaça
-    # passa a pesar quem é FORTE NO MAPA (μ=0.70) mais que os counters brutos (λ=0.20).
-    "meta-first": ModelWeights(lam=0.20, mu=0.70, beta_meta=4.0, beta_ctr=1.0, beta_syn=0.65),
-    # "Conforto+": mais sinergia (β_syn=1.25) e ameaça inimiga DE-ENFATIZADA
-    # (λ=0.18, μ=0.20) — o foco é o SEU time, não o inimigo.
-    "conforto+": ModelWeights(lam=0.18, mu=0.20, beta_syn=1.25),
+    # Sinergia do time inimigo (ν) no baseline — a alavanca distintiva é o counter.
+    "counter-first": ModelWeights(
+        lam=0.45, mu=0.30, nu=0.10, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50
+    ),
+    # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=3.0. A ameaça
+    # passa a pesar quem é FORTE NO MAPA (μ=0.70) e quem forma uma COMP COESA
+    # (ν=0.15) mais que os counters brutos (λ=0.20).
+    "meta-first": ModelWeights(lam=0.20, mu=0.70, nu=0.15, beta_meta=3.0, beta_ctr=1.0, beta_syn=0.65),
+    # "Conforto+": mais sinergia no SEU time (β_syn=1.25) e ameaça inimiga
+    # DE-ENFATIZADA em todos os eixos (λ=0.18, μ=0.20, ν=0.06) — o foco é o SEU time.
+    "conforto+": ModelWeights(lam=0.18, mu=0.20, nu=0.06, beta_syn=1.25),
 }
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
@@ -256,19 +265,32 @@ def compute_threat_weights(
     meta_strength: dict[str, float] | None = None,
     lam: float = LAMBDA,
     mu: float = MU_THREAT,
+    synergy_matrix: dict[str, dict[str, float]] | None = None,
+    nu: float = NU_THREAT,
 ) -> dict[str, float]:
     """
     Para cada inimigo e:
-        raw = λ · Σ_a C(e,a) + μ · m(e,k)       (sinal bruto; 0 = ameaça neutra)
+        raw = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')
         w_e = threat_multiplier(raw) = exp(A · tanh(raw / S))
 
-    `raw = 0` (inimigo que não countera ninguém e é neutro no mapa) dá w_e = 1
-    exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1. `threat_multiplier` é
-    contínuo, suave, monotônico (preserva a ordenação das ameaças) e log-simétrico,
-    ancorado em w(−6)=0.5 e w(8)=2.5. Retorna {nome_normalizado_do_inimigo: w_e}.
+    Três componentes do sinal bruto de ameaça (0 = neutro):
+      • λ · Σ_a C(e,a)      — quão bem o inimigo countera o SEU time (counters).
+      • μ · m(e,k)          — força do inimigo no mapa atual (MetaStrength).
+      • ν · Σ_{e'≠e} Y(e,e') — sinergia do inimigo com o RESTO do time inimigo
+                               (combo: um inimigo numa comp coesa é mais perigoso;
+                               anti-sinergia com os companheiros reduz a ameaça).
+                               `Y` é a MESMA matriz de sinergia dos aliados
+                               (`synergy_matrix`), aplicada aos pares de inimigos;
+                               `None` ⇒ termo ausente (compatibilidade).
+
+    `raw = 0` dá w_e = 1 exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1.
+    `threat_multiplier` é contínuo, suave, monotônico (preserva a ordenação das
+    ameaças) e log-simétrico. Retorna {nome_normalizado_do_inimigo: w_e}.
     """
     allies_norm = [normalize_hero_name(a) for a in allies if a]
+    enemies_norm = [normalize_hero_name(e) for e in enemies if e]
     meta = meta_strength or {}
+    syn = synergy_matrix or {}
     weights: dict[str, float] = {}
     for enemy in enemies:
         if not enemy:
@@ -277,7 +299,10 @@ def compute_threat_weights(
         row = enemy_matrix.get(en, {})
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
-        raw = lam * counter_sum + mu * map_bonus
+        syn_row = syn.get(en, {})
+        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada).
+        synergy_sum = sum(syn_row.get(other, 0.0) for other in enemies_norm if other != en)
+        raw = lam * counter_sum + mu * map_bonus + nu * synergy_sum
         weights[en] = threat_multiplier(raw)
     return weights
 

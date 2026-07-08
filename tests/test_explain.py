@@ -46,8 +46,8 @@ def test_reasons_decompoem_counter_sinergia_e_mapa():
     # Sinergia relevante aparece; a desprezível (0.01·β) fica de fora.
     assert "sinergia com Mei" in text
     assert "Ana" not in text
-    # Influência do mapa por último (já ponderada por β_meta: 2.0 · 1.20 = 2.40).
-    assert reasons[-1] == "forte em Ilios (+2.40)"
+    # Influência do mapa por último (já ponderada por β_meta: 1.5 · 1.20 = 1.80).
+    assert reasons[-1] == "forte em Ilios (+1.80)"
 
 
 def test_reasons_ordenadas_por_impacto():

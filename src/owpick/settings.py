@@ -73,7 +73,7 @@ class Settings:
     # "counter-first", "meta-first", "conforto+" (ver core.scoring.PRESETS).
     weights_preset: str = "equilibrado"
     # Modo avançado: overrides individuais dos pesos por cima do preset
-    # (ex.: {"beta_syn": 1.2}). Campos válidos: alpha, lam, mu, beta_meta,
+    # (ex.: {"beta_syn": 1.2}). Campos válidos: alpha, lam, mu, nu, beta_meta,
     # beta_ctr, beta_syn.
     custom_weights: dict[str, float] = field(default_factory=dict)
     # --- Overrides avançados (None = default calibrado do módulo dono) ---

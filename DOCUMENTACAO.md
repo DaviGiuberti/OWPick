@@ -78,7 +78,8 @@ OWPick/
 │       └── ranking_view.py  # Formatação rich do ranking (consome RankingResult)
 │
 ├── tools/                   # Ferramentas de desenvolvimento (não empacotadas)
-│   ├── coletar_stats.py     # Scraper externo → data/stats_inputs.csv (aceita destino via argv)
+│   ├── coletar_stats.py     # Scraper externo (owtics.gg) → data/stats_inputs.csv (aceita destino via argv)
+│   ├── coletar_stats2.py    # Scraper alternativo (site oficial da Blizzard, sem Playwright) → mesmo CSV
 │   ├── xlsx_to_csv.py       # Converte as matrizes .xlsx (edição) → .csv (runtime)
 │   ├── enemy_mult.py        # Diagnóstico de threat weight (consumidor do core)
 │   └── resolucao.py         # Seletor visual de coordenadas
@@ -193,7 +194,8 @@ current_map.txt   # Mapa identificado na última captura (fluxo CLI)
 | infra | `infra/stats_update.py` | Atualização das stats de meta pelo app (baixa o CSV publicado; sem deps externas) |
 | infra | `infra/storage.py` | Persistência dos arquivos do usuário |
 | infra | `infra/updater.py` | Auto-update via GitHub |
-| tool | `tools/coletar_stats.py` | Scraper que gera `stats_inputs.csv` (destino via argv) |
+| tool | `tools/coletar_stats.py` | Scraper (owtics.gg, Playwright) que gera `stats_inputs.csv` (destino via argv) |
+| tool | `tools/coletar_stats2.py` | Scraper alternativo/independente (site oficial da Blizzard, sem Playwright) → mesmo `stats_inputs.csv` |
 | tool | `tools/xlsx_to_csv.py` | Converte as matrizes `.xlsx` (edição) em `.csv` (runtime) |
 | tool | `tools/enemy_mult.py` | Diagnóstico de threat weight (consumidor do core) |
 | tool | `tools/bump.py` | Sincroniza `version.txt` + `CHANGELOG` para um novo release |
@@ -300,7 +302,7 @@ S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
 m_scaled(h, k) = α · clamp( conf · (wr(h) - wr̄_role(k)) / σ_role(k), -Mmax, +Mmax )  [MetaStrength]
 conf           = pr / (pr + k0_role),   k0_role = pickrate neutra da role            [confiança da pickrate]
 T_ctr(h)       = Σ_e w_e · C(h, e)                                                    [counter com threat weighting]
-raw_e          = λ · Σ_a C(e,a) + μ · m(e,k)                                          [sinal bruto de ameaça; 0 = neutro]
+raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')                   [sinal bruto de ameaça; 0 = neutro]
 w_e            = exp( A · tanh(raw_e / S) )                                           [multiplicador de ameaça; log-simétrico]
 T_syn(h)       = Σ_a Y(h, a) · β_syn                                                  [sinergia; diagonal h==a ignorada]
 ```
@@ -312,9 +314,17 @@ comparado apenas com heróis da mesma função.
 #### Multiplicador de Enemy Threat — `w_e = exp(A · tanh(raw_e / S))`
 
 O peso de ameaça de cada inimigo transforma o **sinal bruto**
-`raw_e = λ · Σ_a C(e,a) + μ · m(e,k)` (0 = inimigo que não countera ninguém e é
-neutro no mapa) em um multiplicador aplicado ao counter term. A transformação é
-`w(raw) = exp( A · tanh(raw / S) )`, com as propriedades:
+`raw_e = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')` em um multiplicador
+aplicado ao counter term. São **três componentes** (0 = ameaça neutra):
+
+- `λ · Σ_a C(e,a)` — quão bem o inimigo countera o **seu** time;
+- `μ · m(e,k)` — força do inimigo no mapa atual (MetaStrength);
+- `ν · Σ_{e'≠e} Y(e,e')` — **sinergia do inimigo com o resto do time inimigo**
+  (combo: um inimigo numa comp coesa é mais perigoso; anti-sinergia reduz a
+  ameaça). Usa a **mesma matriz de sinergia `Y`** dos aliados, aplicada aos pares
+  de inimigos, com a diagonal `e' == e` ignorada.
+
+A transformação é `w(raw) = exp( A · tanh(raw / S) )`, com as propriedades:
 
 - `w(0) = 1` **exatamente** (`tanh(0) = 0`); `raw < 0 ⇒ w < 1`; `raw > 0 ⇒ w > 1`.
 - **Contínua, suave (C∞) e estritamente monotônica** em `raw` — preserva a
@@ -359,11 +369,12 @@ visivelmente o peso e a ordenação das ameaças.
 | `k0_role` | pickrate neutra | Pseudo-contagem da confiança: `conf = pr/(pr+k0_role)` |
 | `λ` | 0.25 | Intensidade do threat weighting (componente counter) |
 | `μ` | 0.3 | Intensidade do threat weighting (componente mapa) |
+| `ν` | 0.10 | Intensidade do threat weighting (sinergia do inimigo com o time inimigo) |
 | `THREAT_ANCHOR_LOW` | `(−1.5, 0.6)` | Ponto-âncora negativo do multiplicador de ameaça `(raw, w)` |
 | `THREAT_ANCHOR_HIGH` | `(3.0, 2.5)` | Ponto-âncora positivo do multiplicador de ameaça `(raw, w)` |
 | `A` (`THREAT_LOG_CAP`) | ≈ 1.51 | ln do teto assintótico — **derivado** dos dois âncoras |
 | `S` (`THREAT_SCALE`) | ≈ 4.25 | Escala do `raw` — **derivada** dos dois âncoras |
-| `β_meta` | 2.0 | Peso do MetaStrength no score total (preset "equilibrado") |
+| `β_meta` | 1.5 | Peso do MetaStrength no score total (preset "equilibrado") |
 | `β_ctr` | 1.0 | Peso do counter term no score total |
 | `β_syn` | 0.65 | Peso da sinergia no score total |
 
@@ -371,19 +382,21 @@ Os valores acima são o preset **"equilibrado"** (default). `core/scoring.py`
 expõe `ModelWeights` + `PRESETS`; o preset ativo vem de `settings.json`
 (`weights_preset`), com overrides individuais via `custom_weights` (modo
 avançado). Os presets reponderam os termos do score **e também o Enemy Threat**
-(via `λ` e `μ`), mantendo comuns apenas `α` e as âncoras estruturais da curva de
-ameaça:
+(via `λ`, `μ` e `ν`), mantendo comuns apenas `α` e as âncoras estruturais da
+curva de ameaça:
 
-| Preset | `β_meta` | `λ` | `μ` | `β_ctr` | `β_syn` | Prioriza |
-|---|---|---|---|---|---|---|
-| **Equilibrado** (padrão) | 2.0 | 0.25 | 0.30 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
-| **Counter-first** | 1.0 | 0.45 | 0.30 | 1.50 | 0.50 | counterar o time inimigo (ameaça por counters) |
-| **Meta-first** | 4.0 | 0.20 | 0.70 | 1.0 | 0.65 | desempenho no mapa (ameaça = quem é forte no mapa) |
-| **Conforto+** | 2.0 | 0.18 | 0.20 | 1.0 | 1.25 | sinergia com o seu time (ameaça de-enfatizada) |
+| Preset | `β_meta` | `λ` | `μ` | `ν` | `β_ctr` | `β_syn` | Prioriza |
+|---|---|---|---|---|---|---|---|
+| **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
+| **Counter-first** | 1.0 | 0.45 | 0.30 | 0.10 | 1.50 | 0.50 | counterar o time inimigo (ameaça por counters) |
+| **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
+| **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 | sinergia com o seu time (ameaça de-enfatizada) |
 
-Como `λ`/`μ` agora diferem por preset, **trocar o preset muda o multiplicador de
-ameaça, o ranking de ameaças, o counter score e o ranking final** — não só os
-pesos do score. As colunas da tabela de ranking (`MAP META`, `COUNTER`,
+O componente `ν` mede a **sinergia do inimigo com o próprio time inimigo** (combo):
+"Meta-first" o valoriza mais (comp coesa é ameaça), "Conforto+" o de-enfatiza junto
+com os demais eixos de ameaça. Como `λ`/`μ`/`ν` agora diferem por preset, **trocar o
+preset muda o multiplicador de ameaça, o ranking de ameaças, o counter score e o
+ranking final** — não só os pesos do score. As colunas da tabela de ranking (`MAP META`, `COUNTER`,
 `SYNERGY`) são as **contribuições já ponderadas** (por `β_meta`/`β_ctr`/`β_syn`)
 que entram no `TOTAL`, de modo que vale **`TOTAL = MAP META + COUNTER + SYNERGY`**
 exatamente — o usuário confere a soma olhando a tabela.
@@ -624,7 +637,7 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 | `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
-| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k))` (sinal bruto sem offset; 0 = neutro) |
+| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro) |
 | `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`** |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 
@@ -827,6 +840,7 @@ injetável para testes.
 | Ferramenta | Descrição |
 |---|---|
 | `coletar_stats.py` | Scraper Playwright (owtics.gg) → `stats_inputs.csv`. `argv[1]` = destino (o app passa o override do usuário); `argv[2]`/`argv[3]` = região/tier. Estratégias: JS direto → XHR interceptado → regex no texto |
+| `coletar_stats2.py` | Scraper **alternativo e independente** → mesmo `stats_inputs.csv`, coletado do site **oficial da Blizzard** (`overwatch.blizzard.com/en-us/rates/`). **Sem Playwright**: os dados vêm embutidos no HTML (SSR) como JSON HTML-escapado (`"cells":{"name",…,"winrate",…,"pickrate",…}`) — GET `urllib` + des-escape + regex/`json`. Locale `en-us` para casar os nomes canônicos; slugs do projeto = slugs da Blizzard. `argv[1]` = destino; `argv[2]`/`argv[3]` = região/tier (aliases dos códigos do settings). `banrate` ignorado; página 200 sem dados vira aviso claro |
 | `xlsx_to_csv.py` | Converte as matrizes de **edição** (`heroes ally.xlsx`/`heroes enemy.xlsx`) nos CSVs lidos em runtime (`synergies.csv`/`counters.csv`) — rodar antes de cada release com mudança de dados |
 | `enemy_mult.py` | Diagnóstico de threat weight (consumidor do core). **Atenção**: lê o lineup com perspectiva **invertida** (do ponto de vista do herói inimigo avaliado) — intencional |
 | `bump.py` | `python tools/bump.py X.Y.Z`: grava `version.txt` e insere o cabeçalho no `CHANGELOG` (o `version.json` é atualizado pelo workflow de release) |

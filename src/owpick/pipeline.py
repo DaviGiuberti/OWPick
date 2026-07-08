@@ -128,7 +128,14 @@ def rank(
 
     meta = load_meta_strength(datasource.read_stats_inputs(), mapa, alpha=weights.alpha)
     threat = compute_threat_weights(
-        enemies, enemy_matrix, allies, meta, lam=weights.lam, mu=weights.mu
+        enemies,
+        enemy_matrix,
+        allies,
+        meta,
+        lam=weights.lam,
+        mu=weights.mu,
+        synergy_matrix=ally_matrix,
+        nu=weights.nu,
     )
 
     ally_keys = {normalize_hero_name(a) for a in allies if a}
