@@ -1,5 +1,5 @@
 {
-    "version": "1.2.3",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.3/OWPick_v1.2.3.zip",
-    "notas": " ### Enemy Threat: curva re-ancorada em dois pontos escolhidos - A **forma** da curva do multiplicador de ameaça introduzida na v1.2.2 (`w(raw) = exp( A · tanh(raw / S) )`) **não muda**. O que muda é **como `A` e `S` são obtidos**: em vez de calibrados por percentil sobre a distribuição real de `raw` (`THREAT_CAP = 2.5`, `THREAT_SCALE = 2.5` fixados diretamente), a curva agora é *"
+    "version": "1.2.4",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.4/OWPick_v1.2.4.zip",
+    "notas": " ### Correção: tabela de ranking inconsistente (TOTAL ≠ MAP META + COUNTER + SYNERGY) - **Causa raiz**: `calculate_hero_score` (`core/scoring.py`) gravava as colunas `MAP META` e `COUNTER` com os valores **brutos** (sem `β_meta`/`β_ctr`), enquanto `SYNERGY` já vinha ponderada por `β_syn` e `TOTAL` aplicava todos os pesos — misturando escalas. Resultado: a soma das três colunas n�"
 }
