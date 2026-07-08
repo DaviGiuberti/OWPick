@@ -325,27 +325,29 @@ neutro no mapa) em um multiplicador aplicado ao counter term. A transformação 
   não-positivo nem cresce sem limite**.
 
 A curva é **ancorada em dois pontos escolhidos** (fonte única de verdade, em
-`core/scoring.py`): passa **exatamente** por `w(−6) = 0.5` e `w(8) = 2.5`. Como
-não há forma fechada para `A` e `S`, eles são derivados desses dois pontos por
-bisseção no import (`_fit_log_symmetric`), resultando em `A ≈ 3.81` (⇒ teto
-assintótico `e^A ≈ 45`) e `S ≈ 32.6`. Comportamento da curva:
+`core/scoring.py`): passa **exatamente** por `w(−1.5) = 0.6` e `w(3.0) = 2.5`.
+Como não há forma fechada para `A` e `S`, eles são derivados desses dois pontos
+por bisseção no import (`_fit_log_symmetric`), resultando em `A ≈ 1.51` (⇒ teto
+assintótico `e^A ≈ 4.5`) e `S ≈ 4.25`. Comportamento da curva:
 
-| `raw` | −8 | −6 | −4 | −2 | −1 | 0 | 1 | 2 | 4 | 6 | 8 |
+| `raw` | −3 | −2 | −1.5 | −1 | −0.5 | 0 | 0.5 | 1 | 1.5 | 2 | 3 |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| `w` | 0.40 | **0.50** | 0.63 | 0.79 | 0.89 | **1.00** | 1.12 | 1.26 | 1.59 | 2.00 | **2.50** |
+| `w` | 0.40 | 0.52 | **0.60** | 0.71 | 0.84 | **1.00** | 1.19 | 1.42 | 1.67 | 1.94 | **2.50** |
 
-Como o `raw` real fica em `~[−2.85, +2.71]` (Monte Carlo com a matriz de counters
-+ MetaStrength por mapa: `std ≈ 0.64`, p1 ≈ −1.44, p99 ≈ +1.50), na **faixa de
-operação** o peso fica em `~[0.72, 1.37]` — `0.5` e `2.5` só aparecem em `raw`
-extremo (`−6`/`+8`), representando casos "extremamente extremos".
+As âncoras ficam **dentro da faixa real** de `raw` (com as matrizes reais:
+`Σ_a C(e,a)` tem `std ≈ 2.31` e `m(e,k)` `std ≈ 0.88`; `raw = λ·ΣC + μ·m` opera em
+`~[−2, +2]`), então o multiplicador **responde de fato ao preset**: na faixa
+típica `w` varia em `~[0.6, 1.7]`, e mudanças de `λ`/`μ` entre presets movem
+visivelmente o peso e a ordenação das ameaças.
 
 > Substitui o `softplus(1 + …)` das versões anteriores, que dava `w ≈ 1.313` em
 > `raw = 0` e **não tinha teto** (podia explodir). O antigo piso `W_min` deixou de
 > existir: o intervalo é estrutural (`tanh` limitado). A forma `exp(A·tanh(raw/S))`
-> foi introduzida na v1.2.2 (calibrada por percentil); a **v1.2.3** trocou a
-> calibração pela ancoragem em dois pontos (`w(−6)=0.5`, `w(8)=2.5`), o que deixa
-> a curva mais suave na faixa de operação real e move o teto prático de 2.5 para
-> além dela.
+> foi introduzida na v1.2.2; a **v1.2.3** ancorou em dois pontos. A calibração
+> anterior usava âncoras `(−6, 0.5)`/`(8, 2.5)` que ficavam a ~10σ da faixa real
+> de `raw`, deixando a curva quase reta (`w ∈ ~[0.97, 1.05]`) e insensível ao
+> preset — por isso a **recalibração** para `(−1.5, 0.6)`/`(3.0, 2.5)`, que traz
+> as âncoras para a faixa operacional e faz o Enemy Threat obedecer o preset.
 
 **Parâmetros**:
 
@@ -357,10 +359,10 @@ extremo (`−6`/`+8`), representando casos "extremamente extremos".
 | `k0_role` | pickrate neutra | Pseudo-contagem da confiança: `conf = pr/(pr+k0_role)` |
 | `λ` | 0.25 | Intensidade do threat weighting (componente counter) |
 | `μ` | 0.3 | Intensidade do threat weighting (componente mapa) |
-| `THREAT_ANCHOR_LOW` | `(−6, 0.5)` | Ponto-âncora negativo do multiplicador de ameaça `(raw, w)` |
-| `THREAT_ANCHOR_HIGH` | `(8, 2.5)` | Ponto-âncora positivo do multiplicador de ameaça `(raw, w)` |
-| `A` (`THREAT_LOG_CAP`) | ≈ 3.81 | ln do teto assintótico — **derivado** dos dois âncoras |
-| `S` (`THREAT_SCALE`) | ≈ 32.6 | Escala do `raw` — **derivada** dos dois âncoras |
+| `THREAT_ANCHOR_LOW` | `(−1.5, 0.6)` | Ponto-âncora negativo do multiplicador de ameaça `(raw, w)` |
+| `THREAT_ANCHOR_HIGH` | `(3.0, 2.5)` | Ponto-âncora positivo do multiplicador de ameaça `(raw, w)` |
+| `A` (`THREAT_LOG_CAP`) | ≈ 1.51 | ln do teto assintótico — **derivado** dos dois âncoras |
+| `S` (`THREAT_SCALE`) | ≈ 4.25 | Escala do `raw` — **derivada** dos dois âncoras |
 | `β_meta` | 2.0 | Peso do MetaStrength no score total (preset "equilibrado") |
 | `β_ctr` | 1.0 | Peso do counter term no score total |
 | `β_syn` | 0.65 | Peso da sinergia no score total |
@@ -368,15 +370,23 @@ extremo (`−6`/`+8`), representando casos "extremamente extremos".
 Os valores acima são o preset **"equilibrado"** (default). `core/scoring.py`
 expõe `ModelWeights` + `PRESETS`; o preset ativo vem de `settings.json`
 (`weights_preset`), com overrides individuais via `custom_weights` (modo
-avançado). Os quatro presets diferem apenas nos pesos abaixo (os demais
-parâmetros — `α`, `μ`, âncoras de ameaça — são comuns):
+avançado). Os presets reponderam os termos do score **e também o Enemy Threat**
+(via `λ` e `μ`), mantendo comuns apenas `α` e as âncoras estruturais da curva de
+ameaça:
 
-| Preset | `β_meta` | `λ` | `β_ctr` | `β_syn` | Prioriza |
-|---|---|---|---|---|---|
-| **Equilibrado** (padrão) | 2.0 | 0.25 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
-| **Counter-first** | 1.0 | 0.40 | 1.50 | 0.50 | counterar o time inimigo |
-| **Meta-first** | 4.0 | 0.25 | 1.0 | 0.65 | desempenho estatístico no mapa atual |
-| **Conforto+** | 2.0 | 0.25 | 1.0 | 1.25 | sinergia com o seu próprio time |
+| Preset | `β_meta` | `λ` | `μ` | `β_ctr` | `β_syn` | Prioriza |
+|---|---|---|---|---|---|---|
+| **Equilibrado** (padrão) | 2.0 | 0.25 | 0.30 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
+| **Counter-first** | 1.0 | 0.45 | 0.30 | 1.50 | 0.50 | counterar o time inimigo (ameaça por counters) |
+| **Meta-first** | 4.0 | 0.20 | 0.70 | 1.0 | 0.65 | desempenho no mapa (ameaça = quem é forte no mapa) |
+| **Conforto+** | 2.0 | 0.18 | 0.20 | 1.0 | 1.25 | sinergia com o seu time (ameaça de-enfatizada) |
+
+Como `λ`/`μ` agora diferem por preset, **trocar o preset muda o multiplicador de
+ameaça, o ranking de ameaças, o counter score e o ranking final** — não só os
+pesos do score. As colunas da tabela de ranking (`MAP META`, `COUNTER`,
+`SYNERGY`) são as **contribuições já ponderadas** (por `β_meta`/`β_ctr`/`β_syn`)
+que entram no `TOTAL`, de modo que vale **`TOTAL = MAP META + COUNTER + SYNERGY`**
+exatamente — o usuário confere a soma olhando a tabela.
 
 Heróis já presentes no time aliado **e heróis banidos no competitivo** são
 **excluídos do ranking** (regra rígida — mesmo tratamento de indisponibilidade).
@@ -610,12 +620,12 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 | Item | Descrição |
 |---|---|
 | Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` (= 1.0) |
-| `threat_multiplier(raw, log_cap, scale)` | Multiplicador de ameaça `exp(A·tanh(raw/S))`; `w(0)=1`, log-simétrico, ancorado em `w(−6)=0.5` e `w(8)=2.5` |
+| `threat_multiplier(raw, log_cap, scale)` | Multiplicador de ameaça `exp(A·tanh(raw/S))`; `w(0)=1`, log-simétrico, ancorado em `w(−1.5)=0.6` e `w(3.0)=2.5` |
 | `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
 | `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k))` (sinal bruto sem offset; 0 = neutro) |
-| `calculate_hero_score(...)` | Componentes meta/ctr/syn + **acumula contribuições por origem em `reasons`** |
+| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`** |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 
 #### `core/ports.py`

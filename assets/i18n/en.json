@@ -16,6 +16,7 @@
   "pipeline.no_heroes_detected": "Could not find the hero-select screen. Open Overwatch on the hero-select screen and press {hotkey} again.",
   "pipeline.error": "Pipeline error: {error}. Try again; if it persists, run with --debug and check the log in %APPDATA%\\OWPick\\logs.",
 
+  "update.badge": "UPDATE AVAILABLE",
   "update.available": "Update available: v{version}. Type 'update' and ENTER to apply it now, or it will be applied automatically when you close the program.",
   "update.applying": "Applying update... the program will restart.",
   "update.none": "No pending update. You are already on the latest version.",

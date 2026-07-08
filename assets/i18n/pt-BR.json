@@ -16,6 +16,7 @@
   "pipeline.no_heroes_detected": "Não encontrei a tela de seleção de heróis. Abra o Overwatch na tela de escolha de personagem e pressione {hotkey} novamente.",
   "pipeline.error": "Erro no pipeline: {error}. Tente novamente; se persistir, rode com --debug e consulte o log em %APPDATA%\\OWPick\\logs.",
 
+  "update.badge": "ATUALIZACAO DISPONIVEL",
   "update.available": "Atualização disponível: v{version}. Digite 'update' e ENTER para aplicar agora, ou ela será aplicada automaticamente ao fechar o programa.",
   "update.applying": "Aplicando atualização... o programa será reiniciado.",
   "update.none": "Nenhuma atualização pendente. Você já está na versão mais recente.",

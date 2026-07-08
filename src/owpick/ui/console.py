@@ -139,8 +139,24 @@ def run_hotkey_config():
 
 
 def _notify_update_available(update: dict):
-    """Aviso NÃO bloqueante de update disponível (callback da thread de fundo)."""
-    print(f"\n>>> {t('update.available', version=update.get('version', '?'))}")
+    """Aviso NÃO bloqueante de update disponível (callback da thread de fundo).
+
+    Renderizado como um painel rich destacado (borda + cor) para não passar
+    despercebido no meio da saída do console.
+    """
+    from rich.panel import Panel
+    from rich.text import Text
+
+    msg = Text(t("update.available", version=update.get("version", "?")), style="bold yellow")
+    ranking_view.console.print()
+    ranking_view.console.print(
+        Panel(
+            msg,
+            title=f"[bold black on yellow] {t('update.badge')} [/]",
+            border_style="yellow",
+            expand=False,
+        )
+    )
 
 
 def run_apply_update():

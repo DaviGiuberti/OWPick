@@ -61,8 +61,8 @@ class TestThreatMultiplier:
     def test_ancoras(self):
         # A curva passa EXATAMENTE pelos dois pontos escolhidos + pelo neutro.
         assert scoring.threat_multiplier(0.0) == pytest.approx(1.0)
-        assert scoring.threat_multiplier(-6.0) == pytest.approx(0.5)
-        assert scoring.threat_multiplier(8.0) == pytest.approx(2.5)
+        assert scoring.threat_multiplier(-1.5) == pytest.approx(0.6)
+        assert scoring.threat_multiplier(3.0) == pytest.approx(2.5)
 
     def test_neutro_negativo_positivo(self):
         # raw = 0 -> 1 exato; raw < 0 -> < 1; raw > 0 -> > 1.
@@ -131,12 +131,14 @@ class TestCalculateHeroScore:
             threat_weights=threat,
             meta_strength=meta,
         )
-        assert r["counter_score"] == pytest.approx(1.5 * 2.0 + 1.0 * (-1.0))  # 2.0
+        # Colunas JÁ PONDERADAS: COUNTER = β_ctr·Σ w_e·C, META = β_meta·m,
+        # SYNERGY = β_syn·Y — e TOTAL é a soma exata das três.
+        assert r["counter_score"] == pytest.approx(scoring.BETA_CTR * (1.5 * 2.0 + 1.0 * (-1.0)))
         # diagonal (h com h) ignorada; só a1 conta
         assert r["synergy_score"] == pytest.approx(1.0 * scoring.BETA_SYN)  # 0.65
-        assert r["meta_score"] == pytest.approx(0.5)
+        assert r["meta_score"] == pytest.approx(scoring.BETA_META * 0.5)
         assert r["total"] == pytest.approx(
-            scoring.BETA_META * 0.5 + scoring.BETA_CTR * 2.0 + 1.0 * scoring.BETA_SYN
+            r["meta_score"] + r["counter_score"] + r["synergy_score"]
         )
 
     def test_hero_sem_dados_score_zero(self):

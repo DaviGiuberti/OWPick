@@ -61,11 +61,14 @@ BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
 #     log-simétrica: w(−raw) = 1/w(raw); tanh ∈ (−1, 1) ⇒ w ∈ (e^−A, e^A),
 #     então NUNCA explode nem fica não-positivo
 #   • A curva é ANCORADA em dois pontos escolhidos (fonte única): passa
-#     EXATAMENTE por (raw, w) = (−6, 0.5) e (8, 2.5). Como o raw real fica em
-#     ~[−2.85, 2.71] (Monte Carlo: std≈0.64), 0.5 e 2.5 só aparecem em raw
-#     extremo; na faixa de operação w fica em ~[0.72, 1.37].
-THREAT_ANCHOR_LOW = (-6.0, 0.5)  # (raw, w) do lado negativo
-THREAT_ANCHOR_HIGH = (8.0, 2.5)  # (raw, w) do lado positivo
+#     EXATAMENTE por (raw, w) = (−1.5, 0.6) e (3.0, 2.5). As âncoras ficam
+#     DENTRO da faixa real de raw (~[−2, +2] com as matrizes reais: Σ C(e,a) tem
+#     std≈2.31 e m(e,k) std≈0.88; raw = λ·ΣC + μ·m), então o multiplicador
+#     responde de fato ao preset: na faixa típica w varia em ~[0.6, 1.7] em vez
+#     de ficar quase preso em 1.0. (As âncoras antigas −6/+8 ficavam a ~10σ da
+#     faixa real e deixavam a curva praticamente reta — w∈~[0.97, 1.05].)
+THREAT_ANCHOR_LOW = (-1.5, 0.6)  # (raw, w) do lado negativo
+THREAT_ANCHOR_HIGH = (3.0, 2.5)  # (raw, w) do lado positivo
 
 
 def _fit_log_symmetric(
@@ -105,7 +108,7 @@ def threat_multiplier(
     estritamente monotônica em `raw` (preserva a ordenação das ameaças), com
     w(0) = 1 e w ∈ (e^−log_cap, e^+log_cap) por construção — o multiplicador
     jamais explode nem fica não-positivo (o antigo piso `W_MIN` some por design).
-    Ancorada em w(−6) = 0.5 e w(8) = 2.5 (ver THREAT_ANCHOR_*).
+    Ancorada em w(−1.5) = 0.6 e w(3.0) = 2.5 (ver THREAT_ANCHOR_*).
     """
     return math.exp(log_cap * math.tanh(raw / scale))
 
@@ -135,15 +138,15 @@ DEFAULT_WEIGHTS = ModelWeights()
 PRESETS: dict[str, ModelWeights] = {
     # O modelo padrão (β_meta=2.0). Base dos demais presets.
     "equilibrado": DEFAULT_WEIGHTS,
-    # Prioriza counterar o time inimigo: threat weighting (λ) e counter term
-    # mais fortes; meta recua (β_meta=1.0) e sinergia também.
-    "counter-first": ModelWeights(lam=0.40, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50),
-    # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=4.0, com
-    # counter e sinergia nos valores do "equilibrado".
-    "meta-first": ModelWeights(beta_meta=4.0, beta_ctr=1.0, beta_syn=0.65),
-    # "Conforto+": "equilibrado" com mais sinergia (β_syn=1.25) — valoriza jogar
-    # o que combina com o SEU time.
-    "conforto+": ModelWeights(beta_syn=1.25),
+    # Prioriza counterar o time inimigo: threat weighting por COUNTERS mais forte
+    # (λ=0.45) e counter term mais pesado; meta recua (β_meta=1.0) e sinergia também.
+    "counter-first": ModelWeights(lam=0.45, mu=0.30, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50),
+    # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=4.0. A ameaça
+    # passa a pesar quem é FORTE NO MAPA (μ=0.70) mais que os counters brutos (λ=0.20).
+    "meta-first": ModelWeights(lam=0.20, mu=0.70, beta_meta=4.0, beta_ctr=1.0, beta_syn=0.65),
+    # "Conforto+": mais sinergia (β_syn=1.25) e ameaça inimiga DE-ENFATIZADA
+    # (λ=0.18, μ=0.20) — o foco é o SEU time, não o inimigo.
+    "conforto+": ModelWeights(lam=0.18, mu=0.20, beta_syn=1.25),
 }
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
@@ -296,13 +299,16 @@ def calculate_hero_score(
     hn = normalize_hero_name(hero_name)
 
     # Contribuições por origem (tarefa 6.4): cada termo relevante gera uma
-    # razão legível, na MESMA escala das colunas da tabela (CTR = w_e·C sem
-    # β_ctr; SYN = Y·β_syn; META = m_scaled) — os números batem com o ranking.
+    # razão legível, na MESMA escala das colunas da tabela. As três colunas
+    # (META, COUNTER, SYNERGY) são as contribuições JÁ PONDERADAS que entram no
+    # TOTAL — cada peso (β_meta/β_ctr/β_syn) é aplicado AQUI, uma única vez —, de
+    # forma que vale exatamente TOTAL = META + COUNTER + SYNERGY (o usuário
+    # confere a soma olhando a tabela). Os números das razões batem com as colunas.
     REASON_MIN = 0.05  # contribuições abaixo disso são ruído e não explicam nada
     counter_reasons: list[tuple[float, str]] = []
     synergy_reasons: list[tuple[float, str]] = []
 
-    # --- counter term (com threat weighting) ---
+    # --- counter term (threat weighting × β_ctr) ---
     enemy_row = enemy_matrix.get(hn, {})
     counter_score = 0.0
     for enemy in enemies:
@@ -311,7 +317,7 @@ def calculate_hero_score(
         en = normalize_hero_name(enemy)
         if en in enemy_row:
             w_e = threat_weights.get(en, 1.0)
-            contribution = w_e * enemy_row[en]
+            contribution = weights.beta_ctr * w_e * enemy_row[en]
             counter_score += contribution
             if contribution >= REASON_MIN:
                 counter_reasons.append(
@@ -320,7 +326,7 @@ def calculate_hero_score(
             elif contribution <= -REASON_MIN:
                 counter_reasons.append((contribution, f"sofre contra {enemy} ({contribution:.2f})"))
 
-    # --- synergy term (diagonal ignorada) ---
+    # --- synergy term (× β_syn, diagonal ignorada) ---
     ally_row = ally_matrix.get(hn, {})
     synergy_score = 0.0
     for ally in allies:
@@ -339,10 +345,10 @@ def calculate_hero_score(
                     (contribution, f"anti-sinergia com {ally} ({contribution:.2f})")
                 )
 
-    # --- meta term ---
-    meta_score = meta_strength.get(hn, 0.0)
+    # --- meta term (× β_meta) ---
+    meta_score = weights.beta_meta * meta_strength.get(hn, 0.0)
 
-    total = weights.beta_meta * meta_score + weights.beta_ctr * counter_score + synergy_score
+    total = meta_score + counter_score + synergy_score
 
     # Razões ordenadas pelo IMPACTO (|contribuição|, desc) dentro de cada termo;
     # counters primeiro, depois sinergias, mapa por último.

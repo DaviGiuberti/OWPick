@@ -4,6 +4,63 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.4] — 2026-07-07
+
+### Correção: tabela de ranking inconsistente (TOTAL ≠ MAP META + COUNTER + SYNERGY)
+
+- **Causa raiz**: `calculate_hero_score` (`core/scoring.py`) gravava as colunas
+  `MAP META` e `COUNTER` com os valores **brutos** (sem `β_meta`/`β_ctr`),
+  enquanto `SYNERGY` já vinha ponderada por `β_syn` e `TOTAL` aplicava todos os
+  pesos — misturando escalas. Resultado: a soma das três colunas não batia com
+  o `TOTAL` exibido.
+- **Correção**: `β_meta` e `β_ctr` passam a ser aplicados **uma única vez,
+  dentro** de `calculate_hero_score`. As colunas `MAP META`, `COUNTER` e
+  `SYNERGY` agora são exatamente as contribuições **já ponderadas** que entram
+  no score, de modo que **`TOTAL = MAP META + COUNTER + SYNERGY`** sempre —
+  verificável a olho na tabela.
+- As razões da explicabilidade ("por quê" do top-3) passam a usar os mesmos
+  valores ponderados das colunas (ex.: a razão "forte em `<mapa>`" agora reflete
+  a contribuição de meta já multiplicada por `β_meta`).
+- `tests/test_scoring.py` e `tests/test_explain.py` atualizados para os novos
+  snapshots.
+
+### Enemy Threat: curva recalibrada + λ/μ diferenciados por preset
+
+- **Causa raiz**: o Enemy Threat já usava os parâmetros do preset ativo (sem
+  bug de fiação ou cache), mas dois fatores o tornavam quase invariável:
+  1. Só o preset "Counter-first" alterava `λ`; "Meta-first" e "Conforto+" não
+     sobrescreviam `λ`/`μ`/`α`, produzindo um multiplicador de ameaça
+     **idêntico** ao "Equilibrado".
+  2. As âncoras da curva (`w(−6) = 0.5`, `w(8) = 2.5`, da v1.2.3) ficavam a
+     ~10σ da faixa real observada de `raw` (medida nas matrizes reais:
+     `Σ_a C(e,a)` tem desvio-padrão ≈ 2.31, `m(e,k)` ≈ 0.88 ⇒ `raw` opera em
+     `~[−2, +2]`), deixando a curva praticamente reta (`w ∈ ~[0.97, 1.05]`)
+     mesmo com `λ`/`μ` diferentes.
+- **Correção — recalibração das âncoras** (`THREAT_ANCHOR_LOW`/`THREAT_ANCHOR_HIGH`
+  em `core/scoring.py`): de `(−6, 0.5)`/`(8, 2.5)` para **`(−1.5, 0.6)`/`(3.0, 2.5)`**
+  — dentro da faixa operacional real. `A` (`THREAT_LOG_CAP`) e `S`
+  (`THREAT_SCALE`) recalculados por bisseção: `A ≈ 1.51`, `S ≈ 4.25` (antes
+  `3.81`/`32.6`). Curva atualizada:
+  `raw −3/−2/−1.5/−1/−0.5/0/0.5/1/1.5/2/3 → 0.40/0.52/0.60/0.71/0.84/1.00/1.19/1.42/1.67/1.94/2.50`.
+- **Correção — `λ`/`μ` diferenciados por preset** (antes só `λ` do
+  "Counter-first" mudava; `μ` era comum a todos):
+
+  | Preset | `λ` (antes → agora) | `μ` (antes → agora) |
+  |---|---|---|
+  | Equilibrado | 0.25 → 0.25 | 0.30 → 0.30 |
+  | Counter-first | 0.40 → **0.45** | 0.30 → 0.30 |
+  | Meta-first | 0.25 → **0.20** | 0.30 → **0.70** |
+  | Conforto+ | 0.25 → **0.18** | 0.30 → **0.20** |
+
+- **Efeito**: trocar o preset agora muda de fato o multiplicador de ameaça, o
+  ranking de ameaças exibido, o counter score e o ranking final — inclusive
+  reordenando quem é a maior ameaça (ex.: "Meta-first" passa a priorizar
+  inimigos fortes no mapa atual sobre quem apenas countera bem o time).
+- `tests/test_scoring.py` (`TestThreatMultiplier.test_ancoras`) atualizado para
+  as novas âncoras.
+
+---
+
 ## [v1.2.3] — 2026-07-07
 
 ### Enemy Threat: curva re-ancorada em dois pontos escolhidos
