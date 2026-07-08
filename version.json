@@ -1,5 +1,5 @@
 {
-    "version": "1.2.4",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.4/OWPick_v1.2.4.zip",
-    "notas": "v1.2.4: tabela de ranking consistente (TOTAL = MAP META + COUNTER + SYNERGY) e Enemy Threat recalibrado, agora respeitando o preset ativo."
+    "version": "1.2.5",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.5/OWPick_v1.2.5.zip",
+    "notas": "### Enemy Threat agora considera a sinergia DENTRO do time inimigo - O sinal bruto de ameaça de cada inimigo ganhou um **terceiro componente**: além de (1) quão bem ele countera o seu time e (2) sua força no mapa, entra agora (3) a **sinergia dele com o resto do time inimigo**. A fórmula passa de `raw = λ·Σ_a C(e,a) + μ·m(e,k)` para **`raw = λ·Σ_a C(e,a) + μ·m(e,k) + ν·Σ_{e'≠e} Y(e,e')`**. - **Rac"
 }
