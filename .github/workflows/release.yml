@@ -88,15 +88,19 @@ jobs:
         run: |
           v="${{ steps.ver.outputs.version }}"
           url="https://github.com/${GITHUB_REPOSITORY}/releases/download/v$v/OWPick_v$v.zip"
-          # Notas em uma linha (o version.json é o que o auto-updater mostra).
-          notas="$(head -c 400 release_notes.md | tr '\n' ' ' | sed 's/  */ /g' | sed 's/"/\\"/g')"
-          cat > version.json <<EOF
-          {
-              "version": "$v",
-              "download_url": "$url",
-              "notas": "$notas"
-          }
-          EOF
+          # O version.json é gerado por Python: assim as notas são truncadas por
+          # CARACTERE (não por byte — head -c partia caracteres multibyte como
+          # ç/β/≠ e gerava UTF-8/JSON inválido) e o escape de JSON é correto.
+          python - "$v" "$url" <<'PY'
+          import json, re, sys
+          v, url = sys.argv[1], sys.argv[2]
+          with open("release_notes.md", encoding="utf-8") as f:
+              notas = re.sub(r"\s+", " ", f.read()).strip()[:400]
+          data = {"version": v, "download_url": url, "notas": notas}
+          with open("version.json", "w", encoding="utf-8") as f:
+              json.dump(data, f, ensure_ascii=False, indent=4)
+              f.write("\n")
+          PY
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add version.json
