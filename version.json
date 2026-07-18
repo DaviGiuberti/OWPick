@@ -1,5 +1,5 @@
 {
-    "version": "1.2.5",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.5/OWPick_v1.2.5.zip",
-    "notas": "### Enemy Threat agora considera a sinergia DENTRO do time inimigo - O sinal bruto de ameaça de cada inimigo ganhou um **terceiro componente**: além de (1) quão bem ele countera o seu time e (2) sua força no mapa, entra agora (3) a **sinergia dele com o resto do time inimigo**. A fórmula passa de `raw = λ·Σ_a C(e,a) + μ·m(e,k)` para **`raw = λ·Σ_a C(e,a) + μ·m(e,k) + ν·Σ_{e'≠e} Y(e,e')`**. - **Rac"
+    "version": "1.2.6",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.6/OWPick_v1.2.6.zip",
+    "notas": "### Atualização de dados (counters e stats de meta) - `data/counters.csv` (e a fonte de edição `data/heroes enemy.xlsx`) atualizada com ajustes finos na matriz de counters entre heróis, refletindo o balanceamento atual do jogo. - `data/stats_inputs.csv` atualizado com winrate/pickrate por mapa mais recentes, fonte do MetaStrength no scoring. - Nenhuma mudança de código: modelo de scoring, pipeline"
 }
