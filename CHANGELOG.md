@@ -4,6 +4,24 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.7] — 2026-07-18
+
+### Atualização de dados (matriz de sinergias)
+
+- Matriz de sinergias migrada de uma fonte externa em JSON para a planilha
+  oficial de edição `data/heroes ally.xlsx`, convertendo a escala do JSON
+  (−30..30, em passos de 10) para a escala do projeto (−3..3).
+- **Relações Suporte × Suporte preservadas**: os valores já existentes na
+  planilha para pares de heróis da role SUP foram mantidos exatamente como
+  estavam. Todas as demais relações vieram do JSON. A diagonal (herói × ele
+  mesmo) também foi preservada.
+- `data/synergies.csv` e `data/counters.csv` regenerados a partir dos `.xlsx`
+  via `tools/xlsx_to_csv.py` (fonte lida em runtime).
+- Nenhuma mudança de código: modelo de scoring, pipeline e demais módulos
+  permanecem idênticos à v1.2.6.
+
+---
+
 ## [v1.2.6] — 2026-07-18
 
 ### Atualização de dados (counters e stats de meta)
