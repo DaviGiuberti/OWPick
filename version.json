@@ -1,5 +1,5 @@
 {
-    "version": "1.2.6",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.6/OWPick_v1.2.6.zip",
-    "notas": "### Atualização de dados (counters e stats de meta) - `data/counters.csv` (e a fonte de edição `data/heroes enemy.xlsx`) atualizada com ajustes finos na matriz de counters entre heróis, refletindo o balanceamento atual do jogo. - `data/stats_inputs.csv` atualizado com winrate/pickrate por mapa mais recentes, fonte do MetaStrength no scoring. - Nenhuma mudança de código: modelo de scoring, pipeline"
+    "version": "1.2.7",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.7/OWPick_v1.2.7.zip",
+    "notas": "### Atualização de dados (matriz de sinergias) - Matriz de sinergias migrada de uma fonte externa em JSON para a planilha oficial de edição `data/heroes ally.xlsx`, convertendo a escala do JSON (−30..30, em passos de 10) para a escala do projeto (−3..3). - **Relações Suporte × Suporte preservadas**: os valores já existentes na planilha para pares de heróis da role SUP foram mantidos exatamente com"
 }
