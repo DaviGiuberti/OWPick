@@ -4,6 +4,20 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.6] — 2026-07-18
+
+### Atualização de dados (counters e stats de meta)
+
+- `data/counters.csv` (e a fonte de edição `data/heroes enemy.xlsx`) atualizada
+  com ajustes finos na matriz de counters entre heróis, refletindo o
+  balanceamento atual do jogo.
+- `data/stats_inputs.csv` atualizado com winrate/pickrate por mapa mais
+  recentes, fonte do MetaStrength no scoring.
+- Nenhuma mudança de código: modelo de scoring, pipeline e demais módulos
+  permanecem idênticos à v1.2.5.
+
+---
+
 ## [v1.2.5] — 2026-07-08
 
 ### Enemy Threat agora considera a sinergia DENTRO do time inimigo
