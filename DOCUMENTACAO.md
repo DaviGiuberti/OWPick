@@ -304,7 +304,8 @@ conf           = pr / (pr + k0_role),   k0_role = pickrate neutra da role       
 T_ctr(h)       = Σ_e w_e · C(h, e)                                                    [counter com threat weighting]
 raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')                   [sinal bruto de ameaça; 0 = neutro]
 w_e            = exp( A · tanh(raw_e / S) )                                           [multiplicador de ameaça; log-simétrico]
-T_syn(h)       = Σ_a Y(h, a) · β_syn                                                  [sinergia; diagonal h==a ignorada]
+T_syn(h)       = Σ_a Y(h, a) · β_syn(h, a)                                            [sinergia; diagonal h==a ignorada]
+β_syn(h, a)    = β_syn_sup_sup se role(h) = role(a) = SUP, senão β_syn                 [só o Counter-first define β_syn_sup_sup]
 ```
 
 O MetaStrength é o z-score da winrate **bruta por role** (DPS/TANK/SUP), atenuado
@@ -388,9 +389,18 @@ curva de ameaça:
 | Preset | `β_meta` | `λ` | `μ` | `ν` | `β_ctr` | `β_syn` | Prioriza |
 |---|---|---|---|---|---|---|---|
 | **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
-| **Counter-first** | 1.0 | 0.45 | 0.30 | 0.10 | 1.50 | 0.50 | counterar o time inimigo (ameaça por counters) |
+| **Counter-first** | 0.75 | 0.32 | 0.23 | 0.10 | 1.00 | 0.325 (0.65 em SUP×SUP) | counterar o time inimigo (ameaça por counters) |
 | **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
 | **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 | sinergia com o seu time (ameaça de-enfatizada) |
+
+> **Exceção de sinergia do Counter-first**: no preset Counter-first, pares
+> **Support × Support** utilizam um peso de sinergia de **0.65**, enquanto todas
+> as demais combinações continuam utilizando **0.325**. Ou seja, com
+> `Y(Ana, Cassidy) = 1` a contribuição é `1 × 0.325 = 0.325`, mas com
+> `Y(Ana, Mercy) = 1` é `1 × 0.65 = 0.65`. A regra vale **somente** para o
+> Counter-first e apenas quando **ambos** os heróis do par são da role SUP; é
+> implementada pelo campo opcional `ModelWeights.beta_syn_sup_sup` (`None` nos
+> demais presets ⇒ usa `beta_syn` para todos os pares).
 
 O componente `ν` mede a **sinergia do inimigo com o próprio time inimigo** (combo):
 "Meta-first" o valoriza mais (comp coesa é ameaça), "Conforto+" o de-enfatiza junto
@@ -638,7 +648,7 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
 | `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro) |
-| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`** |
+| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`**; par SUP×SUP usa `beta_syn_sup_sup` quando o preset o define (Counter-first) |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 
 #### `core/ports.py`

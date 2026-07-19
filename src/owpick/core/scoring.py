@@ -19,7 +19,11 @@ onde:
     w_e            = exp(A · tanh(raw_e / S))                  (multiplicador de ameaça — ver
                      threat_multiplier: w_e(0)=1, log-simétrico, ancorado em
                      w(−6)=0.5 e w(8)=2.5)
-    T_syn(h)       = Σ_a  Y(h, a) · β_syn                      (sinergia, diagonal ignorada)
+    T_syn(h)       = Σ_a  Y(h, a) · β_syn(h, a)                (sinergia, diagonal ignorada;
+                                                                β_syn(h,a) = β_syn_sup_sup se
+                                                                ambos forem SUP e o preset o
+                                                                definir — só o "counter-first" —,
+                                                                senão β_syn)
 
 As estatísticas (DataFrame de winrate/pickrate) e as matrizes já normalizadas
 chegam POR PARÂMETRO — a leitura de xlsx/csv é responsabilidade da infra.
@@ -134,6 +138,8 @@ class ModelWeights:
     beta_meta: float = BETA_META  # peso do MetaStrength no score
     beta_ctr: float = BETA_CTR  # peso do counter term no score
     beta_syn: float = BETA_SYN  # peso da sinergia no score
+    # Peso de sinergia específico para pares SUP × SUP; None ⇒ usa `beta_syn`.
+    beta_syn_sup_sup: float | None = None
 
 
 DEFAULT_WEIGHTS = ModelWeights()
@@ -143,11 +149,18 @@ DEFAULT_WEIGHTS = ModelWeights()
 PRESETS: dict[str, ModelWeights] = {
     # O modelo padrão (β_meta=1.5). Base dos demais presets.
     "equilibrado": DEFAULT_WEIGHTS,
-    # Prioriza counterar o time inimigo: threat weighting por COUNTERS mais forte
-    # (λ=0.45) e counter term mais pesado; meta recua (β_meta=1.0) e sinergia também.
-    # Sinergia do time inimigo (ν) no baseline — a alavanca distintiva é o counter.
+    # Prioriza counterar o time inimigo: threat weighting por COUNTERS (λ=0.32) e
+    # counter term cheio (β_ctr=1.0); meta recua (β_meta=0.75) e a sinergia geral
+    # também (β_syn=0.325), EXCETO entre dois suportes (β_syn_sup_sup=0.65), onde a
+    # dupla de sup pesa como no preset equilibrado.
     "counter-first": ModelWeights(
-        lam=0.45, mu=0.30, nu=0.10, beta_meta=1.0, beta_ctr=1.50, beta_syn=0.50
+        lam=0.32,
+        mu=0.23,
+        nu=0.10,
+        beta_meta=0.75,
+        beta_ctr=1.00,
+        beta_syn=0.325,
+        beta_syn_sup_sup=0.65,
     ),
     # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=3.0. A ameaça
     # passa a pesar quem é FORTE NO MAPA (μ=0.70) e quem forma uma COMP COESA
@@ -352,7 +365,10 @@ def calculate_hero_score(
                 counter_reasons.append((contribution, f"sofre contra {enemy} ({contribution:.2f})"))
 
     # --- synergy term (× β_syn, diagonal ignorada) ---
+    # β_syn_sup_sup (se definido no preset) substitui β_syn quando AMBOS os heróis
+    # do par são suportes; qualquer outra combinação de roles usa β_syn.
     ally_row = ally_matrix.get(hn, {})
+    hero_is_sup = weights.beta_syn_sup_sup is not None and heroes.get_hero_role(hn) == "SUP"
     synergy_score = 0.0
     for ally in allies:
         if not ally:
@@ -361,7 +377,11 @@ def calculate_hero_score(
         if an == hn:
             continue  # diagonal: remove o antigo hack do -11
         if an in ally_row:
-            contribution = ally_row[an] * weights.beta_syn
+            beta = weights.beta_syn
+            if hero_is_sup and heroes.get_hero_role(an) == "SUP":
+                assert weights.beta_syn_sup_sup is not None
+                beta = weights.beta_syn_sup_sup
+            contribution = ally_row[an] * beta
             synergy_score += contribution
             if contribution >= REASON_MIN:
                 synergy_reasons.append((contribution, f"sinergia com {ally} (+{contribution:.2f})"))

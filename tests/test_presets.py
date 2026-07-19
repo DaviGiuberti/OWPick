@@ -57,10 +57,33 @@ def test_preset_equilibrado_e_o_modelo_atual():
 
 
 def test_snapshot_counter_first():
-    # β_meta=1.0, β_ctr=1.50, β_syn=0.50 -> counter domina.
+    # β_meta=0.75, β_ctr=1.00, β_syn=0.325 -> counter domina.
     totals = _totals(resolve_weights("counter-first"))
-    assert totals == pytest.approx({"sniper": 3.0, "anchor": 2.0, "buddy": 1.0})
+    assert totals == pytest.approx({"sniper": 2.0, "anchor": 1.5, "buddy": 0.65})
     assert max(totals, key=lambda h: totals[h]) == "sniper"
+
+
+def test_counter_first_sinergia_sup_x_sup_usa_peso_dobrado():
+    """No counter-first, SUP × SUP usa β_syn_sup_sup=0.65; o resto, β_syn=0.325."""
+    w = resolve_weights("counter-first")
+    ally_matrix = {"ana": {"mercy": 1.0, "cassidy": 1.0}}
+
+    def _syn(ally: str) -> float:
+        return float(
+            calculate_hero_score("Ana", ally_matrix, {}, [ally], [], {}, {}, weights=w)[
+                "synergy_score"
+            ]  # pyright: ignore[reportArgumentType]
+        )
+
+    assert _syn("Mercy") == pytest.approx(0.65)  # SUP × SUP
+    assert _syn("Cassidy") == pytest.approx(0.325)  # SUP × DPS
+    # Os demais presets não têm a regra: tudo usa β_syn.
+    eq = resolve_weights("equilibrado")
+    assert float(
+        calculate_hero_score("Ana", ally_matrix, {}, ["Mercy"], [], {}, {}, weights=eq)[
+            "synergy_score"
+        ]  # pyright: ignore[reportArgumentType]
+    ) == pytest.approx(scoring.BETA_SYN)
 
 
 def test_snapshot_meta_first():

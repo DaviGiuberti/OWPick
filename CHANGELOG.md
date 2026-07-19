@@ -4,6 +4,28 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.8] — 2026-07-18
+
+### Recalibração do preset Counter-first
+
+- Novos pesos do preset **Counter-first**: `β_ctr = 1.00` (era 1.50),
+  `β_syn = 0.325` (era 0.50), `β_meta = 0.75` (era 1.0), `λ = 0.32` (era 0.45),
+  `μ = 0.23` (era 0.30). `ν` permanece 0.10.
+- **Sinergia Suporte × Suporte**: no Counter-first, pares em que **ambos** os
+  heróis são da role SUP usam peso de sinergia **0.65**; todas as demais
+  combinações de roles (SUP×DPS, SUP×TANK, DPS×TANK, ...) usam **0.325**.
+  Implementado pelo novo campo opcional `ModelWeights.beta_syn_sup_sup`
+  (`None` = usa `beta_syn`), preenchido apenas no preset Counter-first.
+
+### Comportamento alterado
+
+- Como `λ` e `μ` mudaram, o multiplicador de ameaça, o ranking de ameaças, o
+  counter score e o ranking final do Counter-first mudam em relação à v1.2.7.
+- Os presets **Equilibrado**, **Meta-first** e **Conforto+** permanecem
+  inalterados.
+
+---
+
 ## [v1.2.7] — 2026-07-18
 
 ### Atualização de dados (matriz de sinergias)
