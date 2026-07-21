@@ -1,5 +1,5 @@
 {
-    "version": "1.2.8",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.8/OWPick_v1.2.8.zip",
-    "notas": "### Recalibração do preset Counter-first - Novos pesos do preset **Counter-first**: `β_ctr = 1.00` (era 1.50), `β_syn = 0.325` (era 0.50), `β_meta = 0.75` (era 1.0), `λ = 0.32` (era 0.45), `μ = 0.23` (era 0.30). `ν` permanece 0.10. - **Sinergia Suporte × Suporte**: no Counter-first, pares em que **ambos** os heróis são da role SUP usam peso de sinergia **0.65**; todas as demais combinações de role"
+    "version": "1.2.9",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.9/OWPick_v1.2.9.zip",
+    "notas": "### Enemy Threat — sinergia SUP × SUP ignorada - O componente de sinergia usado no cálculo do **Enemy Threat** (threat weightings) `ν · Σ_{e'≠e} Y(e,e')` passa a **ignorar pares Suporte × Suporte**: qualquer par em que **ambos** os inimigos são da role SUP contribui **0** para o sinal bruto de ameaça. Pares com pelo menos uma role diferente (SUP×DPS, SUP×TANK, DPS×TANK, ...) continuam contribuindo"
 }
