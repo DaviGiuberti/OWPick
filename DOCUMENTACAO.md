@@ -323,7 +323,11 @@ aplicado ao counter term. São **três componentes** (0 = ameaça neutra):
 - `ν · Σ_{e'≠e} Y(e,e')` — **sinergia do inimigo com o resto do time inimigo**
   (combo: um inimigo numa comp coesa é mais perigoso; anti-sinergia reduz a
   ameaça). Usa a **mesma matriz de sinergia `Y`** dos aliados, aplicada aos pares
-  de inimigos, com a diagonal `e' == e` ignorada.
+  de inimigos, com a diagonal `e' == e` ignorada. **Exceção**: pares
+  **Support × Support** (ambos os inimigos da role SUP) contribuem **0** neste
+  somatório — dois suportes juntos não elevam a ameaça. Essa exceção vale
+  **apenas** para a sinergia usada pelo Enemy Threat; o cálculo normal de
+  sinergias do ranking (`T_syn`) continua contabilizando SUP × SUP normalmente.
 
 A transformação é `w(raw) = exp( A · tanh(raw / S) )`, com as propriedades:
 
@@ -647,7 +651,7 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 | `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
-| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro) |
+| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro). Pares SUP × SUP são ignorados no termo de sinergia (só aqui, não no `T_syn` do ranking) |
 | `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`**; par SUP×SUP usa `beta_syn_sup_sup` quando o preset o define (Counter-first) |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 

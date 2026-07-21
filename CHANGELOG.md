@@ -4,6 +4,24 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.9] — 2026-07-21
+
+### Enemy Threat — sinergia SUP × SUP ignorada
+
+- O componente de sinergia usado no cálculo do **Enemy Threat** (threat
+  weightings) `ν · Σ_{e'≠e} Y(e,e')` passa a **ignorar pares Suporte × Suporte**:
+  qualquer par em que **ambos** os inimigos são da role SUP contribui **0** para
+  o sinal bruto de ameaça. Pares com pelo menos uma role diferente (SUP×DPS,
+  SUP×TANK, DPS×TANK, ...) continuam contribuindo normalmente.
+- Ajuste interno de balanceamento dos threat weightings (dois suportes juntos
+  não tornam o inimigo mais perigoso para efeito de ameaça).
+- **Nenhuma alteração no cálculo normal de sinergias**: o score de sinergia do
+  ranking principal, o score final, as matrizes, os CSVs e os presets de score
+  seguem usando SUP × SUP exatamente como antes. A exceção vale **somente** para
+  o termo de sinergia dentro do Enemy Threat.
+
+---
+
 ## [v1.2.8] — 2026-07-18
 
 ### Recalibração do preset Counter-first

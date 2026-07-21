@@ -313,8 +313,16 @@ def compute_threat_weights(
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
         syn_row = syn.get(en, {})
-        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada).
-        synergy_sum = sum(syn_row.get(other, 0.0) for other in enemies_norm if other != en)
+        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada). Pares
+        # SUP × SUP NÃO contam para a ameaça: dois suportes juntos não tornam o
+        # inimigo mais perigoso para efeito de threat weighting (a sinergia
+        # SUP × SUP segue valendo normalmente no ranking principal).
+        enemy_is_sup = heroes.get_hero_role(en) == "SUP"
+        synergy_sum = sum(
+            syn_row.get(other, 0.0)
+            for other in enemies_norm
+            if other != en and not (enemy_is_sup and heroes.get_hero_role(other) == "SUP")
+        )
         raw = lam * counter_sum + mu * map_bonus + nu * synergy_sum
         weights[en] = threat_multiplier(raw)
     return weights
