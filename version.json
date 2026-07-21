@@ -1,5 +1,5 @@
 {
-    "version": "1.2.7",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.7/OWPick_v1.2.7.zip",
-    "notas": "### Atualização de dados (matriz de sinergias) - Matriz de sinergias migrada de uma fonte externa em JSON para a planilha oficial de edição `data/heroes ally.xlsx`, convertendo a escala do JSON (−30..30, em passos de 10) para a escala do projeto (−3..3). - **Relações Suporte × Suporte preservadas**: os valores já existentes na planilha para pares de heróis da role SUP foram mantidos exatamente com"
+    "version": "1.2.8",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.8/OWPick_v1.2.8.zip",
+    "notas": "### Recalibração do preset Counter-first - Novos pesos do preset **Counter-first**: `β_ctr = 1.00` (era 1.50), `β_syn = 0.325` (era 0.50), `β_meta = 0.75` (era 1.0), `λ = 0.32` (era 0.45), `μ = 0.23` (era 0.30). `ν` permanece 0.10. - **Sinergia Suporte × Suporte**: no Counter-first, pares em que **ambos** os heróis são da role SUP usam peso de sinergia **0.65**; todas as demais combinações de role"
 }
