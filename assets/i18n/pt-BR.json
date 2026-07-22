@@ -10,6 +10,7 @@
   "pipeline.capturing": "Capturando a tela...",
   "pipeline.comparing": "Comparando os prints e identificando o mapa...",
   "pipeline.choosing": "Executando escolha de herói...",
+  "pipeline.role_detected": "Role detectada automaticamente: {role} (herói: {hero})",
   "pipeline.slot_unidentified": "{slot}: não identificado (score {score})",
   "pipeline.role_missing": "Não encontrei sua Role. Use a opção 2 do menu para definir a função que você joga.",
   "pipeline.favorites_missing": "Não encontrei seus favoritos ('{role}.txt'). Use a opção 3 do menu para escolher os heróis que você joga.",

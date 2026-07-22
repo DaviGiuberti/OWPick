@@ -15,6 +15,7 @@ OWPick é uma ferramenta desktop para jogadores de **Overwatch** que automatiza 
 - Identificação de heróis por template matching com deslizamento vertical (`cv2.matchTemplate`, `TM_CCOEFF_NORMED` — correlação de média zero, robusta a brilho/HDR/highlight), com **limiar de confiança** por slot: slot cujo melhor score fica acima do limiar vira "não identificado" e é excluído das somas de counter/sinergia
 - **Suporte aos bans do modo Competitivo**: identifica os heróis banidos nos 5 slots de ban e os remove automaticamente do ranking (mesmo tratamento dos heróis já presentes no time). Os bans usam um banco de templates dedicado (`assets/heroes/bans/`, ícones 3D oficiais — arte diferente dos retratos do lineup) e matching direto, sem janela deslizante
 - Identificação automática do mapa via OCR (Tesseract embutido) + fuzzy match
+- **Detecção automática da role do jogador no TAB+1**: após a captura, o pipeline lê o **nome do herói que o jogador está usando** (exibido na scoreboard, logo abaixo do retrato) por OCR + fuzzy match contra `HEROES_ROLES` e usa a role desse herói em **todo o pipeline** (recorte do lineup, favoritos e ranking). **Fallback**: se o herói não for identificado com confiança, mantém a role escolhida manualmente (`Roles.txt`) — detecção automática primeiro, role manual como fallback
 - Suporte a múltiplas resoluções de tela: 720p e 2K com escalonamento automático; resoluções intermediárias (1080p) interpoladas
 - **Escolha automática do banco de templates do lineup pelo TAMANHO do retrato** (não pela resolução da tela): retratos maiores usam o banco 2K (maior qualidade), menores usam 720p
 - Cálculo de pontuação baseado em:
@@ -60,6 +61,7 @@ OWPick/
 │   │   ├── capture.py       # Screen capture (mss/janela do jogo) + recorte em memória
 │   │   ├── matching.py      # Template matching (OpenCV TM_CCOEFF_NORMED) + limiar de confiança
 │   │   ├── map_detect.py    # OCR + fuzzy match do mapa (token_set_ratio + aliases por idioma)
+│   │   ├── player_hero.py   # Detecção automática do herói/role do jogador (OCR do nome; reusa o OCR do mapa)
 │   │   ├── ocr_backends.py  # Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional)
 │   │   ├── datasource.py    # Leitura/cache das matrizes CSV, stats e layout (override de stats do usuário)
 │   │   ├── validation.py    # Validação de matrizes/stats/templates na carga (aviso claro)
@@ -101,7 +103,8 @@ OWPick/
 │   ├── heroes enemy.xlsx    # Counters: fonte de EDIÇÃO (NÃO empacotada; vira counters.csv)
 │   ├── layouts/
 │   │   └── ow_hero_select.json  # Layout de captura versionado: slots do lineup,
-│   │                            # perks, slots de ban e âncoras da região do mapa
+│   │                            # perks, slots de ban, região do nome do herói do
+│   │                            # jogador e âncoras da região do mapa
 │   └── stats_inputs.csv     # Winrate/pickrate por mapa (fonte do MetaStrength;
 │                            # override do usuário em %APPDATA%\OWPick tem prioridade)
 │
@@ -188,6 +191,7 @@ current_map.txt   # Mapa identificado na última captura (fluxo CLI)
 | infra | `infra/capture.py` | Screen capture via MSS + recorte em memória |
 | infra | `infra/matching.py` | Template matching (OpenCV/NumPy/Pillow) |
 | infra | `infra/map_detect.py` | OCR + fuzzy match do mapa (`token_set_ratio` + aliases por idioma) |
+| infra | `infra/player_hero.py` | Detecção automática do herói/role do jogador (OCR do nome na scoreboard; reusa o OCR do `map_detect`) |
 | infra | `infra/ocr_backends.py` | Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional) |
 | infra | `infra/datasource.py` | Leitura/cache das matrizes CSV, stats (com override do usuário) e layout |
 | infra | `infra/validation.py` | Validação de matrizes/stats/templates na carga (aviso claro do que falta) |
@@ -208,7 +212,9 @@ ui/console.main()
 ├── ui/roles.executar()                   → infra/storage.write_role()  [Roles.txt]
 ├── ui/favorites.executar()               → infra/storage.save_heroes_to_files()  [ALL/DPS/SUP/TANK.txt]
 └── [TAB+1] → pipeline.run_pipeline()
-    ├── capture.capture()                 → CaptureResult (recortes em memória; sem disco)
+    ├── capture.grab_screen()             → imagem completa (captura única)
+    ├── player_hero.detect(full) → Hero?  → role AUTO-detectada (fallback: storage.read_role)
+    ├── capture.crop_capture(full, role)  → CaptureResult (pula o slot do próprio jogador)
     ├── matching.match_bans() / match_lineup()   → BanList, Lineup (objetos Hero)
     ├── map_detect.detect(cap.full)       → MapDetection
     └── pipeline.rank(...)                → RankingResult
@@ -254,13 +260,14 @@ standalone):
 [hotkey de captura pressionada]  → ui/console._trigger_pipeline (thread)
         ↓
 pipeline.run_pipeline(report, save_debug)
-  - storage.read_role() / read_playable_heroes(role)   [pré-requisitos; %APPDATA%]
+  - capture.grab_screen(): retângulo do cliente da janela do Overwatch (ctypes)
+    ou monitor primário (fallback) — captura ÚNICA da tela
+  - player_hero.detect(full) → role AUTO-detectada (herói do jogador via OCR do
+    nome na scoreboard); se não identificar, storage.read_role() [fallback manual]
+  - storage.read_playable_heroes(role)   [pré-requisito; %APPDATA%]
         ↓
-pipeline.analyze()
-  - capture.capture() → CaptureResult
-      - grab_screen(): retângulo do cliente da janela do Overwatch (ctypes)
-        ou monitor primário (fallback)
-      - crop_capture(): interpreta data/layouts/ow_hero_select.json —
+pipeline.analyze(full_img, role)
+  - crop_capture(full, role): interpreta data/layouts/ow_hero_select.json —
         10 slots × 4 variações de perk (pula o slot da role) + 5 slots de ban,
         escalados por scale_and_clamp p/ a resolução atual (tudo em memória)
   - Em PARALELO (ThreadPoolExecutor, 2 workers):
@@ -526,9 +533,10 @@ Ponto de entrada (`python -m owpick` e entry do PyInstaller): garante `src/` no
 | Função | Descrição |
 |---|---|
 | `RankingResult` | Dataclass com o resultado completo (role, lineup, bans, mapa, ameaças, recomendações, excluídos) — a `ui` só formata |
-| `analyze(report, save_debug)` | Captura → matching → OCR, tudo **em memória**: `capture.capture()`; matching de bans+lineup roda **em paralelo** ao OCR do mapa (`ThreadPoolExecutor(max_workers=2)` — o Tesseract é subprocess-bound e o OpenCV libera o GIL); reporta slots não identificados |
+| `analyze(full_img, role, report, save_debug)` | `crop_capture(full_img, role)` → matching → OCR, tudo **em memória**; matching de bans+lineup roda **em paralelo** ao OCR do mapa (`ThreadPoolExecutor(max_workers=2)` — o Tesseract é subprocess-bound e o OpenCV libera o GIL); reporta slots não identificados. `full_img`/`role` são injetados pelo `run_pipeline` (que já capturou e resolveu a role); ausentes ⇒ captura e lê a role manual (compat. CLI/testes) |
 | `rank(role, playable, allies, enemies, banned, mapa)` | Matrizes via `datasource`, pesos do preset ativo (`settings` + `resolve_weights`), `load_meta_strength` + `compute_threat_weights` + `rank_heroes` → `RankingResult` |
-| `run_pipeline(report, save_debug)` | Caso de uso completo da hotkey de captura; `None` se role/favoritos ausentes (mensagens "o que houve + o que fazer") |
+| `_resolve_role(full_img, report)` | Role efetiva: `player_hero.detect(full_img)` (detecção automática do herói do jogador) e usa a role dele; se não identificar, cai para `storage.read_role()` (role manual) |
+| `run_pipeline(report, save_debug)` | Caso de uso completo da hotkey de captura: captura a tela UMA vez (`grab_screen`), resolve a role (`_resolve_role`), lê favoritos e chama `analyze` + `rank`; `None` se role/favoritos ausentes (mensagens "o que houve + o que fazer") |
 | `rank_from_files()` | Fluxo standalone por arquivos (equivalente ao antigo `choose_ow_hero`): lê `lineup.txt`/`bans.txt`/`current_map.txt` do cache e ranqueia |
 
 O parâmetro `report` é um callback de progresso (a UI passa o console rich);
@@ -719,6 +727,38 @@ o MAE; melhor MAE acima do limiar = slot **vazio**. Validação em captura real 
    (MetaStrength neutro, ranking continua)
 
 `executar()` é o fluxo CLI (lê `cache/print/full.png`, grava `current_map.txt`).
+`extract_text_from_image(full_img, region)` é **genérico** (recorta a região, faz
+grayscale → autocontraste → upscale 2× → OCR) e é **reutilizado** pelo
+`player_hero` para ler o nome do herói do jogador — mesmo pré-processamento, sem
+duplicação.
+
+#### `infra/player_hero.py`
+
+`detect(full_img) -> Hero | None`, em memória: identifica automaticamente o herói
+(e a role) que o **jogador** está usando, para o pipeline do TAB+1 usar essa role
+no lugar da manual.
+
+1. `name_region(w, h)`: caixa do **nome do herói** na scoreboard (região versionada
+   em `data/layouts/ow_hero_select.json → player_hero.name_region`, base 720p),
+   escalada por `resolution.scale_and_clamp` — **mesmo mecanismo** dos demais
+   recortes, compatível com 720p/1080p/2K/4K sem lógica por resolução
+2. OCR do recorte via `map_detect.extract_text_from_image` (reuso do pré-processo
+   e do backend de OCR)
+3. `identify_hero`: **uma** chamada a `rapidfuzz.process.extractOne` com
+   `fuzz.token_set_ratio` contra `heroes.get_all_heroes()`, com um processor que
+   deixa o match tolerante a caixa/acentos preservando os espaços (o ruído do OCR
+   ao lado do nome — ex.: o badge de role — vira token separado e não contamina o
+   nome). Devolve o nome **canônico**
+4. `MIN_CONFIDENCE = 60.0` (score do fuzzy): abaixo disso → `None` (o pipeline usa
+   a role manual como **fallback**). A role sai de `Hero.from_name(nome).role`
+   (`HEROES_ROLES`)
+
+**Por que OCR do nome, e não template matching contra `assets/heroes/2k`**: a arte
+do retrato **grande** da scoreboard tem enquadramento/zoom diferentes do busto
+pequeno (84×80) do banco do lineup, então o template matching é **não confiável**
+para esse recorte (em capturas reais o herói correto some no meio do ranking de
+similaridade). O nome em texto é lido de forma robusta pelo OCR já existente
+(validado nas fixtures 720p/1080p/2K).
 
 #### `infra/ocr_backends.py`
 

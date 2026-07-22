@@ -10,6 +10,7 @@ from __future__ import annotations
 from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING
 
 from owpick import settings
 from owpick.core.heroes import normalize_hero_name
@@ -22,8 +23,11 @@ from owpick.core.scoring import (
 )
 from owpick.i18n import t
 from owpick.infra import capture as capture_mod
-from owpick.infra import datasource, map_detect, matching, storage
+from owpick.infra import datasource, map_detect, matching, player_hero, storage
 from owpick.log import get_logger
+
+if TYPE_CHECKING:
+    from PIL import Image
 
 log = get_logger("pipeline")
 
@@ -57,12 +61,24 @@ class RankingResult:
 # Análise da captura (TAB+1): captura -> matching -> OCR do mapa
 # ---------------------------------------------------------------------------
 def analyze(
+    full_img: Image.Image | None = None,
+    role: str | None = None,
     report: Reporter = None,
     save_debug: bool = False,
 ) -> tuple[Lineup, BanList, MapDetection]:
-    """Captura a tela e devolve (lineup, bans, mapa) — tudo em memória."""
-    _report(report, t("pipeline.capturing"))
-    cap = capture_mod.capture()
+    """Captura (ou recebe) a tela e devolve (lineup, bans, mapa) — em memória.
+
+    `full_img`/`role` são injetados pelo run_pipeline, que já captura a tela UMA
+    vez e resolve a role automaticamente (detecção do herói + fallback manual)
+    antes do recorte — o recorte precisa da role para pular o slot do próprio
+    jogador. Quando ausentes (fluxo CLI/testes), captura a tela e lê a role manual.
+    """
+    if full_img is None:
+        _report(report, t("pipeline.capturing"))
+        full_img = capture_mod.grab_screen()
+    if role is None:
+        role = storage.read_role()
+    cap = capture_mod.crop_capture(full_img, role)
     if save_debug:
         capture_mod.save_debug_artifacts(cap)
 
@@ -175,12 +191,34 @@ def rank(
     )
 
 
+def _resolve_role(full_img: Image.Image, report: Reporter) -> str | None:
+    """Role efetiva do jogador: detecção automática do herói, com fallback manual.
+
+    Tenta identificar o herói que o jogador está usando (OCR do nome na scoreboard,
+    player_hero.detect) e usa a role DELE. Se não identificar com confiança, cai
+    para a role escolhida manualmente pelo usuário (Roles.txt) — o comportamento
+    anterior. Assim a detecção automática vem primeiro; o sistema antigo é o
+    fallback.
+    """
+    hero = player_hero.detect(full_img)
+    if hero is not None and hero.role is not None:
+        _report(report, t("pipeline.role_detected", role=hero.role, hero=hero.name))
+        return hero.role
+    return storage.read_role()
+
+
 def run_pipeline(report: Reporter = None, save_debug: bool = False) -> RankingResult | None:
     """
     Caso de uso completo do TAB+1: captura, identifica e ranqueia.
     Retorna None se pré-requisitos (role/favoritos) estiverem ausentes.
     """
-    role = storage.read_role()
+    # Captura a tela UMA vez: a mesma imagem serve para a detecção automática da
+    # role (herói do jogador) e para o recorte do lineup — que só pode ser feito
+    # depois de conhecida a role (para pular o slot do próprio jogador).
+    _report(report, t("pipeline.capturing"))
+    full_img = capture_mod.grab_screen()
+
+    role = _resolve_role(full_img, report)
     if role is None:
         _report(report, t("pipeline.role_missing"))
         return None
@@ -190,7 +228,9 @@ def run_pipeline(report: Reporter = None, save_debug: bool = False) -> RankingRe
         _report(report, t("pipeline.favorites_missing", role=role))
         return None
 
-    lineup, bans, detection = analyze(report=report, save_debug=save_debug)
+    lineup, bans, detection = analyze(
+        full_img=full_img, role=role, report=report, save_debug=save_debug
+    )
     return rank(
         role=role,
         playable=playable,

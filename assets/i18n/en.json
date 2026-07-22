@@ -10,6 +10,7 @@
   "pipeline.capturing": "Capturing the screen...",
   "pipeline.comparing": "Matching the crops and identifying the map...",
   "pipeline.choosing": "Running hero selection...",
+  "pipeline.role_detected": "Role auto-detected: {role} (hero: {hero})",
   "pipeline.slot_unidentified": "{slot}: not identified (score {score})",
   "pipeline.role_missing": "Your Role was not found. Use menu option 2 to set the role you play.",
   "pipeline.favorites_missing": "Your favorites were not found ('{role}.txt'). Use menu option 3 to pick the heroes you play.",

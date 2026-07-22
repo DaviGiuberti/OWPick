@@ -4,6 +4,36 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.10] — 2026-07-22
+
+### Detecção automática da role no TAB+1
+
+- O pipeline do **TAB+1** passa a **detectar automaticamente a role** (Tank/DPS/
+  Support) que o jogador está usando, em vez de depender apenas da role escolhida
+  manualmente no menu. Logo após a captura, um novo passo lê o **nome do herói do
+  jogador** exibido na scoreboard (região versionada no layout, escalada por
+  `resolution.scale_and_clamp` — compatível com 720p/1080p/2K/4K, sem lógica por
+  resolução) e identifica o herói por OCR + fuzzy match contra `HEROES_ROLES`. A
+  role desse herói é usada em **todo o pipeline** (recorte do lineup, favoritos
+  jogáveis e ranking).
+- **Fallback preservado**: se o herói do jogador não for identificado com
+  confiança, o pipeline mantém exatamente o comportamento anterior — usa a role
+  escolhida manualmente pelo usuário (`Roles.txt`). Detecção automática primeiro;
+  sistema antigo como fallback.
+- Novo módulo `infra/player_hero.py` (`detect(full_img) -> Hero | None`), que
+  **reutiliza** o OCR do `map_detect` (mesmo backend e pré-processamento) e a
+  matemática de escala já existente — sem lógica de resolução paralela nem
+  duplicação de código. A captura da tela passou a ser feita **uma única vez** por
+  execução do TAB+1 (a mesma imagem alimenta a detecção da role e o recorte do
+  lineup, que precisa da role para pular o slot do próprio jogador).
+- **Nota técnica**: a identificação usa o NOME do herói (texto na scoreboard), e
+  não template matching do retrato contra `assets/heroes/2k` — a arte do retrato
+  grande da scoreboard tem enquadramento diferente do busto do lineup, tornando o
+  template matching não confiável para esse fim; o OCR do nome é robusto (validado
+  nas fixtures 720p/1080p/2K).
+
+---
+
 ## [v1.2.9] — 2026-07-21
 
 ### Enemy Threat — sinergia SUP × SUP ignorada

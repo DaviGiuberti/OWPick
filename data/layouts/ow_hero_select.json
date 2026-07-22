@@ -34,6 +34,9 @@
       { "name": "ban5.png", "left": 437.0, "top": 13.5, "width": 31.5, "height": 31.0 }
     ]
   },
+  "player_hero": {
+    "name_region": { "left": 789, "top": 238, "width": 130, "height": 39 }
+  },
   "map_region_anchors": {
     "2k": {
       "map_region": { "left": 2104, "top": 38, "width": 269, "height": 50 },
