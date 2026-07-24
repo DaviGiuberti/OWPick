@@ -1,5 +1,5 @@
 {
-    "version": "1.2.10",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.10/OWPick_v1.2.10.zip",
-    "notas": "### Detecção automática da role no TAB+1 - O pipeline do **TAB+1** passa a **detectar automaticamente a role** (Tank/DPS/ Support) que o jogador está usando, em vez de depender apenas da role escolhida manualmente no menu. Logo após a captura, um novo passo lê o **nome do herói do jogador** exibido na scoreboard (região versionada no layout, escalada por `resolution.scale_and_clamp` — compatível c"
+    "version": "1.2.11",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.11/OWPick_v1.2.11.zip",
+    "notas": "### Consumo de recursos: o jogo tem prioridade sobre o OWPick Auditoria de performance do programa inteiro, motivada por travamentos do Overwatch em notebook fraco enquanto o OWPick está aberto. **Nenhuma mudança de comportamento**: ranking, detecção de heróis/mapas/bans e textos continuam idênticos (verificado nas fixtures 720p/1080p/2K — mesmos heróis, mesmos bans, mesmo mapa e mesmos scores até"
 }
