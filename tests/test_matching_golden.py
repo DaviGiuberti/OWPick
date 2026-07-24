@@ -1,9 +1,10 @@
 """Golden tests do matching — o coração do produto.
 
 Roda o pipeline REAL em memória (capture.capture -> matching -> map_detect.detect)
-sobre capturas reais em tests/fixtures/<res>/full.png, sem capturar a tela: o
+sobre capturas reais em tests/fixtures/<res>/ (full.png; em 720p, full1.png +
+as fixtures adicionais full2/full3.png da v1.2.11), sem capturar a tela: o
 `mss` é substituído por um fake que devolve a imagem da fixture. Cada fixture
-tem um gabarito expected.json (lineup, bans, mapa); a comparação usa nomes
+tem um gabarito expected*.json (lineup, bans, mapa); a comparação usa nomes
 normalizados (core.heroes.normalize_hero_name).
 
 Também mede e reporta a MARGEM (score do 1º vs 2º colocado) por slot do
@@ -23,6 +24,11 @@ from owpick.infra import capture, map_detect, matching
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
+
+# Nome do arquivo da fixture por resolução: na v1.2.11 o full.png de 720p foi
+# renomeado para full1.png (e ganhou os companheiros full2/full3.png); 1080p e
+# 2k continuam com full.png.
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full.png", "2k": "full.png"}
 
 
 class _FakeGrab:
@@ -60,10 +66,10 @@ def _norm(names):
     return [normalize_hero_name(n) for n in names]
 
 
-def _capture_fixture(res: str, tmp_path, monkeypatch):
+def _capture_fixture(res: str, tmp_path, monkeypatch, fixture_file=None, expected_file="expected.json"):
     """capture.capture() real sobre a imagem da fixture (mss falsificado)."""
     fixture = FIXTURES_DIR / res
-    with Image.open(fixture / "full.png") as img:
+    with Image.open(fixture / (fixture_file or FIXTURE_FILE[res])) as img:
         img.load()
     # Dados do usuário e cache isolados em tmp_path (sem Roles.txt) -> nenhum
     # slot de aliado é pulado (10 retratos). Aponta APPDATA/LOCALAPPDATA para o
@@ -73,7 +79,7 @@ def _capture_fixture(res: str, tmp_path, monkeypatch):
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(capture, "mss", _FakeMssModule(img))
     cap = capture.capture()
-    expected = json.loads((fixture / "expected.json").read_text(encoding="utf-8"))
+    expected = json.loads((fixture / expected_file).read_text(encoding="utf-8"))
     return cap, expected
 
 
@@ -127,6 +133,62 @@ def test_golden_mapa(res, tmp_path, monkeypatch):
     detection = map_detect.detect(cap.full)
     assert normalize_hero_name(detection.name) == normalize_hero_name(expected["map"]), (
         f"[{res}] mapa diverge: '{detection.name}'"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Fixtures 720p adicionais (v1.2.11): full2.png e full3.png
+# ---------------------------------------------------------------------------
+
+# (arquivo da fixture, gabarito) das capturas 720p adicionadas na v1.2.11.
+EXTRA_720P = [
+    ("full2.png", "expected2.json"),
+    ("full3.png", "expected3.json"),
+]
+
+
+@pytest.mark.parametrize("fixture_file,expected_file", EXTRA_720P)
+def test_golden_lineup_720p_extra(fixture_file, expected_file, tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("720p", tmp_path, monkeypatch, fixture_file, expected_file)
+    lineup, slot_results = matching.match_lineup(cap)
+
+    assert len(slot_results) == 10  # 5 aliados + 5 inimigos (sem Roles.txt)
+    assert _norm(lineup.ally_names()) == _norm(expected["allies"]), (
+        f"[{fixture_file}] aliados divergem: {lineup.ally_names()}"
+    )
+    assert _norm(lineup.enemy_names()) == _norm(expected["enemies"]), (
+        f"[{fixture_file}] inimigos divergem: {lineup.enemy_names()}"
+    )
+
+
+@pytest.mark.parametrize("fixture_file,expected_file", EXTRA_720P)
+def test_golden_mapa_720p_extra(fixture_file, expected_file, tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("720p", tmp_path, monkeypatch, fixture_file, expected_file)
+    detection = map_detect.detect(cap.full)
+    assert normalize_hero_name(detection.name) == normalize_hero_name(expected["map"]), (
+        f"[{fixture_file}] mapa diverge: '{detection.name}'"
+    )
+
+
+# Limite conhecido dos bans fora de 2K (mesma causa do xfail do 1080p): nas duas
+# fixtures o 4º ban legítimo marca MAE ACIMA do BAN_MATCH_MAX_SCORE (0.12,
+# calibrado em 2K) e é descartado, embora seja o herói correto no topo do
+# ranking — full2 (Wrecking Ball, MAE 0.152) e full3 (Mercy, MAE 0.141). O 5º
+# slot está vazio e é corretamente rejeitado. O gabarito guarda os 4 bans reais
+# da imagem; a detecção acha só 3 (requer critério de margem/métrica robusta,
+# tarefas 4.1/4.2).
+@pytest.mark.parametrize("fixture_file,expected_file", EXTRA_720P)
+@pytest.mark.xfail(
+    strict=True,
+    reason="Limite conhecido: em 720p o 4º ban legítimo (Wrecking Ball 0.152 / "
+    "Mercy 0.141) fica acima do BAN_MATCH_MAX_SCORE (0.12, calibrado em 2K) e é "
+    "descartado — mesma causa do xfail do 1080p.",
+)
+def test_golden_bans_720p_extra(fixture_file, expected_file, tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("720p", tmp_path, monkeypatch, fixture_file, expected_file)
+    bans = matching.match_bans(cap)
+    assert _norm(bans.names()) == _norm(expected["bans"]), (
+        f"[{fixture_file}] bans divergem: {bans.names()}"
     )
 
 

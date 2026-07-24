@@ -1,0 +1,6 @@
+{
+    "allies": ["Zarya", "Genji", "Cassidy", "Mizuki", "Ana"],
+    "enemies": ["Ramattra", "Soldier 76", "Cassidy", "Ana", "Lúcio"],
+    "bans": ["Moira", "Mauga", "Sierra", "Wrecking Ball"],
+    "map": "Lijiang Tower"
+}

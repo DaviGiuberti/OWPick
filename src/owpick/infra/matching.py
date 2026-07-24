@@ -143,7 +143,7 @@ def load_templates_from_category(templates_dir: Path, category: str, template_si
     return templates
 
 
-@lru_cache(maxsize=8)
+@lru_cache(maxsize=1)
 def load_all_templates(templates_dir: Path, template_size):
     """
     Carrega o banco do lineup (tank/dps/sup) já em escala de cinza e
@@ -154,6 +154,12 @@ def load_all_templates(templates_dir: Path, template_size):
     não é relido/redimensionado de novo. Se a resolução mudar, `template_size`
     muda e a chave também — invalidação automática, sem estado manual.
     Os arrays retornados são tratados como imutáveis pelos consumidores.
+
+    `maxsize=1` de propósito: uma sessão usa UM banco por vez (a resolução da
+    janela do jogo não muda a cada captura). Guardar bancos antigos só manteria
+    dezenas de MB de arrays residentes depois de um alt-tab entre tela cheia e
+    modo janela — a próxima captura na resolução nova recarrega o banco certo e
+    a anterior é liberada.
     """
     if not templates_dir.exists():
         raise RuntimeError(f"Pasta de templates não existe: {templates_dir}")
@@ -341,13 +347,14 @@ def match_lineup(cap: CaptureResult) -> tuple[Lineup, dict[str, MatchResult]]:
 # ---------------------------------------------------------------------------
 # Bans do competitivo — matching DIRETO (sem janela deslizante, sem buffer)
 # ---------------------------------------------------------------------------
-@lru_cache(maxsize=4)
+@lru_cache(maxsize=1)
 def load_ban_templates(templates_dir: Path, template_size) -> list:
     """Carrega o banco dedicado de bans (assets/heroes/bans/, pasta plana).
 
     Cacheado por `(templates_dir, template_size)` — o banco de bans (fonte
     128px) é resolução-independente (template_size fixo em BAN_COMPARE_SIZE),
-    então na prática é lido/redimensionado uma única vez por sessão."""
+    então na prática é lido/redimensionado uma única vez por sessão. `maxsize=1`
+    reflete isso: só existe uma chave possível no fluxo normal."""
     templates = []
     if not templates_dir.exists():
         print(f"AVISO: banco de bans não encontrado: {templates_dir}")

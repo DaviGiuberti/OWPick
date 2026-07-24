@@ -16,7 +16,7 @@ import keyboard
 from owpick import log as applog
 from owpick import paths, pipeline, settings
 from owpick.i18n import t
-from owpick.infra import resources, stats_update, storage, updater, validation
+from owpick.infra import perf, resources, stats_update, storage, updater, validation
 from owpick.log import get_logger, setup_logging
 from owpick.ui import favorites, hotkey, profiles, ranking_view, roles, sim, weights
 
@@ -349,6 +349,12 @@ def main():
         updater.get_local_version(),
         getattr(sys, "frozen", False),
     )
+
+    # Consumo de recursos: o OWPick roda AO LADO do jogo, então cede CPU/GPU
+    # para ele. Prioridade do processo abaixo do normal + OpenCV limitado a uma
+    # thread e sem despachar para a GPU integrada (OpenCL). Não muda nenhum
+    # resultado — só quem executa o cálculo e com que prioridade.
+    perf.tune_runtime(low_priority=cfg.low_priority, opencv_threads=cfg.opencv_threads)
 
     # Validação dos dados (matrizes/stats/templates) — só no modo --debug, com
     # aviso claro do que estiver faltando/errado (tarefa 5.2). No modo normal o

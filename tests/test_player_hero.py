@@ -1,7 +1,7 @@
 """Testes da detecção automática do herói/role do jogador (v1.2.10).
 
 Cobre o módulo infra/player_hero (OCR do nome + fuzzy match + role) sobre as
-capturas reais em tests/fixtures/<res>/full.png, o fallback quando não há herói
+capturas reais em tests/fixtures/<res>/ (full.png; em 720p, full1.png), o fallback quando não há herói
 legível, o escalonamento da região por resolução e a integração no pipeline
 (role detectada tem prioridade sobre a role manual, com fallback ao Roles.txt).
 """
@@ -16,6 +16,9 @@ from owpick.infra import capture, player_hero, storage
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
+
+# Nome do arquivo da fixture por resolução (v1.2.11: 720p/full.png -> full1.png).
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full.png", "2k": "full.png"}
 
 # Herói que o JOGADOR está usando em cada captura (retrato/nome grande na
 # scoreboard) — distinto do gabarito de lineup em expected.json.
@@ -52,7 +55,7 @@ class _FakeMss:
 
 
 def _load_full(res: str) -> Image.Image:
-    with Image.open(FIXTURES_DIR / res / "full.png") as img:
+    with Image.open(FIXTURES_DIR / res / FIXTURE_FILE[res]) as img:
         img.load()
     return img.convert("RGB")
 

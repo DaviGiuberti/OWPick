@@ -1,0 +1,6 @@
+{
+    "allies": ["Sigma", "Hanzo", "Torbjörn", "Lifeweaver", "Moira"],
+    "enemies": ["Sigma", "Ashe", "Soldier 76", "Lifeweaver", "Baptiste"],
+    "bans": ["Zarya", "Doomfist", "Widowmaker", "Mercy"],
+    "map": "Havana"
+}

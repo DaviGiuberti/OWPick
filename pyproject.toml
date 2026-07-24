@@ -1,6 +1,6 @@
 [project]
 name = "owpick"
-version = "1.1.6"
+version = "1.2.11"  # espelho informativo; a fonte única é version.txt (tools/bump.py)
 description = "Ferramenta de recomendacao automatica de herois para Overwatch (captura de tela + template matching + scoring)"
 authors = [{ name = "Davi Giuberti" }]
 requires-python = ">=3.11"

@@ -4,6 +4,72 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.11] — 2026-07-24
+
+### Consumo de recursos: o jogo tem prioridade sobre o OWPick
+
+Auditoria de performance do programa inteiro, motivada por travamentos do
+Overwatch em notebook fraco enquanto o OWPick está aberto. **Nenhuma mudança de
+comportamento**: ranking, detecção de heróis/mapas/bans e textos continuam
+idênticos (verificado nas fixtures 720p/1080p/2K — mesmos heróis, mesmos bans,
+mesmo mapa e mesmos scores até a 8ª casa decimal).
+
+- **Prioridade do processo abaixo do normal** (novo `infra/perf.py`): no boot o
+  OWPick entra em `BELOW_NORMAL_PRIORITY_CLASS`. Em disputa por CPU o Windows
+  passa a servir o Overwatch primeiro. Como o pipeline é uma ação manual de
+  ~1–2s, a latência não muda de forma perceptível. Desligável em
+  `settings.json` (`low_priority: false`).
+- **OpenCV limitado a 1 thread e sem GPU**: o OpenCV vinha usando **todos os
+  núcleos** (8 nesta máquina) e com **OpenCL LIGADO**, ou seja, podia despachar
+  operações para a mesma GPU integrada que renderiza o jogo — exatamente no
+  instante do TAB+1. Agora o boot aplica `cv2.setNumThreads(1)` e
+  `cv2.ocl.setUseOpenCL(False)`. Como os recortes são minúsculos (~42×57 px em
+  720p), o paralelismo quase não compensava a sincronização: medido em rodadas
+  repetidas nas fixtures, a latência do matching fica **dentro do ruído** nas
+  duas configurações (~±10%) — o ajuste não custa tempo perceptível e devolve
+  7 núcleos e a GPU integrada para o jogo. Ajustável em `settings.json`
+  (`opencv_threads`; `0` = padrão do OpenCV).
+- **Cache de templates só mantém o banco em uso**: `load_all_templates` e
+  `load_ban_templates` passaram de `lru_cache(maxsize=8)`/`(maxsize=4)` para
+  `maxsize=1`. Alternar entre tela cheia e modo janela numa mesma sessão não
+  deixa mais bancos de resoluções antigas residentes em memória.
+- **Instrumentação de tempo por etapa** (só com `--debug` / `settings.debug`):
+  o `owpick.log` passa a registrar o tempo de parede de cada etapa do pipeline
+  (`captura`, `recorte`, `matching`, `ocr-mapa`, `ocr-role`, `ranking`) e a
+  memória residente do processo. Custo zero em uso normal — fora do modo debug
+  nem o relógio é consultado. Sem dependência nova (`time.perf_counter` +
+  `ctypes`).
+- Correção de uma armadilha do `ctypes` no novo módulo: sem `argtypes`/`restype`
+  explícitos o pseudo-handle de `GetCurrentProcess()` chega **truncado** em 32
+  bits e o `SetPriorityClass` falha silenciosamente com `ERROR_INVALID_HANDLE`.
+  Coberto por teste de regressão (`tests/test_perf.py`).
+
+### Destaque do ranking por preset (apresentação)
+
+- A tabela do ranking (TAB+1) passa a **destacar em laranja** (`bold orange1`) o
+  nome do herói campeão da coluna que o **preset ativo** prioriza:
+  - **Counter-first** → maior valor em `COUNTER`;
+  - **Meta-first** → maior valor em `MAP META`;
+  - **Conforto+** → maior valor em `SYNERGY`;
+  - **Equilibrado** → sem destaque especial (exibição inalterada).
+- Mudança **exclusivamente visual**, em `ui/ranking_view.py`: nenhuma alteração
+  em ordenação, pontuação, pesos, presets ou no algoritmo de scoring. O herói
+  destacado permanece na mesma posição do ranking.
+
+### Fixtures de teste 720p adicionais
+
+- A fixture golden `tests/fixtures/720p/full.png` foi renomeada para `full1.png`
+  e ganhou duas companheiras reais — `full2.png` e `full3.png` — cada uma com seu
+  gabarito (`expected2.json`/`expected3.json`). Ampliam a cobertura do matching de
+  lineup e da detecção de mapa em 720p (novos testes em
+  `tests/test_matching_golden.py`); lineup e mapa das três fixtures batem 100%.
+- Os bans de `full2.png` (Wrecking Ball, MAE 0.152) e `full3.png` (Mercy, 0.141)
+  reincidem no **limite conhecido** dos bans fora de 2K — o 4º ban legítimo fica
+  acima do `BAN_MATCH_MAX_SCORE` (0.12, calibrado em 2K) e é descartado. Registrado
+  como `xfail` (mesma causa do 1080p); **algoritmo inalterado**.
+
+---
+
 ## [v1.2.10] — 2026-07-22
 
 ### Detecção automática da role no TAB+1

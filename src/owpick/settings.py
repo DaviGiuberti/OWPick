@@ -76,6 +76,14 @@ class Settings:
     # (ex.: {"beta_syn": 1.2}). Campos válidos: alpha, lam, mu, nu, beta_meta,
     # beta_ctr, beta_syn.
     custom_weights: dict[str, float] = field(default_factory=dict)
+    # --- Consumo de recursos (o jogo tem prioridade sobre o OWPick) ---
+    # Roda o processo em BELOW_NORMAL_PRIORITY_CLASS: em disputa por CPU, o
+    # Windows serve o Overwatch primeiro. Desligue só para diagnóstico.
+    low_priority: bool = True
+    # Threads internas do OpenCV no matching. None = default do OWPick
+    # (infra.perf.DEFAULT_OPENCV_THREADS = 1, o mais leve para o jogo);
+    # 0 ou negativo = deixa o OpenCV decidir (usa todos os núcleos).
+    opencv_threads: int | None = None
     # --- Overrides avançados (None = default calibrado do módulo dono) ---
     lineup_match_max_score: float | None = None  # canônico: infra.matching
     ban_match_max_score: float | None = None  # canônico: infra.matching
@@ -121,10 +129,17 @@ def _validate_field(name: str, value: object, default: object) -> tuple[object, 
             return value, None
         return default, f"'language' deve ser um de {list(VALID_LANGUAGES)} (recebi {value!r})"
 
-    if name in ("debug", "explain_ranking"):
+    if name in ("debug", "explain_ranking", "low_priority"):
         if isinstance(value, bool):
             return value, None
         return default, f"'{name}' deve ser true/false (recebi {value!r})"
+
+    if name == "opencv_threads":
+        if value is None:
+            return None, None
+        if isinstance(value, int) and not isinstance(value, bool):
+            return value, None
+        return default, f"'opencv_threads' deve ser um inteiro ou null (recebi {value!r})"
 
     if name == "weights_preset":
         # Import tardio para manter o settings leve no import (scoring puxa

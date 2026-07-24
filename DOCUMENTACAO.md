@@ -63,6 +63,8 @@ OWPick/
 │   │   ├── map_detect.py    # OCR + fuzzy match do mapa (token_set_ratio + aliases por idioma)
 │   │   ├── player_hero.py   # Detecção automática do herói/role do jogador (OCR do nome; reusa o OCR do mapa)
 │   │   ├── ocr_backends.py  # Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional)
+│   │   ├── perf.py          # Consumo de recursos: prioridade do processo, threads/OpenCL
+│   │   │                    # do OpenCV e instrumentação de tempo (só no --debug)
 │   │   ├── datasource.py    # Leitura/cache das matrizes CSV, stats e layout (override de stats do usuário)
 │   │   ├── validation.py    # Validação de matrizes/stats/templates na carga (aviso claro)
 │   │   ├── stats_update.py  # Atualização das stats de meta pelo app (baixa o CSV publicado)
@@ -193,6 +195,7 @@ current_map.txt   # Mapa identificado na última captura (fluxo CLI)
 | infra | `infra/map_detect.py` | OCR + fuzzy match do mapa (`token_set_ratio` + aliases por idioma) |
 | infra | `infra/player_hero.py` | Detecção automática do herói/role do jogador (OCR do nome na scoreboard; reusa o OCR do `map_detect`) |
 | infra | `infra/ocr_backends.py` | Backends de OCR plugáveis (Tesseract padrão; Windows.Media.Ocr opcional) |
+| infra | `infra/perf.py` | Consumo de recursos: prioridade do processo, threads/OpenCL do OpenCV, instrumentação de tempo/memória (só `--debug`) |
 | infra | `infra/datasource.py` | Leitura/cache das matrizes CSV, stats (com override do usuário) e layout |
 | infra | `infra/validation.py` | Validação de matrizes/stats/templates na carga (aviso claro do que falta) |
 | infra | `infra/stats_update.py` | Atualização das stats de meta pelo app (baixa o CSV publicado; sem deps externas) |
@@ -236,17 +239,18 @@ e os fluxos CLI (`matching.executar()`, `map_detect.executar()`,
 1. O usuário executa `OWPick.exe` (pelo atalho criado pelo instalador) ou `python src\owpick\__main__.py` (dev)
 2. `infra.resources.configure_windows_app_identity()` registra o AppUserModelID e o ícone da janela (identidade na taskbar do Windows)
 3. `paths.ensure_dirs()` cria os diretórios de dados do usuário/cache e `paths.migrate_legacy_user_data()` migra `Roles.txt`/favoritos de versões antigas (que gravavam ao lado do exe); `settings.get()` carrega o `settings.json` validado e `setup_logging()` inicia o log — com `--debug` (ou `settings.debug`), a validação de dados (`validation.report_problems`) também roda
-4. `updater.cleanup_old_backup()` apaga o backup `OWPick.old` de um update
+4. `perf.tune_runtime()` aplica os ajustes de **consumo de recursos**: prioridade do processo abaixo do normal e OpenCV limitado a 1 thread sem OpenCL (ver [Consumo de recursos](#consumo-de-recursos-o-jogo-tem-prioridade))
+5. `updater.cleanup_old_backup()` apaga o backup `OWPick.old` de um update
    anterior bem-sucedido; em seguida `updater.start_background_check()` verifica
    atualizações **em thread de fundo** (boot não bloqueia):
    - Baixa `version.json` do GitHub e compara com `version.txt` local
    - Se houver versão nova, avisa no console; o usuário aplica pelo comando
      `update` ou ao fechar o programa
-5. Se `Roles.txt` não existir (em `%APPDATA%\OWPick`) → `roles.executar()` é chamado (escolha de role obrigatória)
-6. Se `ALL.txt` não existir → `favorites.executar()` é chamado (configuração de favoritos)
-7. A hotkey global de captura é registrada (padrão `TAB+1`, configurável na opção 5; combinações com TAB usam `keyboard.hook()` + `HotkeyDetector`, as demais `keyboard.add_hotkey`)
-8. O loop de input de menu é iniciado em uma thread daemon separada
-9. O programa entra em loop principal (`while True: time.sleep(1)`)
+6. Se `Roles.txt` não existir (em `%APPDATA%\OWPick`) → `roles.executar()` é chamado (escolha de role obrigatória)
+7. Se `ALL.txt` não existir → `favorites.executar()` é chamado (configuração de favoritos)
+8. A hotkey global de captura é registrada (padrão `TAB+1`, configurável na opção 5; combinações com TAB usam `keyboard.hook()` + `HotkeyDetector`, as demais `keyboard.add_hotkey`)
+9. O loop de input de menu é iniciado em uma thread daemon separada
+10. O programa entra em loop principal (`while True: time.sleep(1)`)
 
 ### Como os Dados Fluem entre os Módulos (pipeline em memória)
 
@@ -540,7 +544,9 @@ Ponto de entrada (`python -m owpick` e entry do PyInstaller): garante `src/` no
 | `rank_from_files()` | Fluxo standalone por arquivos (equivalente ao antigo `choose_ow_hero`): lê `lineup.txt`/`bans.txt`/`current_map.txt` do cache e ranqueia |
 
 O parâmetro `report` é um callback de progresso (a UI passa o console rich);
-`save_debug=True` grava os PNGs intermediários (modo `--debug`).
+`save_debug=True` grava os PNGs intermediários (modo `--debug`). No modo debug,
+cada etapa (`captura`, `ocr-role`, `recorte`, `matching`, `ocr-mapa`, `ranking`)
+é cronometrada por `perf.stage` e vai para o `owpick.log`.
 
 #### `paths.py`
 
@@ -570,6 +576,8 @@ esquema. API: `get()` (cacheado) / `save()` / `reload()` / `parse()`.
 | `debug` | Equivale à flag `--debug` |
 | `explain_ranking` | Liga/desliga o "por quê" dos top-3 |
 | `weights_preset` / `custom_weights` | Preset de pesos do modelo + overrides individuais |
+| `low_priority` | `true` (default) roda o processo em `BELOW_NORMAL_PRIORITY_CLASS` — o jogo ganha a CPU na disputa (ver [Consumo de recursos](#consumo-de-recursos-o-jogo-tem-prioridade)) |
+| `opencv_threads` | Threads internas do OpenCV. `None` = default do OWPick (1); `0` = deixa o OpenCV decidir |
 | `scraper_region` / `scraper_tier` | Passados ao scraper na atualização de stats |
 | `lineup_match_max_score`, `ban_match_max_score`, `map_min_confidence`, `updater_url` | Overrides avançados; `None` = default calibrado do módulo dono |
 | `profiles` / `active_profile` | Múltiplos perfis (role + favoritos + preset + tier) |
@@ -584,7 +592,11 @@ chave); placeholder inválido devolve o texto cru — uma string nunca derruba o
 
 `setup_logging(debug)`: `RotatingFileHandler` (2×1MB) em `%APPDATA%\OWPick\logs`
 no nível DEBUG + console em INFO. `--debug` (ou `settings.debug`) sobe o console
-para DEBUG e preserva os PNGs intermediários.
+para DEBUG, preserva os PNGs intermediários e liga a **instrumentação de tempo
+por etapa** do pipeline (`infra/perf.stage`; ver
+[Consumo de recursos](#instrumentação---debug)). `DEBUG_MODE` é lido **do
+módulo** pelos consumidores (nunca importado por valor): `setup_logging` só o
+define depois que os demais módulos já foram importados.
 
 ---
 
@@ -693,7 +705,9 @@ Os dois limiares aceitam override via `settings.json`.
 
 **Lineup** (`match_lineup(cap)`):
 1. Banco escolhido pelo **tamanho do retrato** (`template_bank_for_resolution`)
-2. Templates **cacheados** por `(banco, tamanho)` (`lru_cache` — resolução nova invalida sozinha)
+2. Templates **cacheados** por `(banco, tamanho)` (`lru_cache(maxsize=1)` —
+   resolução nova invalida sozinha; `maxsize=1` porque uma sessão usa um banco
+   por vez, então alternar tela cheia/janela não deixa bancos antigos residentes)
 3. `find_best_match_sliding`: `cv2.matchTemplate` com **`TM_CCOEFF_NORMED`**
    (correlação de média zero — imune a brilho/HDR/highlight); como o template tem
    a largura do recorte, o mapa de resultado é 1D = deslizamento vertical em C++
@@ -766,6 +780,27 @@ Backends de OCR plugáveis, selecionados pela env `OWPICK_OCR_BACKEND`:
 `tesseract` (default — `assets/ocr/tesseract.exe` + `tessdata/`, embutidos) e
 `windows` (`Windows.Media.Ocr` via `winsdk`, **experimental**, grupo opcional
 `ocr-win`; fallback automático para o Tesseract se indisponível).
+
+#### `infra/perf.py`
+
+Ajuste de **consumo de recursos** e instrumentação de tempo. Vive em `infra`
+porque é I/O com o SO (Win32) e com o OpenCV. Tudo é *best-effort*: qualquer
+falha é silenciosa e o app segue normalmente.
+
+| Função | Descrição |
+|---|---|
+| `set_below_normal_priority()` | Coloca o processo em `BELOW_NORMAL_PRIORITY_CLASS` (`SetPriorityClass`) |
+| `limit_opencv(threads, disable_opencl)` | `cv2.setNumThreads(threads)` + `cv2.ocl.setUseOpenCL(False)`; `threads <= 0` deixa o OpenCV decidir. Import de `cv2` **tardio** |
+| `tune_runtime(low_priority, opencv_threads)` | Aplica os dois no boot, a partir do `settings.json` (chamado por `ui.console.main`) |
+| `stage(nome, enabled)` | Context manager que loga o tempo de parede de uma etapa em DEBUG; **no-op** quando `enabled=False` |
+| `process_rss_mb()` | Memória residente do processo (psapi via `ctypes`), para o log de debug |
+
+> **Armadilha do `ctypes`** (coberta por teste de regressão): `argtypes`/`restype`
+> explícitos **não são opcionais** aqui. Sem eles o retorno de
+> `GetCurrentProcess()` é tratado como C `int` e o pseudo-handle chega
+> **truncado** em 32 bits nas APIs que esperam um `HANDLE` de 64 bits — o
+> `SetPriorityClass` falha com `ERROR_INVALID_HANDLE` **silenciosamente** e o app
+> segue achando que ajustou a prioridade.
 
 #### `infra/datasource.py`
 
@@ -849,6 +884,20 @@ disparo duplo. Combinações **com TAB** usam `keyboard.hook()` + `HotkeyDetecto
 Apresentação `rich` do `RankingResult`: tabela com cores por role (DPS/TANK/SUP),
 top-3 em negrito, barra proporcional ao score, painel do ranking de ameaças,
 spinner durante o pipeline e explicações do top-3 (`settings.explain_ranking`).
+
+**Destaque por preset (v1.2.11)** — o nome do herói líder da coluna que o preset
+ativo prioriza é pintado em **laranja** (`HIGHLIGHT_STYLE = "bold orange1"`),
+segundo o mapa `PRESET_HIGHLIGHT_FIELD`:
+
+| Preset ativo (`settings.weights_preset`) | Coluna destacada |
+|---|---|
+| **Counter-first** | maior `COUNTER` |
+| **Meta-first** | maior `MAP META` |
+| **Conforto+** | maior `SYNERGY` |
+| **Equilibrado** | nenhum destaque especial |
+
+É **só apresentação**: a coluna vem pronta da `Recommendation`, o herói continua
+na mesma posição e nada é recalculado, reordenado ou reponderado.
 
 #### `ui/roles.py` / `ui/favorites.py`
 
@@ -969,7 +1018,7 @@ apenas como referência de transição.
 | Biblioteca | Finalidade |
 |---|---|
 | `msvcrt` | Leitura de tecla sem echo (`ui/roles.py`, Windows only) |
-| `ctypes` | Localização da janela do jogo (user32) e identidade na taskbar |
+| `ctypes` | Localização da janela do jogo (user32), identidade na taskbar e, em `infra/perf.py`, prioridade do processo (`SetPriorityClass`) + memória residente (psapi) |
 | `tkinter` | Interface gráfica do seletor de área (`tools/resolucao.py`) |
 | `unicodedata` | Remoção de acentos para normalização |
 | `urllib` | Download de `version.json` e do pacote de update |
@@ -983,6 +1032,60 @@ apenas como referência de transição.
 | **Tesseract OCR** | `assets/ocr/tesseract.exe` + `assets/ocr/tessdata/` | Reconhecimento óptico de caracteres para identificação do mapa |
 
 O Tesseract está embutido no repositório e no executável. Não é necessário instalá-lo separadamente.
+
+---
+
+## Consumo de recursos (o jogo tem prioridade)
+
+O OWPick roda **ao lado** do Overwatch, muitas vezes em notebook fraco. A regra
+de projeto é simples: **quem precisa dos recursos é o jogo**. O pipeline do
+TAB+1 é uma ação manual de ~1–2 s, então trocar um pouco da latência dele por
+menos contenção de CPU/GPU é sempre um bom negócio.
+
+Os ajustes vivem em `infra/perf.py` e são aplicados no boot por
+`perf.tune_runtime()` (passo 4 de [Como o Sistema Inicia](#como-o-sistema-inicia)):
+
+| Ajuste | Efeito | Override |
+|---|---|---|
+| `BELOW_NORMAL_PRIORITY_CLASS` | Em disputa por CPU, o Windows serve o Overwatch antes do OWPick. Não limita o OWPick quando há núcleo livre | `low_priority: false` |
+| `cv2.setNumThreads(1)` | O OpenCV deixa de espalhar o matching por **todos** os núcleos no instante do TAB+1 | `opencv_threads` (`0` = padrão do OpenCV) |
+| `cv2.ocl.setUseOpenCL(False)` | Impede o despacho automático (T-API) para a **GPU integrada** — a mesma que renderiza o jogo | — |
+
+**Por que 1 thread não deixa o pipeline mais lento**: os recortes comparados são
+minúsculos (~42×57 px em 720p, ~84×114 em 2K) e há ~960 chamadas curtas a
+`cv2.matchTemplate` por captura. Nesse tamanho o paralelismo interno do OpenCV
+custa quase tanto em sincronização quanto economiza em cálculo — não há ganho
+real a perder ao desligá-lo.
+
+Medição do matching (lineup + bans) nas fixtures, em rodadas repetidas na mesma
+máquina de 8 núcleos: **a diferença fica dentro do ruído de execução (~±10%)** —
+720p ~95–110 ms, 1080p ~150–180 ms, 2K ~260–290 ms nas **duas** configurações.
+Ou seja, o custo do ajuste em latência é nulo na prática, e o ganho é o
+Overwatch ficar com 7 núcleos e a GPU integrada livres no instante do TAB+1.
+
+O resultado do matching é **idêntico** nas duas configurações (mesmos heróis,
+bans, mapa e scores até a 8ª casa decimal) — muda só *quem* executa o cálculo.
+O paralelismo que importa continua existindo: o OCR do mapa roda em paralelo ao
+matching (`ThreadPoolExecutor(max_workers=2)` no `pipeline.analyze`).
+
+### Instrumentação (`--debug`)
+
+Com `--debug` (ou `settings.debug`), o `owpick.log` registra o tempo de parede de
+cada etapa e a memória residente do processo:
+
+```
+owpick.perf: etapa captura        123 ms
+owpick.perf: etapa ocr-role       174 ms
+owpick.perf: etapa recorte          1 ms
+owpick.perf: etapa matching       173 ms
+owpick.perf: etapa ocr-mapa       192 ms
+owpick.perf: etapa ranking          8 ms
+owpick.pipeline: memória do processo: 148 MB
+```
+
+Fora do modo debug o custo é **zero**: `perf.stage(nome, enabled=False)` não
+consulta nem o relógio. Não há dependência nova — só `time.perf_counter()` e
+`ctypes`.
 
 ---
 
@@ -1019,7 +1122,24 @@ um observador passivo, indistinguível de um software de captura de tela comum.
 ### Pontos que podem confundir
 
 1. **Perspectiva invertida em `tools/enemy_mult.py`**: as variáveis `allies` e `enemies` têm semântica invertida — são do ponto de vista do herói inimigo avaliado, não do jogador. O código está correto, mas pode confundir quem lê pela primeira vez sem contexto.
-2. **Limite conhecido — bans em 1080p**: um dos 5 slots de ban da fixture 1080p marca MAE 0.152 (> `BAN_MATCH_MAX_SCORE = 0.12`, calibrado em 2K) e é descartado. Subir o limiar não resolve (um slot vazio em 720p marca 0.173). Documentado como `xfail` em `tests/test_matching_golden.py`; requer métrica/critério de margem mais robustos para os bans.
+2. **Limite conhecido — bans fora de 2K**: um dos 5 slots de ban da fixture 1080p marca MAE 0.152 (> `BAN_MATCH_MAX_SCORE = 0.12`, calibrado em 2K) e é descartado. O mesmo ocorre em duas fixtures 720p da v1.2.11: `full2.png` (Wrecking Ball, MAE 0.152) e `full3.png` (Mercy, 0.141) — o herói correto é o topo do ranking, mas fica acima do limiar. Subir o limiar não resolve (um slot vazio em 720p marca 0.173/0.187). Documentado como `xfail` em `tests/test_matching_golden.py`; requer métrica/critério de margem mais robustos para os bans.
+3. **Modo de vídeo do jogo — recomende "tela cheia sem bordas"**: em **tela
+   cheia exclusiva**, qualquer ferramenta externa que capture a tela (o OWPick
+   incluso — vale para OBS, ShareX, Game Bar etc.) pode causar uma engasgada
+   pontual no instante da captura, por causa de como o Windows gerencia a troca
+   de superfície nesse modo. **É uma limitação do SO, não do código do OWPick**:
+   não há otimização que a corrija, porque a captura passiva de tela é a única
+   forma de leitura permitida pela [postura de anticheat](#postura-de-anticheat--termos-de-serviço-restrição-de-arquitetura).
+   Jogar em **"Tela cheia sem bordas" / borderless windowed** costuma eliminar
+   esse tipo de engasgada. É também o modo em que a captura do retângulo do
+   cliente (`find_overwatch_client_rect`) funciona melhor.
+4. **`pandas` é o maior item de memória do processo** (~43 MB de RSS e ~525 ms de
+   import, medidos): é usado só para ler três CSVs pequenos, mas a dependência é
+   **estrutural** — `core.scoring.load_meta_strength` recebe um `DataFrame`
+   (`pd.to_numeric`, `.iterrows()`, `pd.notna`) e `core.heroes.build_matrix_dict`
+   também. Trocar por `csv` da stdlib mudaria assinaturas do `core` e as fixtures
+   dos testes, então **não** é um ajuste pontual: fica registrado como
+   oportunidade, a ser feita só com a suíte golden como rede de segurança.
 
 ### Adição de Novos Heróis
 

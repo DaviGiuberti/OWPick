@@ -15,6 +15,7 @@ from rich.text import Text
 
 from owpick import settings
 from owpick.core.heroes import get_hero_role, normalize_hero_name
+from owpick.core.models import Recommendation
 from owpick.core.scoring import NEUTRAL_WEIGHT
 from owpick.i18n import t
 from owpick.pipeline import RankingResult
@@ -32,9 +33,31 @@ ROLE_STYLES = {"DPS": "red", "TANK": "blue", "SUP": "green"}
 
 _BAR_MAX_CHARS = 12  # largura máxima da barra de score
 
+# Destaque do herói "campeão" da coluna que o preset ativo prioriza. `orange1` é
+# a tonalidade de laranja mais chamativa da paleta padrão do rich (256 cores).
+HIGHLIGHT_STYLE = "bold orange1"
+
+# Qual coluna do Recommendation cada preset destaca. "equilibrado" não aparece
+# aqui de propósito: não tem destaque especial. É SÓ apresentação — a ordem, o
+# score e o ranking vêm prontos do pipeline e não são tocados.
+PRESET_HIGHLIGHT_FIELD: dict[str, str] = {
+    "counter-first": "counter",
+    "meta-first": "meta",
+    "conforto+": "synergy",
+}
+
 
 def _role_style(role: str | None) -> str:
     return ROLE_STYLES.get(role or "", "white")
+
+
+def _highlighted_hero(recommendations: list[Recommendation]) -> Recommendation | None:
+    """Recomendação com o maior valor na coluna priorizada pelo preset ativo
+    (`None` no "equilibrado" / preset sem destaque ou lista vazia)."""
+    field_name = PRESET_HIGHLIGHT_FIELD.get(settings.get().weights_preset)
+    if not field_name or not recommendations:
+        return None
+    return max(recommendations, key=lambda r: getattr(r, field_name))
 
 
 def _score_bar(total: float, max_abs: float) -> Text:
@@ -77,8 +100,13 @@ def print_ranking(result: RankingResult) -> None:
     table.add_column("")  # barra de score
 
     max_abs = max((abs(r.total) for r in result.recommendations), default=0.0)
+    highlight = _highlighted_hero(result.recommendations)
     for rank, rec in enumerate(result.recommendations, start=1):
-        hero_text = Text(rec.hero.name, style=_role_style(rec.hero.role))
+        is_highlight = highlight is not None and rec is highlight
+        hero_text = Text(
+            rec.hero.name,
+            style=HIGHLIGHT_STYLE if is_highlight else _role_style(rec.hero.role),
+        )
         row_style = "bold" if rank <= 3 else ""
         table.add_row(
             f"{rank}",

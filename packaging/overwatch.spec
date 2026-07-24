@@ -109,6 +109,8 @@ a = Analysis(
         "owpick.infra.capture",
         "owpick.infra.matching",
         "owpick.infra.map_detect",
+        "owpick.infra.player_hero",
+        "owpick.infra.perf",
         "owpick.infra.updater",
         "owpick.ui.console",
         "owpick.ui.roles",

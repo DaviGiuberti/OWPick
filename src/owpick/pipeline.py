@@ -12,6 +12,7 @@ from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING
 
+from owpick import log as applog
 from owpick import settings
 from owpick.core.heroes import normalize_hero_name
 from owpick.core.models import BanList, Lineup, MapDetection, Recommendation
@@ -23,7 +24,7 @@ from owpick.core.scoring import (
 )
 from owpick.i18n import t
 from owpick.infra import capture as capture_mod
-from owpick.infra import datasource, map_detect, matching, player_hero, storage
+from owpick.infra import datasource, map_detect, matching, perf, player_hero, storage
 from owpick.log import get_logger
 
 if TYPE_CHECKING:
@@ -38,6 +39,15 @@ Reporter = Callable[[str], None] | None
 def _report(report: Reporter, msg: str) -> None:
     if report is not None:
         report(msg)
+
+
+def _timing_enabled() -> bool:
+    """Instrumentação de tempo por etapa: só no modo debug (--debug/settings).
+
+    Lido do MÓDULO a cada chamada (não importado por valor): `setup_logging` só
+    define `DEBUG_MODE` depois que o pipeline já foi importado.
+    """
+    return applog.DEBUG_MODE
 
 
 @dataclass
@@ -73,32 +83,37 @@ def analyze(
     antes do recorte — o recorte precisa da role para pular o slot do próprio
     jogador. Quando ausentes (fluxo CLI/testes), captura a tela e lê a role manual.
     """
+    timed = _timing_enabled()
     if full_img is None:
         _report(report, t("pipeline.capturing"))
-        full_img = capture_mod.grab_screen()
+        with perf.stage("captura", timed):
+            full_img = capture_mod.grab_screen()
     if role is None:
         role = storage.read_role()
-    cap = capture_mod.crop_capture(full_img, role)
+    with perf.stage("recorte", timed):
+        cap = capture_mod.crop_capture(full_img, role)
     if save_debug:
         capture_mod.save_debug_artifacts(cap)
 
     def _match() -> tuple[Lineup, BanList, dict]:
         """Matching de bans + lineup (template matching, CPU/SIMD via OpenCV)."""
-        try:
-            bans = matching.match_bans(cap)
-        except Exception:  # noqa: BLE001
-            log.warning("falha ao processar bans", exc_info=True)
-            bans = BanList()
-        lineup, slots = matching.match_lineup(cap)
+        with perf.stage("matching", timed):
+            try:
+                bans = matching.match_bans(cap)
+            except Exception:  # noqa: BLE001
+                log.warning("falha ao processar bans", exc_info=True)
+                bans = BanList()
+            lineup, slots = matching.match_lineup(cap)
         return lineup, bans, slots
 
     def _detect_map() -> MapDetection:
         """OCR do mapa (Tesseract em subprocesso — libera o GIL na espera)."""
-        try:
-            return map_detect.detect(cap.full)
-        except Exception:  # noqa: BLE001
-            log.warning("falha ao identificar o mapa", exc_info=True)
-            return MapDetection()
+        with perf.stage("ocr-mapa", timed):
+            try:
+                return map_detect.detect(cap.full)
+            except Exception:  # noqa: BLE001
+                log.warning("falha ao identificar o mapa", exc_info=True)
+                return MapDetection()
 
     # O OCR do mapa (subprocess-bound) roda em paralelo ao matching de
     # lineup+bans (OpenCV libera o GIL), tirando o OCR do caminho crítico.
@@ -212,13 +227,16 @@ def run_pipeline(report: Reporter = None, save_debug: bool = False) -> RankingRe
     Caso de uso completo do TAB+1: captura, identifica e ranqueia.
     Retorna None se pré-requisitos (role/favoritos) estiverem ausentes.
     """
+    timed = _timing_enabled()
     # Captura a tela UMA vez: a mesma imagem serve para a detecção automática da
     # role (herói do jogador) e para o recorte do lineup — que só pode ser feito
     # depois de conhecida a role (para pular o slot do próprio jogador).
     _report(report, t("pipeline.capturing"))
-    full_img = capture_mod.grab_screen()
+    with perf.stage("captura", timed):
+        full_img = capture_mod.grab_screen()
 
-    role = _resolve_role(full_img, report)
+    with perf.stage("ocr-role", timed):
+        role = _resolve_role(full_img, report)
     if role is None:
         _report(report, t("pipeline.role_missing"))
         return None
@@ -231,14 +249,19 @@ def run_pipeline(report: Reporter = None, save_debug: bool = False) -> RankingRe
     lineup, bans, detection = analyze(
         full_img=full_img, role=role, report=report, save_debug=save_debug
     )
-    return rank(
-        role=role,
-        playable=playable,
-        allies=lineup.ally_names(),
-        enemies=lineup.enemy_names(),
-        banned=bans.names(),
-        mapa=detection.name,
-    )
+    with perf.stage("ranking", timed):
+        result = rank(
+            role=role,
+            playable=playable,
+            allies=lineup.ally_names(),
+            enemies=lineup.enemy_names(),
+            banned=bans.names(),
+            mapa=detection.name,
+        )
+    if timed:
+        rss = perf.process_rss_mb()
+        log.debug("memória do processo: %s", f"{rss:.0f} MB" if rss is not None else "n/d")
+    return result
 
 
 def rank_from_files() -> RankingResult | None:
