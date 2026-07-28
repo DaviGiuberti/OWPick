@@ -1,5 +1,5 @@
 {
-    "version": "1.2.12",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.12/OWPick_v1.2.12.zip",
-    "notas": "### Sinergia DPS × DPS: peso próprio no score e exclusão da ameaça - **Peso fixo de 0.65 em pares DPS × DPS no `T_syn`** (`core/scoring.py`): quando os dois heróis de um par de sinergia são DPS, a contribuição do par usa `ModelWeights.beta_syn_dps_dps` (0.65) no lugar do `β_syn` do preset. Vale em **Equilibrado, Counter-first e Meta-first**; o **Conforto+** é a exceção e mantém o próprio `β_syn` ("
+    "version": "1.2.13",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.13/OWPick_v1.2.13.zip",
+    "notas": "### Sinergia Mercy × DPS: valores próprios, peso 1 e regra do \"DPS prioritário\" A linha da Mercy contra os DPS deixou de ser uma edição herói a herói qualquer e passou a ser uma **escala própria**: quem ela \"pocketa\" bem sobe, quem não aproveita o dano amplificado desce. Três mudanças, do lado **aliado** do modelo (o ajuste de Mercy \"pocket\" do **Enemy Threat** continua exatamente como estava — é "
 }
