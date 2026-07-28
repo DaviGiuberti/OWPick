@@ -86,6 +86,57 @@ def test_counter_first_sinergia_sup_x_sup_usa_peso_dobrado():
     ) == pytest.approx(scoring.BETA_SYN)
 
 
+def test_sinergia_dps_x_dps_usa_peso_fixo_de_065():
+    """Pares DPS × DPS usam β_syn_dps_dps=0.65 em TODOS os presets, menos o
+    "conforto+" (que mantém o β_syn próprio, 1.25)."""
+    ally_matrix = {"cassidy": {"ana": 1.0, "ashe": -6.0}}
+
+    def _syn(preset: str, ally: str) -> float:
+        return float(
+            calculate_hero_score(
+                "Cassidy", ally_matrix, {}, [ally], [], {}, {}, weights=resolve_weights(preset)
+            )["synergy_score"]  # pyright: ignore[reportArgumentType]
+        )
+
+    # Y(Cassidy, Ashe) = -6 (DPS × DPS): peso fixo 0.65 -> -3.9 nos 3 presets.
+    for preset in ("equilibrado", "counter-first", "meta-first"):
+        assert _syn(preset, "Ashe") == pytest.approx(-6 * 0.65), preset
+    # Y(Cassidy, Ana) = 1 (DPS × SUP): usa o β_syn NORMAL de cada preset.
+    assert _syn("counter-first", "Ana") == pytest.approx(0.325)
+    assert _syn("equilibrado", "Ana") == pytest.approx(0.65)
+    # "conforto+" não tem a regra: DPS × DPS usa o β_syn cheio (1.25).
+    assert _syn("conforto+", "Ashe") == pytest.approx(-6 * 1.25)
+    assert _syn("conforto+", "Ana") == pytest.approx(1.25)
+
+
+def test_precedencia_sup_sup_sobre_dps_dps_e_beta_syn():
+    """Precedência: SUP × SUP -> β_syn_sup_sup; DPS × DPS -> β_syn_dps_dps; senão β_syn."""
+    w = resolve_weights("counter-first")
+    assert w.beta_syn_sup_sup == 0.325 * 2  # 0.65
+    assert w.beta_syn_dps_dps == 0.65
+    # Um par SUP × SUP nunca cai na regra de DPS (roles distintas não se cruzam).
+    ally_matrix = {"ana": {"mercy": 1.0}, "cassidy": {"ashe": 1.0}}
+    sup = float(
+        calculate_hero_score("Ana", ally_matrix, {}, ["Mercy"], [], {}, {}, weights=w)[
+            "synergy_score"
+        ]  # pyright: ignore[reportArgumentType]
+    )
+    dps = float(
+        calculate_hero_score("Cassidy", ally_matrix, {}, ["Ashe"], [], {}, {}, weights=w)[
+            "synergy_score"
+        ]  # pyright: ignore[reportArgumentType]
+    )
+    assert sup == pytest.approx(0.65)
+    assert dps == pytest.approx(0.65)
+    # Par de roles diferentes: β_syn normal do preset.
+    misto = float(
+        calculate_hero_score(
+            "Cassidy", {"cassidy": {"ana": 1.0}}, {}, ["Ana"], [], {}, {}, weights=w
+        )["synergy_score"]  # pyright: ignore[reportArgumentType]
+    )
+    assert misto == pytest.approx(0.325)
+
+
 def test_snapshot_meta_first():
     # β_meta=3.0 -> o herói forte no mapa dispara.
     totals = _totals(resolve_weights("meta-first"))

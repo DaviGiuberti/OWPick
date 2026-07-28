@@ -25,7 +25,7 @@ from PIL.Image import Image
 from rapidfuzz import fuzz, process
 
 from owpick.core import resolution
-from owpick.core.heroes import get_all_heroes
+from owpick.core.heroes import HERO_NAME_PUNCTUATION, get_all_heroes
 from owpick.core.models import Hero
 from owpick.infra import datasource, map_detect
 from owpick.log import get_logger
@@ -41,21 +41,35 @@ _FALLBACK_NAME_REGION = {"left": 789, "top": 238, "width": 130, "height": 39}
 
 # Confiança mínima do fuzzy match do nome (escala do fuzz.token_set_ratio, 0-100).
 # Calibração: simulando o OCR (maiúsculas, sem acento/pontuação, com o artefato do
-# badge de role ao lado) para os 52 heróis, o nome correto vence sempre (0 erros),
-# com o pior caso (D.Va) em 67. Nas capturas reais os nomes leem com score 100. 60
+# badge de role ao lado) para os 52 heróis, o nome correto vence sempre (0 erros).
+# Desde que _strip_upper passou a descartar a pontuação (v1.2.12), o nome lido
+# limpo marca 100 nos 52 — a folga até o limiar é o que absorve o ruído do badge
+# em baixa resolução (ex.: 720p lendo "DVS" por "D.VA": 66.7, 2º em 36.4). 60
 # aceita reads parciais/ruidosos e ainda rejeita lixo de OCR — que cai no fallback
 # (role manual), nunca numa role errada.
 MIN_CONFIDENCE = 60.0
 
 
 def _strip_upper(s: str) -> str:
-    """Maiúsculas sem acentos (NFKD), preservando espaços — para o fuzzy match.
+    """Maiúsculas, sem acentos (NFKD) e sem pontuação — para o fuzzy match.
 
     Mantém os espaços (ao contrário de core.heroes.normalize_hero_name, que troca
     não-alfanuméricos por '-') porque o token_set_ratio compara CONJUNTOS de
     tokens separados por espaço: assim o ruído do OCR ao lado do nome (ex.: o badge
     de role lido como um token extra) não contamina o token do nome do herói.
+
+    A pontuação dos nomes canônicos (HERO_NAME_PUNCTUATION: `. : ' \\``) é REMOVIDA
+    dos dois lados da comparação (v1.2.12). Ela não é informação que o OCR consiga
+    produzir de forma confiável — o Tesseract raramente enxerga o ponto de "D.Va" —
+    e, em nomes CURTOS, cada caractere impossível de ler custa muitos pontos no
+    ratio. Era a causa-raiz do bug do 720p: a região do nome inclui o badge de role,
+    que em baixa resolução é lido COLADO ao nome ("DVS"); contra "D.VA" isso dava
+    57.1 (< MIN_CONFIDENCE) e a role caía para o fallback manual. Sem a pontuação,
+    "DVS" vs "DVA" dá 66.7 (2º colocado em 36.4 — margem larga). O ganho é geral,
+    não específico da D.Va: com o OCR lendo o nome limpo, TODOS os 52 heróis passam
+    a marcar 100 (antes o pior caso era D.Va 85.7 e "Soldier: 76" 95.2).
     """
+    s = HERO_NAME_PUNCTUATION.sub("", s)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c))
     return s.upper()

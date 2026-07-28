@@ -132,6 +132,158 @@ class TestComputeThreatWeights:
 
 
 # ---------------------------------------------------------------------------
+# Exclusão de pares de MESMA role no termo de sinergia da ameaça (v1.2.12)
+# ---------------------------------------------------------------------------
+
+
+class TestThreatSynergyPairExclusion:
+    """SUP × SUP e DPS × DPS contribuem 0 no somatório ν do threat weighting.
+
+    Vale em TODOS os presets (inclusive conforto+) — ao contrário da regra de
+    β_syn_dps_dps do ranking, que não se aplica ao conforto+.
+    """
+
+    @pytest.mark.parametrize("preset", ["equilibrado", "counter-first", "meta-first", "conforto+"])
+    def test_dps_x_dps_nao_soma_ameaca(self, preset):
+        # Cassidy × Ashe: dois DPS (Hitscan), Y = -6 -> contribuição 0 (w_e = 1).
+        w_preset = scoring.resolve_weights(preset)
+        synergy_matrix = {"cassidy": {"ashe": -6.0}, "ashe": {"cassidy": -6.0}}
+        w = scoring.compute_threat_weights(
+            ["Cassidy", "Ashe"],
+            {},
+            allies=[],
+            lam=w_preset.lam,
+            mu=w_preset.mu,
+            synergy_matrix=synergy_matrix,
+            nu=w_preset.nu,
+        )
+        assert w["cassidy"] == pytest.approx(1.0)
+        assert w["ashe"] == pytest.approx(1.0)
+
+    def test_dps_x_dps_de_categorias_diferentes_tambem_e_zero(self):
+        # Ashe × Genji: sinergia POSITIVA que conta no T_syn, mas 0 na ameaça.
+        synergy_matrix = {"ashe": {"genji": 2.0}, "genji": {"ashe": 2.0}}
+        w = scoring.compute_threat_weights(
+            ["Ashe", "Genji"], {}, allies=[], synergy_matrix=synergy_matrix
+        )
+        assert w["ashe"] == pytest.approx(1.0)
+        assert w["genji"] == pytest.approx(1.0)
+
+    def test_sup_x_sup_continua_excluido(self):
+        synergy_matrix = {"ana": {"mercy": 2.0}, "mercy": {"ana": 2.0}}
+        w = scoring.compute_threat_weights(
+            ["Ana", "Mercy"], {}, allies=[], synergy_matrix=synergy_matrix
+        )
+        assert w["ana"] == pytest.approx(1.0)
+        assert w["mercy"] == pytest.approx(1.0)
+
+    def test_pares_de_roles_diferentes_continuam_contando(self):
+        # DPS × TANK e DPS × SUP não são excluídos — a regra é só MESMA role.
+        synergy_matrix = {"cassidy": {"winston": 2.0, "ana": 1.0}}
+        w = scoring.compute_threat_weights(
+            ["Cassidy", "Winston", "Ana"], {}, allies=[], synergy_matrix=synergy_matrix
+        )
+        assert w["cassidy"] == pytest.approx(scoring.threat_multiplier(scoring.NU_THREAT * 3.0))
+        assert w["cassidy"] > 1.0
+
+
+# ---------------------------------------------------------------------------
+# Threat weighting do "pocket" da Mercy (v1.2.12)
+# ---------------------------------------------------------------------------
+
+
+class TestMercyPocket:
+    """Mercy + DPS pocketável: ×1.5 no DPS de maior prioridade, ×0.5 na Mercy.
+
+    Os w_e base são todos 1.0 (matrizes vazias ⇒ raw = 0), então o dict de saída
+    mostra o MULTIPLICADOR final de cada herói diretamente.
+    """
+
+    @staticmethod
+    def _w(enemies, preset="equilibrado"):
+        p = scoring.resolve_weights(preset)
+        return scoring.compute_threat_weights(enemies, {}, allies=[], lam=p.lam, mu=p.mu, nu=p.nu)
+
+    def test_mercy_pharah_ashe_so_a_pharah_sobe(self):
+        # Prioridade: Pharah > Ashe -> só a Pharah é pocketada; a Ashe fica ×1.
+        w = self._w(["Mercy", "Pharah", "Ashe"])
+        assert w["pharah"] == pytest.approx(1.5)
+        assert w["mercy"] == pytest.approx(0.5)
+        assert w["ashe"] == pytest.approx(1.0)
+
+    def test_bastion_mais_emre_cancela_o_ajuste(self):
+        w = self._w(["Bastion", "Emre", "Mercy"])
+        assert w["bastion"] == pytest.approx(1.0)
+        assert w["emre"] == pytest.approx(1.0)
+        assert w["mercy"] == pytest.approx(1.0)
+
+    def test_bastion_mais_pharah_nao_e_gatilho_da_excecao(self):
+        # Pharah NÃO está no subconjunto {Sierra, Emre, Cassidy, Soldier: 76}.
+        w = self._w(["Bastion", "Pharah", "Mercy"])
+        assert w["bastion"] == pytest.approx(1.0)
+        assert w["pharah"] == pytest.approx(1.5)
+        assert w["mercy"] == pytest.approx(0.5)
+
+    def test_excecao_do_bastion_tem_precedencia_sobre_a_prioridade(self):
+        # Bastion + Emre cancela TUDO, mesmo com a Pharah (maior prioridade).
+        w = self._w(["Bastion", "Emre", "Pharah", "Mercy"])
+        assert all(v == pytest.approx(1.0) for v in w.values()), w
+
+    def test_ordem_de_prioridade_completa(self):
+        # O primeiro da lista presente vence, qualquer que seja a ordem do lineup.
+        ordem = [
+            "Pharah",
+            "Sojourn",
+            "Ashe",
+            "Freja",
+            "Echo",
+            "Sierra",
+            "Emre",
+            "Cassidy",
+            "Soldier: 76",
+        ]
+        for i, esperado in enumerate(ordem):
+            # Time com Mercy + todos os DPS a partir de `i` (em ordem invertida,
+            # para provar que a escolha não depende da posição no lineup).
+            enemies = ["Mercy", *reversed(ordem[i:])]
+            w = self._w(enemies)
+            alvo = scoring.normalize_hero_name(esperado)
+            assert w[alvo] == pytest.approx(1.5), f"{esperado} deveria ser o pocket"
+            assert w["mercy"] == pytest.approx(0.5)
+            outros = [scoring.normalize_hero_name(h) for h in ordem[i:] if h != esperado]
+            assert all(w[o] == pytest.approx(1.0) for o in outros)
+
+    def test_sem_mercy_nao_ha_ajuste(self):
+        w = self._w(["Pharah", "Ashe"])
+        assert w["pharah"] == pytest.approx(1.0)
+        assert w["ashe"] == pytest.approx(1.0)
+
+    def test_mercy_sem_dps_da_lista_nao_ha_ajuste(self):
+        w = self._w(["Mercy", "Genji", "Winston"])
+        assert all(v == pytest.approx(1.0) for v in w.values()), w
+
+    @pytest.mark.parametrize("preset", ["equilibrado", "counter-first", "meta-first", "conforto+"])
+    def test_vale_em_todos_os_presets(self, preset):
+        w = self._w(["Mercy", "Sojourn"], preset)
+        assert w["sojourn"] == pytest.approx(1.5)
+        assert w["mercy"] == pytest.approx(0.5)
+
+    def test_multiplica_o_w_e_ja_calculado(self):
+        # O ajuste é sobre o w_e PRONTO (não entra no raw nem passa pela curva).
+        enemy_matrix = {"pharah": {"a1": 2.0}}
+        w = scoring.compute_threat_weights(["Mercy", "Pharah"], enemy_matrix, ["A1"])
+        base = scoring.threat_multiplier(scoring.LAMBDA * 2.0)
+        assert w["pharah"] == pytest.approx(base * 1.5)
+        assert w["mercy"] == pytest.approx(0.5)
+
+    def test_nao_muta_o_dict_de_entrada(self):
+        base = {"mercy": 1.0, "pharah": 2.0}
+        out = scoring.apply_mercy_pocket(base, ["mercy", "pharah"])
+        assert base == {"mercy": 1.0, "pharah": 2.0}  # intacto
+        assert out == pytest.approx({"mercy": 0.5, "pharah": 3.0})
+
+
+# ---------------------------------------------------------------------------
 # calculate_hero_score — lineup sintético, matriz de 3 heróis, valores à mão
 # ---------------------------------------------------------------------------
 

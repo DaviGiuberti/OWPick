@@ -1,24 +1,27 @@
 """Testes da detecção automática do herói/role do jogador (v1.2.10).
 
 Cobre o módulo infra/player_hero (OCR do nome + fuzzy match + role) sobre as
-capturas reais em tests/fixtures/<res>/ (full.png; em 720p, full1.png), o fallback quando não há herói
-legível, o escalonamento da região por resolução e a integração no pipeline
-(role detectada tem prioridade sobre a role manual, com fallback ao Roles.txt).
+capturas reais em tests/fixtures/<res>/ (full1.png em 720p/1080p, full.png em
+2K), o fallback quando não há herói legível, o escalonamento da região por
+resolução e a integração no pipeline (role detectada tem prioridade sobre a role
+manual, com fallback ao Roles.txt).
 """
 
 from pathlib import Path
 
+import pytest
 from PIL import Image
 
 from owpick import pipeline
-from owpick.core.heroes import normalize_hero_name
+from owpick.core.heroes import get_all_heroes, normalize_hero_name
 from owpick.infra import capture, player_hero, storage
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
 
-# Nome do arquivo da fixture por resolução (v1.2.11: 720p/full.png -> full1.png).
-FIXTURE_FILE = {"720p": "full1.png", "1080p": "full.png", "2k": "full.png"}
+# Nome do arquivo da fixture por resolução (v1.2.11: 720p/full.png -> full1.png;
+# v1.2.12: 1080p/full.png -> full1.png).
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full.png"}
 
 # Herói que o JOGADOR está usando em cada captura (retrato/nome grande na
 # scoreboard) — distinto do gabarito de lineup em expected.json.
@@ -101,6 +104,54 @@ def test_identify_hero_tolerante_a_ruido_e_acentos():
 
 def test_identify_hero_texto_vazio_nao_casa():
     assert player_hero.identify_hero("") == ("", 0.0)
+
+
+# ---------------------------------------------------------------------------
+# Regressão v1.2.12: D.Va não era reconhecida em 720p
+# ---------------------------------------------------------------------------
+# A região do nome inclui o badge de role; em 720p ele é lido COLADO ao nome, e o
+# Tesseract não enxerga o ponto de "D.Va" — o OCR devolve "DVS". Contra o nome
+# canônico COM pontuação isso dava token_set_ratio 57.1 (< MIN_CONFIDENCE = 60):
+# o herói era descartado e a role caía para o fallback manual (Roles.txt), então
+# o ranking saía para a role errada silenciosamente. A correção descarta a
+# pontuação dos DOIS lados da comparação (_strip_upper), o que vale para todos os
+# heróis — não é um caso especial da D.Va.
+
+# (fixture, OCR observado) das capturas reais da mesma partida.
+DVA_OCR_READS = [("720p/full4.jpeg", "DVS"), ("1080p/full2.jpeg", "D.VA")]
+
+
+@pytest.mark.parametrize("origem,ocr_text", DVA_OCR_READS)
+def test_dva_reconhecida_apesar_do_ruido_do_badge(origem, ocr_text):
+    """O texto que o OCR realmente produz nessas capturas casa com D.Va."""
+    name, score = player_hero.identify_hero(ocr_text)
+    assert name == "D.Va", f"[{origem}] OCR {ocr_text!r} casou com {name!r}"
+    assert score >= player_hero.MIN_CONFIDENCE, (
+        f"[{origem}] score {score:.1f} < limiar {player_hero.MIN_CONFIDENCE}"
+    )
+
+
+@pytest.mark.parametrize("res,fixture_file", [("720p", "full4.jpeg"), ("1080p", "full2.jpeg")])
+def test_detecta_dva_nas_fixtures_jpeg(res, fixture_file):
+    """detect() ponta a ponta: a mesma partida em 720p e 1080p devolve D.Va/TANK."""
+    with Image.open(FIXTURES_DIR / res / fixture_file) as img:
+        img.load()
+    hero = player_hero.detect(img.convert("RGB"))
+    assert hero is not None, f"[{res}/{fixture_file}] herói do jogador não identificado"
+    assert hero.key == normalize_hero_name("D.Va")
+    assert hero.role == "TANK"
+
+
+def test_pontuacao_nao_penaliza_nenhum_nome_canonico():
+    """Causa-raiz, generalizada: com o OCR lendo o nome LIMPO (maiúsculas, sem
+    acento nem pontuação — tudo que o Tesseract consegue emitir), os 52 heróis
+    marcam 100. Antes o ponto/dois-pontos custavam pontos em nomes CURTOS
+    ("D.Va" 85.7, "Soldier: 76" 95.2), corroendo a folga até o limiar."""
+    for hero in get_all_heroes():
+        ocr = player_hero._strip_upper(hero)  # o nome como o OCR o entrega
+        name, score = player_hero.identify_hero(ocr)
+        assert name == hero, f"{hero!r} lido {ocr!r} casou com {name!r}"
+        assert score == 100.0, f"{hero!r} lido {ocr!r} marcou {score:.1f}, não 100"
 
 
 def test_detect_sem_nome_legivel_retorna_none():

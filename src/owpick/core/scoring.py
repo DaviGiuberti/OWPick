@@ -22,7 +22,10 @@ onde:
     T_syn(h)       = Σ_a  Y(h, a) · β_syn(h, a)                (sinergia, diagonal ignorada;
                                                                 β_syn(h,a) = β_syn_sup_sup se
                                                                 ambos forem SUP e o preset o
-                                                                definir — só o "counter-first" —,
+                                                                definir — só o "counter-first" —;
+                                                                β_syn_dps_dps (0.65) se ambos
+                                                                forem DPS e o preset o definir
+                                                                — todos menos o "conforto+" —;
                                                                 senão β_syn)
 
 As estatísticas (DataFrame de winrate/pickrate) e as matrizes já normalizadas
@@ -57,6 +60,12 @@ NU_THREAT = 0.10  # intensidade do threat weighting (componente sinergia DENTRO 
 BETA_META = 1.5  # peso do MetaStrength no score (preset "equilibrado"; era 2.0)
 BETA_CTR = 1.0  # peso do counter term no score
 BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
+# Peso FIXO da sinergia em pares DPS × DPS (v1.2.12). Vale em todos os presets
+# MENOS o "conforto+" (que mantém o β_syn próprio, mais alto, para todos os
+# pares). Note que 0.65 só coincide com BETA_SYN por acaso: aqui é uma âncora
+# independente — em presets com β_syn diferente (counter-first 0.325,
+# meta-first 0.65) o par DPS × DPS continua valendo 0.65.
+BETA_SYN_DPS_DPS = 0.65
 
 
 # ---------------------------------------------------------------------------
@@ -140,6 +149,10 @@ class ModelWeights:
     beta_syn: float = BETA_SYN  # peso da sinergia no score
     # Peso de sinergia específico para pares SUP × SUP; None ⇒ usa `beta_syn`.
     beta_syn_sup_sup: float | None = None
+    # Peso de sinergia específico para pares DPS × DPS; None ⇒ usa `beta_syn`.
+    # Default = 0.65 (vale em equilibrado/counter-first/meta-first); só o
+    # "conforto+" zera a regra (None) e usa o próprio beta_syn nesses pares.
+    beta_syn_dps_dps: float | None = BETA_SYN_DPS_DPS
 
 
 DEFAULT_WEIGHTS = ModelWeights()
@@ -152,7 +165,8 @@ PRESETS: dict[str, ModelWeights] = {
     # Prioriza counterar o time inimigo: threat weighting por COUNTERS (λ=0.32) e
     # counter term cheio (β_ctr=1.0); meta recua (β_meta=0.75) e a sinergia geral
     # também (β_syn=0.325), EXCETO entre dois suportes (β_syn_sup_sup=0.65), onde a
-    # dupla de sup pesa como no preset equilibrado.
+    # dupla de sup pesa como no preset equilibrado, e entre dois DPS
+    # (β_syn_dps_dps=0.65).
     "counter-first": ModelWeights(
         lam=0.32,
         mu=0.23,
@@ -161,14 +175,25 @@ PRESETS: dict[str, ModelWeights] = {
         beta_ctr=1.00,
         beta_syn=0.325,
         beta_syn_sup_sup=0.65,
+        beta_syn_dps_dps=BETA_SYN_DPS_DPS,
     ),
     # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=3.0. A ameaça
     # passa a pesar quem é FORTE NO MAPA (μ=0.70) e quem forma uma COMP COESA
     # (ν=0.15) mais que os counters brutos (λ=0.20).
-    "meta-first": ModelWeights(lam=0.20, mu=0.70, nu=0.15, beta_meta=3.0, beta_ctr=1.0, beta_syn=0.65),
+    "meta-first": ModelWeights(
+        lam=0.20,
+        mu=0.70,
+        nu=0.15,
+        beta_meta=3.0,
+        beta_ctr=1.0,
+        beta_syn=0.65,
+        beta_syn_dps_dps=BETA_SYN_DPS_DPS,
+    ),
     # "Conforto+": mais sinergia no SEU time (β_syn=1.25) e ameaça inimiga
     # DE-ENFATIZADA em todos os eixos (λ=0.18, μ=0.20, ν=0.06) — o foco é o SEU time.
-    "conforto+": ModelWeights(lam=0.18, mu=0.20, nu=0.06, beta_syn=1.25),
+    # Único preset SEM a regra de DPS × DPS (beta_syn_dps_dps=None): aqui um par de
+    # DPS usa o β_syn cheio (1.25), coerente com "jogue o que você domina".
+    "conforto+": ModelWeights(lam=0.18, mu=0.20, nu=0.06, beta_syn=1.25, beta_syn_dps_dps=None),
 }
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
@@ -271,6 +296,76 @@ def load_meta_strength(
 # ---------------------------------------------------------------------------
 # Threat weighting — peso de ameaça de cada inimigo
 # ---------------------------------------------------------------------------
+# Roles cujo par (mesma role dos DOIS inimigos) é IGNORADO no termo de sinergia
+# do threat weighting — em todos os presets. Vale só para a ameaça: no T_syn do
+# ranking esses pares continuam contando.
+THREAT_SYNERGY_EXCLUDED_ROLES = frozenset({"SUP", "DPS"})
+
+
+def _threat_pair_excluded(role_a: str | None, role_b: str | None) -> bool:
+    """True se o par de inimigos não deve somar sinergia no threat weighting."""
+    return role_a == role_b and role_a in THREAT_SYNERGY_EXCLUDED_ROLES
+
+
+# --- Mercy "pocket" (v1.2.12) ------------------------------------------------
+# Uma Mercy no time inimigo raramente é a ameaça em si: ela CONCENTRA a ameaça
+# num DPS (o "pocket"), que ganha sustain/dano amplificado. O ajuste move peso da
+# Mercy para esse DPS — sem mexer no raw nem na curva, só nos w_e já calculados.
+MERCY_KEY = normalize_hero_name("Mercy")
+# Ordem de PRIORIDADE do alvo do pocket: só o PRIMEIRO presente é escolhido.
+MERCY_POCKET_PRIORITY: tuple[str, ...] = tuple(
+    normalize_hero_name(h)
+    for h in (
+        "Pharah",
+        "Sojourn",
+        "Ashe",
+        "Freja",
+        "Echo",
+        "Sierra",
+        "Emre",
+        "Cassidy",
+        "Soldier: 76",
+    )
+)
+# Bastion + QUALQUER um destes CANCELA o ajuste inteiro (a comp deixa de ser um
+# pocket e vira outra coisa). É um subconjunto da lista de prioridade, e a
+# exceção tem precedência ABSOLUTA: cancela mesmo que uma Pharah (prioridade
+# maior) também esteja no time.
+MERCY_POCKET_BASTION_KEY = normalize_hero_name("Bastion")
+MERCY_POCKET_BASTION_BLOCKERS: frozenset[str] = frozenset(
+    normalize_hero_name(h) for h in ("Sierra", "Emre", "Cassidy", "Soldier: 76")
+)
+MERCY_POCKET_DPS_MULT = 1.5  # o DPS pocketado
+MERCY_POCKET_MERCY_MULT = 0.5  # a própria Mercy
+
+
+def apply_mercy_pocket(weights: dict[str, float], enemies_norm: list[str]) -> dict[str, float]:
+    """Ajusta os `w_e` já calculados quando o time inimigo tem Mercy + um DPS alvo.
+
+    Com Mercy e ao menos um DPS de `MERCY_POCKET_PRIORITY` no time inimigo, o DPS
+    de MAIOR prioridade presente tem o w_e multiplicado por 1.5 e a Mercy por 0.5.
+    Os demais heróis (inclusive outros DPS da lista) ficam inalterados.
+
+    Exceção: Bastion junto de qualquer um de `MERCY_POCKET_BASTION_BLOCKERS`
+    cancela o ajuste por completo — ninguém é alterado. Vale em todos os presets.
+    Devolve um dict novo; `weights` não é mutado.
+    """
+    present = set(enemies_norm)
+    if MERCY_KEY not in present:
+        return weights
+    if MERCY_POCKET_BASTION_KEY in present and present & MERCY_POCKET_BASTION_BLOCKERS:
+        return weights
+    target = next((h for h in MERCY_POCKET_PRIORITY if h in present), None)
+    if target is None:
+        return weights
+    adjusted = dict(weights)
+    if target in adjusted:
+        adjusted[target] *= MERCY_POCKET_DPS_MULT
+    if MERCY_KEY in adjusted:
+        adjusted[MERCY_KEY] *= MERCY_POCKET_MERCY_MULT
+    return adjusted
+
+
 def compute_threat_weights(
     enemies: list[str],
     enemy_matrix: dict[str, dict[str, float]],
@@ -295,10 +390,16 @@ def compute_threat_weights(
                                `Y` é a MESMA matriz de sinergia dos aliados
                                (`synergy_matrix`), aplicada aos pares de inimigos;
                                `None` ⇒ termo ausente (compatibilidade).
+                               EXCEÇÃO: pares de mesma role SUP × SUP e DPS × DPS
+                               contribuem 0 aqui, em todos os presets
+                               (THREAT_SYNERGY_EXCLUDED_ROLES).
 
     `raw = 0` dá w_e = 1 exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1.
     `threat_multiplier` é contínuo, suave, monotônico (preserva a ordenação das
     ameaças) e log-simétrico. Retorna {nome_normalizado_do_inimigo: w_e}.
+
+    Como ETAPA FINAL, `apply_mercy_pocket` ajusta os w_e prontos quando o time
+    inimigo tem Mercy + um DPS "pocketável" (×1.5 no DPS, ×0.5 na Mercy).
     """
     allies_norm = [normalize_hero_name(a) for a in allies if a]
     enemies_norm = [normalize_hero_name(e) for e in enemies if e]
@@ -313,24 +414,45 @@ def compute_threat_weights(
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
         syn_row = syn.get(en, {})
-        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada). Pares
-        # SUP × SUP NÃO contam para a ameaça: dois suportes juntos não tornam o
-        # inimigo mais perigoso para efeito de threat weighting (a sinergia
-        # SUP × SUP segue valendo normalmente no ranking principal).
-        enemy_is_sup = heroes.get_hero_role(en) == "SUP"
+        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada). Pares de
+        # MESMA role SUP × SUP e DPS × DPS NÃO contam para a ameaça: dois suportes
+        # (ou dois DPS) juntos não tornam o inimigo mais perigoso para efeito de
+        # threat weighting. A exclusão vale em TODOS os presets e só aqui — no
+        # ranking principal (T_syn) esses pares seguem contando normalmente
+        # (DPS × DPS com o peso próprio; ver _pair_beta_syn).
+        enemy_role = heroes.get_hero_role(en)
         synergy_sum = sum(
             syn_row.get(other, 0.0)
             for other in enemies_norm
-            if other != en and not (enemy_is_sup and heroes.get_hero_role(other) == "SUP")
+            if other != en and not _threat_pair_excluded(enemy_role, heroes.get_hero_role(other))
         )
         raw = lam * counter_sum + mu * map_bonus + nu * synergy_sum
         weights[en] = threat_multiplier(raw)
-    return weights
+    # Ajuste do "pocket" da Mercy: aplicado DEPOIS, sobre os w_e prontos (não
+    # entra no raw nem passa pela curva) — ver apply_mercy_pocket.
+    return apply_mercy_pocket(weights, enemies_norm)
 
 
 # ---------------------------------------------------------------------------
 # Score de um herói candidato
 # ---------------------------------------------------------------------------
+def _pair_beta_syn(weights: ModelWeights, role_a: str | None, role_b: str | None) -> float:
+    """β_syn efetivo de um par de aliados, pela role dos dois heróis.
+
+    Precedência: SUP × SUP → `beta_syn_sup_sup`; DPS × DPS → `beta_syn_dps_dps`;
+    qualquer outra combinação (ou peso não definido no preset) → `beta_syn`.
+    Vale só para o `T_syn` do ranking — o threat weighting tem regra própria
+    (ver `compute_threat_weights`).
+    """
+    if role_a != role_b:
+        return weights.beta_syn
+    if role_a == "SUP" and weights.beta_syn_sup_sup is not None:
+        return weights.beta_syn_sup_sup
+    if role_a == "DPS" and weights.beta_syn_dps_dps is not None:
+        return weights.beta_syn_dps_dps
+    return weights.beta_syn
+
+
 def calculate_hero_score(
     hero_name: str,
     ally_matrix: dict[str, dict[str, float]],
@@ -373,10 +495,10 @@ def calculate_hero_score(
                 counter_reasons.append((contribution, f"sofre contra {enemy} ({contribution:.2f})"))
 
     # --- synergy term (× β_syn, diagonal ignorada) ---
-    # β_syn_sup_sup (se definido no preset) substitui β_syn quando AMBOS os heróis
-    # do par são suportes; qualquer outra combinação de roles usa β_syn.
+    # O peso do par sai de `_pair_beta_syn`: SUP × SUP e DPS × DPS têm pesos
+    # próprios quando o preset os define; qualquer outra combinação usa β_syn.
     ally_row = ally_matrix.get(hn, {})
-    hero_is_sup = weights.beta_syn_sup_sup is not None and heroes.get_hero_role(hn) == "SUP"
+    hero_role = heroes.get_hero_role(hn)
     synergy_score = 0.0
     for ally in allies:
         if not ally:
@@ -385,10 +507,7 @@ def calculate_hero_score(
         if an == hn:
             continue  # diagonal: remove o antigo hack do -11
         if an in ally_row:
-            beta = weights.beta_syn
-            if hero_is_sup and heroes.get_hero_role(an) == "SUP":
-                assert weights.beta_syn_sup_sup is not None
-                beta = weights.beta_syn_sup_sup
+            beta = _pair_beta_syn(weights, hero_role, heroes.get_hero_role(an))
             contribution = ally_row[an] * beta
             synergy_score += contribution
             if contribution >= REASON_MIN:

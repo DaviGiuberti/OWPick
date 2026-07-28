@@ -1,10 +1,11 @@
 """Golden tests do matching — o coração do produto.
 
 Roda o pipeline REAL em memória (capture.capture -> matching -> map_detect.detect)
-sobre capturas reais em tests/fixtures/<res>/ (full.png; em 720p, full1.png +
-as fixtures adicionais full2/full3.png da v1.2.11), sem capturar a tela: o
-`mss` é substituído por um fake que devolve a imagem da fixture. Cada fixture
-tem um gabarito expected*.json (lineup, bans, mapa); a comparação usa nomes
+sobre capturas reais em tests/fixtures/<res>/ (full1.png em 720p e 1080p,
+full.png em 2K; mais as fixtures adicionais full2/full3.png de 720p da v1.2.11 e
+os JPEGs full4.jpeg/full2.jpeg da v1.2.12), sem capturar a tela: o `mss` é
+substituído por um fake que devolve a imagem da fixture. Cada fixture tem um
+gabarito expected*.json (lineup, bans, mapa); a comparação usa nomes
 normalizados (core.heroes.normalize_hero_name).
 
 Também mede e reporta a MARGEM (score do 1º vs 2º colocado) por slot do
@@ -26,9 +27,10 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
 
 # Nome do arquivo da fixture por resolução: na v1.2.11 o full.png de 720p foi
-# renomeado para full1.png (e ganhou os companheiros full2/full3.png); 1080p e
-# 2k continuam com full.png.
-FIXTURE_FILE = {"720p": "full1.png", "1080p": "full.png", "2k": "full.png"}
+# renomeado para full1.png (e ganhou os companheiros full2/full3.png) e na
+# v1.2.12 o mesmo aconteceu com o de 1080p (que ganhou o full2.jpeg); 2k
+# continua com full.png.
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full.png"}
 
 
 class _FakeGrab:
@@ -66,7 +68,9 @@ def _norm(names):
     return [normalize_hero_name(n) for n in names]
 
 
-def _capture_fixture(res: str, tmp_path, monkeypatch, fixture_file=None, expected_file="expected.json"):
+def _capture_fixture(
+    res: str, tmp_path, monkeypatch, fixture_file=None, expected_file="expected.json"
+):
     """capture.capture() real sobre a imagem da fixture (mss falsificado)."""
     fixture = FIXTURES_DIR / res
     with Image.open(fixture / (fixture_file or FIXTURE_FILE[res])) as img:
@@ -190,6 +194,69 @@ def test_golden_bans_720p_extra(fixture_file, expected_file, tmp_path, monkeypat
     assert _norm(bans.names()) == _norm(expected["bans"]), (
         f"[{fixture_file}] bans divergem: {bans.names()}"
     )
+
+
+# ---------------------------------------------------------------------------
+# Fixtures JPEG (v1.2.12): a MESMA partida capturada em 720p e em 1080p
+# ---------------------------------------------------------------------------
+# 720p/full4.jpeg e 1080p/full2.jpeg são a mesma tela de seleção (D.Va, Soldier:
+# 76, Torbjörn, Juno, Kiriko vs D.Va, Soldier: 76, Cassidy, Kiriko, Ana em New
+# Queen Street) em duas resoluções — e as PRIMEIRAS fixtures em JPEG (as demais
+# são PNG). Servem de regressão dupla: o matching/OCR não pode depender do
+# formato sem perdas nem quebrar na resolução mais baixa.
+JPEG_FIXTURES = [
+    ("720p", "full4.jpeg", "expected4.json"),
+    ("1080p", "full2.jpeg", "expected2.json"),
+]
+
+
+@pytest.mark.parametrize("res,fixture_file,expected_file", JPEG_FIXTURES)
+def test_golden_lineup_jpeg(res, fixture_file, expected_file, tmp_path, monkeypatch):
+    cap, expected = _capture_fixture(res, tmp_path, monkeypatch, fixture_file, expected_file)
+    lineup, slot_results = matching.match_lineup(cap)
+
+    assert len(slot_results) == 10  # 5 aliados + 5 inimigos (sem Roles.txt)
+    assert _norm(lineup.ally_names()) == _norm(expected["allies"]), (
+        f"[{res}/{fixture_file}] aliados divergem: {lineup.ally_names()}"
+    )
+    assert _norm(lineup.enemy_names()) == _norm(expected["enemies"]), (
+        f"[{res}/{fixture_file}] inimigos divergem: {lineup.enemy_names()}"
+    )
+
+
+@pytest.mark.parametrize("res,fixture_file,expected_file", JPEG_FIXTURES)
+def test_golden_mapa_jpeg(res, fixture_file, expected_file, tmp_path, monkeypatch):
+    cap, expected = _capture_fixture(res, tmp_path, monkeypatch, fixture_file, expected_file)
+    detection = map_detect.detect(cap.full)
+    assert normalize_hero_name(detection.name) == normalize_hero_name(expected["map"]), (
+        f"[{res}/{fixture_file}] mapa diverge: '{detection.name}'"
+    )
+
+
+def test_golden_bans_jpeg_1080p(tmp_path, monkeypatch):
+    """Em 1080p os 4 bans da captura são detectados corretamente."""
+    cap, expected = _capture_fixture("1080p", tmp_path, monkeypatch, "full2.jpeg", "expected2.json")
+    bans = matching.match_bans(cap)
+    assert _norm(bans.names()) == _norm(expected["bans"]), f"bans divergem: {bans.names()}"
+
+
+# Mesmo limite conhecido dos demais bans fora de 2K: em 720p o slot do Bastion
+# marca MAE 0.1348 > BAN_MATCH_MAX_SCORE (0.12, calibrado em 2K) e é descartado,
+# embora seja o herói correto no topo do ranking. O 5º slot (vazio) marca 0.1924,
+# então subir o limiar para acomodar 0.135 encosta demais no ruído — a correção
+# exige critério de margem/métrica robusta (tarefas 4.1/4.2), não recalibração.
+# A MESMA captura em 1080p (full2.jpeg) acerta os 4 bans, o que confirma que a
+# causa é a resolução do ícone, não o JPEG.
+@pytest.mark.xfail(
+    strict=True,
+    reason="Limite conhecido: em 720p o ban do Bastion marca MAE 0.1348 > "
+    "BAN_MATCH_MAX_SCORE (0.12) e é descartado — mesma causa dos xfails de "
+    "full2/full3.png e do 1080p da v1.2.11.",
+)
+def test_golden_bans_jpeg_720p(tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("720p", tmp_path, monkeypatch, "full4.jpeg", "expected4.json")
+    bans = matching.match_bans(cap)
+    assert _norm(bans.names()) == _norm(expected["bans"]), f"bans divergem: {bans.names()}"
 
 
 # ---------------------------------------------------------------------------

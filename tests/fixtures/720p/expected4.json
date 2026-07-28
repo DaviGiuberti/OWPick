@@ -1,0 +1,7 @@
+{
+    "allies": ["D.Va", "Soldier: 76", "Torbjörn", "Juno", "Kiriko"],
+    "enemies": ["D.Va", "Soldier: 76", "Cassidy", "Kiriko", "Ana"],
+    "bans": ["Bastion", "Illari", "Doomfist", "Lúcio"],
+    "map": "New Queen Street",
+    "player_hero": "D.Va"
+}

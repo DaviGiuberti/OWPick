@@ -316,7 +316,9 @@ T_ctr(h)       = Σ_e w_e · C(h, e)                                            
 raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')                   [sinal bruto de ameaça; 0 = neutro]
 w_e            = exp( A · tanh(raw_e / S) )                                           [multiplicador de ameaça; log-simétrico]
 T_syn(h)       = Σ_a Y(h, a) · β_syn(h, a)                                            [sinergia; diagonal h==a ignorada]
-β_syn(h, a)    = β_syn_sup_sup se role(h) = role(a) = SUP, senão β_syn                 [só o Counter-first define β_syn_sup_sup]
+β_syn(h, a)    = β_syn_sup_sup  se role(h) = role(a) = SUP   (só o Counter-first o define)
+                 β_syn_dps_dps  se role(h) = role(a) = DPS   (0.65; todos menos o Conforto+)
+                 β_syn          nos demais pares
 ```
 
 O MetaStrength é o z-score da winrate **bruta por role** (DPS/TANK/SUP), atenuado
@@ -334,11 +336,30 @@ aplicado ao counter term. São **três componentes** (0 = ameaça neutra):
 - `ν · Σ_{e'≠e} Y(e,e')` — **sinergia do inimigo com o resto do time inimigo**
   (combo: um inimigo numa comp coesa é mais perigoso; anti-sinergia reduz a
   ameaça). Usa a **mesma matriz de sinergia `Y`** dos aliados, aplicada aos pares
-  de inimigos, com a diagonal `e' == e` ignorada. **Exceção**: pares
-  **Support × Support** (ambos os inimigos da role SUP) contribuem **0** neste
-  somatório — dois suportes juntos não elevam a ameaça. Essa exceção vale
-  **apenas** para a sinergia usada pelo Enemy Threat; o cálculo normal de
-  sinergias do ranking (`T_syn`) continua contabilizando SUP × SUP normalmente.
+  de inimigos, com a diagonal `e' == e` ignorada. **Exceção**: pares de **mesma
+  role** — **Support × Support** e **DPS × DPS** — contribuem **0** neste
+  somatório (dois suportes, ou dois DPS, juntos não elevam a ameaça). A exceção
+  vale em **todos os presets** e **apenas** para a sinergia usada pelo Enemy
+  Threat; o cálculo normal de sinergias do ranking (`T_syn`) continua
+  contabilizando SUP × SUP e DPS × DPS normalmente (o par DPS × DPS com o peso
+  próprio de 0.65 — ver a exceção de sinergia logo abaixo da tabela de presets).
+
+#### Ajuste de Mercy "pocket" (aplicado sobre os `w_e` prontos)
+
+Uma Mercy inimiga raramente é a ameaça em si: ela **concentra** a ameaça num DPS.
+Como **etapa final** de `compute_threat_weights`, `apply_mercy_pocket` ajusta os
+`w_e` já calculados (não entra no `raw` nem passa pela curva):
+
+- Com **Mercy** no time inimigo e ao menos um de `Pharah, Sojourn, Ashe, Freja,
+  Echo, Sierra, Emre, Cassidy, Soldier: 76`, o DPS de **maior prioridade
+  presente** (nessa ordem) tem `w_e` × **1.5** e a Mercy `w_e` × **0.5**.
+- Os demais heróis — **inclusive outros DPS da lista** — ficam × 1.
+- **Exceção do Bastion**: Bastion junto de qualquer um de
+  `{Sierra, Emre, Cassidy, Soldier: 76}` **cancela o ajuste inteiro** (todos × 1).
+  A exceção tem **precedência absoluta** sobre a ordem de prioridade: Bastion +
+  Emre cancela mesmo com uma Pharah presente. `Bastion + Pharah` **não** dispara a
+  exceção (Pharah está fora desse subconjunto), então o ajuste normal se aplica.
+- Vale em **todos os presets**.
 
 A transformação é `w(raw) = exp( A · tanh(raw / S) )`, com as propriedades:
 
@@ -403,19 +424,34 @@ curva de ameaça:
 
 | Preset | `β_meta` | `λ` | `μ` | `ν` | `β_ctr` | `β_syn` | Prioriza |
 |---|---|---|---|---|---|---|---|
-| **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 | balanceia meta, counter e sinergia |
-| **Counter-first** | 0.75 | 0.32 | 0.23 | 0.10 | 1.00 | 0.325 (0.65 em SUP×SUP) | counterar o time inimigo (ameaça por counters) |
-| **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
-| **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 | sinergia com o seu time (ameaça de-enfatizada) |
+| **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 (0.65 em DPS×DPS) | balanceia meta, counter e sinergia |
+| **Counter-first** | 0.75 | 0.32 | 0.23 | 0.10 | 1.00 | 0.325 (0.65 em SUP×SUP e em DPS×DPS) | counterar o time inimigo (ameaça por counters) |
+| **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 (0.65 em DPS×DPS) | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
+| **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 (**sem** exceção de DPS×DPS) | sinergia com o seu time (ameaça de-enfatizada) |
 
-> **Exceção de sinergia do Counter-first**: no preset Counter-first, pares
-> **Support × Support** utilizam um peso de sinergia de **0.65**, enquanto todas
-> as demais combinações continuam utilizando **0.325**. Ou seja, com
+> **Exceção de sinergia do Counter-first (SUP × SUP)**: no preset Counter-first,
+> pares **Support × Support** utilizam um peso de sinergia de **0.65**, enquanto
+> todas as demais combinações continuam utilizando **0.325**. Ou seja, com
 > `Y(Ana, Cassidy) = 1` a contribuição é `1 × 0.325 = 0.325`, mas com
 > `Y(Ana, Mercy) = 1` é `1 × 0.65 = 0.65`. A regra vale **somente** para o
 > Counter-first e apenas quando **ambos** os heróis do par são da role SUP; é
 > implementada pelo campo opcional `ModelWeights.beta_syn_sup_sup` (`None` nos
 > demais presets ⇒ usa `beta_syn` para todos os pares).
+>
+> **Exceção de sinergia DPS × DPS (v1.2.12)**: quando **ambos** os heróis do par
+> são DPS, a contribuição usa um peso **fixo de 0.65**
+> (`ModelWeights.beta_syn_dps_dps`) no lugar do `β_syn` do preset. Vale em
+> **Equilibrado, Counter-first e Meta-first**; o **Conforto+** é o único preset
+> **sem** a regra (`beta_syn_dps_dps = None`) e mantém o `β_syn` cheio (1.25)
+> também nesses pares. Exemplo no Counter-first: `Y(Cassidy, Ashe) = -6` contribui
+> `-6 × 0.65 = -3.9` (e **não** `-6 × 0.325`), enquanto `Y(Cassidy, Ana) = 1`
+> (DPS × SUP) segue em `1 × 0.325`. Note que o 0.65 é uma **âncora independente**:
+> só coincide com o `β_syn` do Equilibrado por acaso.
+>
+> **Precedência entre as duas exceções**: `SUP × SUP → beta_syn_sup_sup` (se
+> definido) → `DPS × DPS → beta_syn_dps_dps` (se definido) → `β_syn`. Como as
+> duas exigem que os dois heróis tenham a **mesma** role, elas nunca competem
+> pelo mesmo par.
 
 O componente `ν` mede a **sinergia do inimigo com o próprio time inimigo** (combo):
 "Meta-first" o valoriza mais (comp coesa é ameaça), "Conforto+" o de-enfatiza junto
@@ -666,13 +702,15 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 
 | Item | Descrição |
 |---|---|
-| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `NEUTRAL_WEIGHT` (= 1.0) |
+| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `BETA_SYN_DPS_DPS` (0.65), `NEUTRAL_WEIGHT` (= 1.0), `THREAT_SYNERGY_EXCLUDED_ROLES`, `MERCY_POCKET_*` |
 | `threat_multiplier(raw, log_cap, scale)` | Multiplicador de ameaça `exp(A·tanh(raw/S))`; `w(0)=1`, log-simétrico, ancorado em `w(−1.5)=0.6` e `w(3.0)=2.5` |
 | `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
-| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro). Pares SUP × SUP são ignorados no termo de sinergia (só aqui, não no `T_syn` do ranking) |
-| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`**; par SUP×SUP usa `beta_syn_sup_sup` quando o preset o define (Counter-first) |
+| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro). Pares de mesma role **SUP × SUP e DPS × DPS** são ignorados no termo de sinergia, em todos os presets (só aqui, não no `T_syn` do ranking). Encerra chamando `apply_mercy_pocket` |
+| `apply_mercy_pocket(w, enemies)` | Etapa final do threat weighting: Mercy + DPS "pocketável" ⇒ ×1.5 no DPS de maior prioridade e ×0.5 na Mercy; Bastion + `{Sierra, Emre, Cassidy, Soldier: 76}` cancela o ajuste |
+| `_pair_beta_syn(weights, role_a, role_b)` | β_syn do par: `beta_syn_sup_sup` (SUP×SUP) → `beta_syn_dps_dps` (DPS×DPS) → `beta_syn` |
+| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`**; o β de cada par de sinergia sai de `_pair_beta_syn` |
 | `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
 
 #### `core/ports.py`
@@ -759,13 +797,24 @@ no lugar da manual.
 2. OCR do recorte via `map_detect.extract_text_from_image` (reuso do pré-processo
    e do backend de OCR)
 3. `identify_hero`: **uma** chamada a `rapidfuzz.process.extractOne` com
-   `fuzz.token_set_ratio` contra `heroes.get_all_heroes()`, com um processor que
-   deixa o match tolerante a caixa/acentos preservando os espaços (o ruído do OCR
-   ao lado do nome — ex.: o badge de role — vira token separado e não contamina o
-   nome). Devolve o nome **canônico**
+   `fuzz.token_set_ratio` contra `heroes.get_all_heroes()`, com um processor
+   (`_strip_upper`) que deixa o match tolerante a caixa/acentos **e a pontuação**
+   preservando os espaços (o ruído do OCR ao lado do nome — ex.: o badge de role —
+   vira token separado e não contamina o nome). Devolve o nome **canônico**
 4. `MIN_CONFIDENCE = 60.0` (score do fuzzy): abaixo disso → `None` (o pipeline usa
    a role manual como **fallback**). A role sai de `Hero.from_name(nome).role`
    (`HEROES_ROLES`)
+
+**Por que a pontuação é descartada no match (v1.2.12)**: `_strip_upper` remove
+`. : ' \`` (a constante `core.heroes.HERO_NAME_PUNCTUATION`, a mesma que
+`normalize_hero_name` usa) dos **dois lados** da comparação. Essa pontuação não é
+informação que o OCR produza de forma confiável — o Tesseract praticamente nunca
+enxerga o ponto de `"D.Va"` — e, em nomes **curtos**, cada caractere ilegível
+custa muitos pontos no `token_set_ratio`. Era a causa-raiz do bug de 720p descrito
+em [Pontos que podem confundir](#pontos-que-podem-confundir). Com a correção,
+todos os 52 heróis marcam **100** quando o nome é lido limpo (antes o pior caso
+era D.Va em 85.7 e `Soldier: 76` em 95.2), e a folga até o limiar passa a absorver
+o ruído do badge.
 
 **Por que OCR do nome, e não template matching contra `assets/heroes/2k`**: a arte
 do retrato **grande** da scoreboard tem enquadramento/zoom diferentes do busto
@@ -961,6 +1010,43 @@ injetável para testes.
 | **TANK** (14) | D.Va, Domina, Doomfist, Hazard, Junker Queen, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Sigma, Winston, Wrecking Ball, Zarya |
 | **SUP** (14) | Ana, Baptiste, Brigitte, Illari, Jetpack Cat, Juno, Kiriko, Lifeweaver, Lúcio, Mercy, Mizuki, Moira, Wuyang, Zenyatta |
 
+### Categorias de DPS (sinergias DPS × DPS)
+
+As sinergias **entre dois DPS** em `data/heroes ally.xlsx` não são atribuídas
+herói a herói: saem de uma classificação por **estilo de alcance/engajamento**
+(v1.2.12). Dois DPS que disputam o mesmo espaço no time se anti-sinergizam; estilos
+complementares, não.
+
+| Categoria | Heróis |
+|---|---|
+| **Hitscan** | Ashe, Cassidy, Emre, Hanzo, Sierra, Sojourn, Soldier: 76 |
+| **Meio Hitscan** | Bastion, Torbjörn |
+| **Flex** | Anran, Genji, Mei, Sombra, Vendetta, Venture, Widowmaker |
+| **Meio Flex** | Echo, Freja, Junkrat, Pharah, Reaper, Shion, Symmetra |
+
+Valor da sinergia por par de categorias (**tabela simétrica** — o valor é gravado
+nas duas células, `Y(h,a)` e `Y(a,h)`):
+
+| | Hitscan | Meio Hitscan | Flex | Meio Flex |
+|---|---|---|---|---|
+| **Hitscan** | −6 | −2 | +2 | 0 |
+| **Meio Hitscan** | −2 | −6 | 0 | 0 |
+| **Flex** | +2 | 0 | −6 | 0 |
+| **Meio Flex** | 0 | 0 | 0 | −2 |
+
+**Tracer é caso à parte**: não pertence a categoria alguma e sinergiza **+2 com
+qualquer outro DPS**, com **precedência** sobre a tabela.
+
+A tabela cobre **todos** os pares de categorias, então **todo** par DPS × DPS
+(276 = C(24,2)) tem valor definido. O que a regra **não** toca: a diagonal
+(mantida em −11) e qualquer par que envolva Tank/Suporte — esses continuam sendo
+valores editados à mão, e a assimetria `Y(h,a) ≠ Y(a,h)` que existe fora dos pares
+DPS × DPS é preservada de propósito.
+
+> Ao adicionar um DPS novo, coloque-o em uma das quatro categorias e preencha a
+> linha/coluna dele conforme a tabela — senão ele fica com sinergia herdada/vazia
+> contra os demais DPS.
+
 ### Mapas Suportados (29 total)
 
 | Modo | Mapas |
@@ -1122,7 +1208,7 @@ um observador passivo, indistinguível de um software de captura de tela comum.
 ### Pontos que podem confundir
 
 1. **Perspectiva invertida em `tools/enemy_mult.py`**: as variáveis `allies` e `enemies` têm semântica invertida — são do ponto de vista do herói inimigo avaliado, não do jogador. O código está correto, mas pode confundir quem lê pela primeira vez sem contexto.
-2. **Limite conhecido — bans fora de 2K**: um dos 5 slots de ban da fixture 1080p marca MAE 0.152 (> `BAN_MATCH_MAX_SCORE = 0.12`, calibrado em 2K) e é descartado. O mesmo ocorre em duas fixtures 720p da v1.2.11: `full2.png` (Wrecking Ball, MAE 0.152) e `full3.png` (Mercy, 0.141) — o herói correto é o topo do ranking, mas fica acima do limiar. Subir o limiar não resolve (um slot vazio em 720p marca 0.173/0.187). Documentado como `xfail` em `tests/test_matching_golden.py`; requer métrica/critério de margem mais robustos para os bans.
+2. **Limite conhecido — bans fora de 2K**: um dos 5 slots de ban da fixture 1080p marca MAE 0.152 (> `BAN_MATCH_MAX_SCORE = 0.12`, calibrado em 2K) e é descartado. O mesmo ocorre em duas fixtures 720p da v1.2.11: `full2.png` (Wrecking Ball, MAE 0.152) e `full3.png` (Mercy, 0.141), e na `full4.jpeg` da v1.2.12 (Bastion, 0.135) — o herói correto é o topo do ranking, mas fica acima do limiar. Subir o limiar não resolve (um slot vazio em 720p marca 0.173/0.187/0.192). A **mesma** captura da `full4.jpeg` em 1080p (`full2.jpeg`) acerta os 4 bans, o que confirma que a causa é o **tamanho do ícone**, não o formato JPEG. Documentado como `xfail` em `tests/test_matching_golden.py`; requer métrica/critério de margem mais robustos para os bans.
 3. **Modo de vídeo do jogo — recomende "tela cheia sem bordas"**: em **tela
    cheia exclusiva**, qualquer ferramenta externa que capture a tela (o OWPick
    incluso — vale para OBS, ShareX, Game Bar etc.) pode causar uma engasgada
@@ -1140,6 +1226,20 @@ um observador passivo, indistinguível de um software de captura de tela comum.
    também. Trocar por `csv` da stdlib mudaria assinaturas do `core` e as fixtures
    dos testes, então **não** é um ajuste pontual: fica registrado como
    oportunidade, a ser feita só com a suíte golden como rede de segurança.
+5. **Nomes com pontuação e o OCR da role do jogador** (bug corrigido na v1.2.12):
+   a região do nome do herói inclui o **badge de role**, que em 720p o Tesseract
+   lê **colado** ao nome — "D.Va" saía como `"DVS"`. Como o `token_set_ratio`
+   comparava contra o nome canônico **com** o ponto, o score ficava em 57.1
+   (< `MIN_CONFIDENCE = 60`) e a detecção falhava **silenciosamente**: o pipeline
+   caía para a role manual (`Roles.txt`) e o ranking saía para a role errada, sem
+   nenhum erro visível. A correção **não** é um caso especial da D.Va —
+   `player_hero._strip_upper` passou a descartar a pontuação dos dois lados da
+   comparação, o que beneficia todo nome pontuado (`D.Va`, `Soldier: 76`). Se um
+   bug parecido reaparecer, olhe primeiro o **texto cru do OCR** no log de
+   `--debug` (`player_hero.detect` loga o texto lido, o melhor candidato e o
+   score) antes de suspeitar da região ou do formato da imagem: a fixture 1080p da
+   **mesma** partida sempre leu corretamente, então o formato (JPEG) nunca foi a
+   causa.
 
 ### Adição de Novos Heróis
 
@@ -1148,5 +1248,7 @@ Para adicionar um novo herói ao sistema, é necessário atualizar dois lugares:
 2. Os templates de imagem em `assets/heroes/`: retratos do lineup nas resoluções suportadas (`720p` e `2k`) e o ícone 3D oficial em `assets/heroes/bans/` (reconhecimento de bans)
 
 Depois, atualizar as matrizes (`.xlsx` de edição → `tools/xlsx_to_csv.py`) e as
-stats (`tools/coletar_stats.py`). O validador (`infra/validation.py`, roda nos
-testes e no boot com `--debug`) aponta exatamente o que estiver faltando.
+stats (`tools/coletar_stats.py`). Nas **sinergias**, um DPS novo deve receber os
+valores da sua categoria (ver [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps)).
+O validador (`infra/validation.py`, roda nos testes e no boot com `--debug`)
+aponta exatamente o que estiver faltando.

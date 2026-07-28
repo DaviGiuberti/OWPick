@@ -4,6 +4,109 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.12] — 2026-07-28
+
+### Sinergia DPS × DPS: peso próprio no score e exclusão da ameaça
+
+- **Peso fixo de 0.65 em pares DPS × DPS no `T_syn`** (`core/scoring.py`): quando
+  os dois heróis de um par de sinergia são DPS, a contribuição do par usa
+  `ModelWeights.beta_syn_dps_dps` (0.65) no lugar do `β_syn` do preset. Vale em
+  **Equilibrado, Counter-first e Meta-first**; o **Conforto+** é a exceção e
+  mantém o próprio `β_syn` (1.25) também nesses pares. Segue o mesmo mecanismo já
+  usado pelo `beta_syn_sup_sup`, com a precedência: **SUP × SUP → `beta_syn_sup_sup`;
+  DPS × DPS → `beta_syn_dps_dps`; senão → `β_syn`**.
+  - Efeito prático no Counter-first: `Y(Cassidy, Ashe) = -6` passa a contribuir
+    `-6 × 0.65 = -3.9` (antes `-6 × 0.325 = -1.95`), enquanto `Y(Cassidy, Ana) = 1`
+    (DPS × SUP) segue em `1 × 0.325 = 0.325`.
+- **Pares DPS × DPS deixam de somar ameaça no threat weighting**
+  (`compute_threat_weights`): no termo `ν · Σ_{e'≠e} Y(e,e')`, um par em que os
+  dois inimigos são DPS contribui **0** — a mesma exceção que já existia para
+  SUP × SUP. Ao contrário da regra acima, esta vale em **todos os presets,
+  inclusive o Conforto+**. O `T_syn` do ranking continua contabilizando DPS × DPS
+  normalmente; a exclusão é só do peso de ameaça.
+
+### Threat weighting: Mercy "pocketando" um DPS
+
+- Novo ajuste aplicado **sobre os `w_e` já calculados** (`apply_mercy_pocket`,
+  etapa final de `compute_threat_weights`): com **Mercy** no time inimigo mais ao
+  menos um de `Pharah, Sojourn, Ashe, Freja, Echo, Sierra, Emre, Cassidy,
+  Soldier: 76`, o DPS de **maior prioridade presente** (nessa ordem) tem o `w_e`
+  multiplicado por **1.5** e a Mercy por **0.5**. Os demais heróis — inclusive
+  outros DPS da lista — ficam inalterados.
+- **Exceção do Bastion**: se o time inimigo tiver **Bastion** junto de qualquer um
+  de `Sierra, Emre, Cassidy, Soldier: 76`, o ajuste é **cancelado por completo**
+  (todos ficam com `w_e` normal). A exceção tem **precedência absoluta** sobre a
+  ordem de prioridade — Bastion + Emre cancela o ajuste mesmo com uma Pharah no
+  time. `Bastion + Pharah` **não** dispara a exceção (Pharah não está nesse
+  subconjunto), então o ajuste normal se aplica.
+- Vale em **todos os presets**. O ajuste multiplica o `w_e` pronto: não entra no
+  `raw` nem passa pela curva `exp(A·tanh(raw/S))`.
+
+### Matriz de sinergias reescrita por categoria de DPS
+
+- As sinergias **DPS × DPS** deixaram de ser valores herói a herói e passaram a
+  sair de uma classificação por **estilo de alcance/engajamento**, em 4
+  categorias — **Hitscan** (Ashe, Cassidy, Emre, Hanzo, Sierra, Sojourn,
+  Soldier: 76), **Meio Hitscan** (Bastion, Torbjörn), **Flex** (Anran, Genji, Mei,
+  Sombra, Vendetta, Venture, Widowmaker) e **Meio Flex** (Echo, Freja, Junkrat,
+  Pharah, Reaper, Shion, Symmetra) — com uma tabela **simétrica** de valores:
+
+  | | Hitscan | Meio Hitscan | Flex | Meio Flex |
+  |---|---|---|---|---|
+  | **Hitscan** | −6 | −2 | +2 | 0 |
+  | **Meio Hitscan** | −2 | −6 | 0 | 0 |
+  | **Flex** | +2 | 0 | −6 | 0 |
+  | **Meio Flex** | 0 | 0 | 0 | −2 |
+
+- **Tracer** é caso à parte: **+2 com qualquer outro DPS**, com precedência sobre
+  a tabela.
+- **552 células** (276 pares × 2 — ou seja, **todos** os pares DPS × DPS) foram
+  reescritas em `data/heroes ally.xlsx` e propagadas para `data/synergies.csv`,
+  sempre nas **duas** direções `Y(h,a)` e `Y(a,h)`. Ficaram **intocados**: a
+  diagonal (−11) e todos os pares que envolvem Tank/Suporte — a assimetria
+  pré-existente da matriz fora dos pares DPS × DPS foi preservada (616 → 508
+  pares assimétricos).
+- As categorias e a tabela ficaram registradas em `DOCUMENTACAO.md`
+  ("Categorias de DPS"), que é a referência para classificar um DPS novo.
+
+### Correção: D.Va não era reconhecida no OCR da role do jogador (720p)
+
+- **Sintoma**: em 720p, o herói do jogador não era identificado quando ele estava
+  de D.Va — o pipeline caía silenciosamente para a role manual (`Roles.txt`) e o
+  ranking saía para a role errada.
+- **Causa-raiz**: a região do nome inclui o **badge de role**, que em baixa
+  resolução o Tesseract lê **colado** ao nome (`"DVS"`), e o ponto de `"D.Va"`
+  não é lido. Comparado contra o nome canônico **com** pontuação, o
+  `token_set_ratio` dava **57.1** — abaixo de `MIN_CONFIDENCE = 60`.
+- **Correção geral** (não é caso especial da D.Va): `player_hero._strip_upper`
+  passa a descartar a pontuação dos nomes (`. : ' \``) dos **dois lados** da
+  comparação, reutilizando `core.heroes.HERO_NAME_PUNCTUATION` — a mesma fonte que
+  `normalize_hero_name` já usava. Pontuação não é informação que o OCR produza de
+  forma confiável, e em nomes curtos cada caractere ilegível custa muitos pontos
+  no ratio. Com a correção, `"DVS"` casa com D.Va em **66.7** (2º colocado em
+  36.4) e **todos os 52 heróis** marcam 100 quando o nome é lido limpo (antes o
+  pior caso era D.Va 85.7 e `Soldier: 76` 95.2).
+
+### Fixtures e testes
+
+- Novas fixtures da **mesma partida em duas resoluções**: `720p/full4.jpeg` e
+  `1080p/full2.jpeg` (as primeiras em **JPEG**), com os gabaritos
+  `expected4.json`/`expected2.json`. Cobrem lineup, bans, mapa e o herói do
+  jogador (D.Va).
+- `1080p/full.png` foi renomeado para `full1.png`, acompanhando o que a v1.2.11
+  já fizera em 720p; as referências nos testes foram atualizadas.
+- Novos testes: peso e precedência de `beta_syn_dps_dps` por preset, exclusão de
+  DPS × DPS no threat weighting nos 4 presets, os 4 cenários do ajuste da Mercy
+  (incluindo o caso combinado Bastion + Emre + Pharah) e a regressão do OCR da
+  D.Va (texto real do OCR + `detect()` ponta a ponta nas duas fixtures).
+- **Limite conhecido (inalterado)**: em `720p/full4.jpeg` o ban do **Bastion**
+  marca MAE 0.1348 > `BAN_MATCH_MAX_SCORE` (0.12, calibrado em 2K) e é
+  descartado — mesma causa dos `xfail` já documentados de `full2/full3.png` e do
+  1080p. A **mesma** captura em 1080p acerta os 4 bans, confirmando que a causa é
+  a resolução do ícone, não o formato JPEG.
+
+---
+
 ## [v1.2.11] — 2026-07-24
 
 ### Consumo de recursos: o jogo tem prioridade sobre o OWPick

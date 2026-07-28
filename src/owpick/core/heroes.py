@@ -211,6 +211,13 @@ def get_map_search_index() -> dict[str, str]:
 # ---------------------------------------------------------------------------
 # Normalização de nomes de heróis
 # ---------------------------------------------------------------------------
+# Pontuação presente nos nomes canônicos que NÃO é informação: some na
+# normalização e o OCR também não a produz de forma confiável ("D.Va" é lido
+# "DVA"/"DVS", "Soldier: 76" vira "SOLDIER 76"). Fonte única para
+# normalize_hero_name e para o fuzzy match do infra.player_hero.
+HERO_NAME_PUNCTUATION = re.compile(r"[:.'`]")
+
+
 def normalize_hero_name(name: str) -> str:
     """
     Normaliza um nome para uma chave estável e tolerante a variações de
@@ -226,7 +233,7 @@ def normalize_hero_name(name: str) -> str:
     """
     if name is None:
         return ""
-    s = re.sub(r"[:\.'`]", "", str(name))
+    s = HERO_NAME_PUNCTUATION.sub("", str(name))
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c))
     s = s.lower()
