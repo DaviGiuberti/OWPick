@@ -19,6 +19,7 @@ já existente (os três heróis das fixtures leem com fuzzy score 100).
 
 from __future__ import annotations
 
+import re
 import unicodedata
 
 from PIL.Image import Image
@@ -38,6 +39,11 @@ log = get_logger("player_hero")
 # funciona em 720p/1080p/2K/4K sem lógica por resolução. Fallback usado só se o
 # layout não trouxer a seção player_hero (nunca deveria — é empacotado).
 _FALLBACK_NAME_REGION = {"left": 789, "top": 238, "width": 130, "height": 39}
+
+# Um token do OCR só é "nome" se tiver ao menos um alfanumérico. O badge de role
+# ao lado do nome vira lixo puramente simbólico ("&", "@", "@&") e é descartado
+# antes do fuzzy match — ver _strip_upper.
+_ALNUM = re.compile(r"[A-Z0-9]")
 
 # Confiança mínima do fuzzy match do nome (escala do fuzz.token_set_ratio, 0-100).
 # Calibração: simulando o OCR (maiúsculas, sem acento/pontuação, com o artefato do
@@ -65,14 +71,27 @@ def _strip_upper(s: str) -> str:
     ratio. Era a causa-raiz do bug do 720p: a região do nome inclui o badge de role,
     que em baixa resolução é lido COLADO ao nome ("DVS"); contra "D.VA" isso dava
     57.1 (< MIN_CONFIDENCE) e a role caía para o fallback manual. Sem a pontuação,
-    "DVS" vs "DVA" dá 66.7 (2º colocado em 36.4 — margem larga). O ganho é geral,
-    não específico da D.Va: com o OCR lendo o nome limpo, TODOS os 52 heróis passam
-    a marcar 100 (antes o pior caso era D.Va 85.7 e "Soldier: 76" 95.2).
+    "DVS" vs "DVA" dá 66.7 (2º colocado em 36.4 — margem larga).
+
+    Tokens **sem nenhum alfanumérico** também são descartados (v1.2.13). O badge
+    de role nem sempre gruda no nome: quando o Tesseract o isola, ele vira um
+    token simbólico ("&", "@", "@&") que **infla o comprimento da frase** e derruba
+    o `token_set_ratio` justamente nos nomes curtos. Era o caso da fixture
+    `1080p/full3.png`, onde o OCR lê `"OVA &"` (o "D" sai como "O", confusão comum
+    na fonte itálica do jogo): contra "DVA" isso dava **50.0**, abaixo do limiar,
+    e a role caía de novo para o fallback manual. Sem o token "&", `"OVA"` vs
+    `"DVA"` dá **66.7** e a detecção volta a funcionar. Nenhum nome canônico tem
+    token puramente simbólico, então o filtro **nunca** altera o lado dos
+    candidatos — só limpa o texto do OCR.
+
+    O ganho é geral, não específico da D.Va: com o OCR lendo o nome limpo, TODOS
+    os 52 heróis passam a marcar 100 (antes o pior caso era D.Va 85.7 e
+    "Soldier: 76" 95.2).
     """
     s = HERO_NAME_PUNCTUATION.sub("", s)
     s = unicodedata.normalize("NFKD", s)
     s = "".join(c for c in s if not unicodedata.combining(c))
-    return s.upper()
+    return " ".join(token for token in s.upper().split() if _ALNUM.search(token))
 
 
 def name_region(full_w: int, full_h: int, layout: dict | None = None) -> tuple[int, int, int, int]:
@@ -109,7 +128,9 @@ def identify_hero(ocr_text: str) -> tuple[str, float]:
     O processor _strip_upper deixa o match tolerante a caixa/acentos sem remover os
     espaços (ver docstring de _strip_upper).
     """
-    if not ocr_text:
+    # Texto vazio — ou que sobra vazio depois de descartar pontuação e tokens
+    # simbólicos (ex.: o OCR só pegou o badge, "&") — não casa com ninguém.
+    if not ocr_text or not _strip_upper(ocr_text):
         return "", 0.0
     choices = get_all_heroes()
     result = process.extractOne(

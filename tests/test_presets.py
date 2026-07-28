@@ -137,6 +137,40 @@ def test_precedencia_sup_sup_sobre_dps_dps_e_beta_syn():
     assert misto == pytest.approx(0.325)
 
 
+def test_sinergia_mercy_x_dps_usa_peso_fixo_de_1():
+    """O par Mercy × DPS usa β_syn_mercy_dps=1 nos QUATRO presets."""
+    ally_matrix = {"mercy": {"cassidy": 1.0, "winston": 1.0, "ana": 2.0}}
+
+    def _syn(preset: str, ally: str) -> float:
+        return float(
+            calculate_hero_score(
+                "Mercy", ally_matrix, {}, [ally], [], {}, {}, weights=resolve_weights(preset)
+            )["synergy_score"]  # pyright: ignore[reportArgumentType]
+        )
+
+    for preset in ("equilibrado", "counter-first", "meta-first", "conforto+"):
+        w = resolve_weights(preset)
+        assert w.beta_syn_mercy_dps == scoring.BETA_SYN_MERCY_DPS  # nenhum preset desliga
+        assert _syn(preset, "Cassidy") == pytest.approx(1.0), preset  # Y=1 -> 1 × 1
+        # Mercy × TANK e Mercy × SUP seguem os pesos normais do preset.
+        assert _syn(preset, "Winston") == pytest.approx(w.beta_syn), preset
+        beta_sup = w.beta_syn_sup_sup if w.beta_syn_sup_sup is not None else w.beta_syn
+        assert _syn(preset, "Ana") == pytest.approx(2.0 * beta_sup), preset
+
+
+def test_precedencia_mercy_dps_nunca_colide_com_as_excecoes_de_mesma_role():
+    """SUP × SUP → DPS × DPS → Mercy × DPS → β_syn (as duas primeiras exigem a
+    MESMA role; a terceira, roles distintas — nunca competem pelo mesmo par)."""
+    w = resolve_weights("counter-first")
+    assert scoring._pair_beta_syn(w, "SUP", "SUP", "mercy", "ana") == pytest.approx(0.65)
+    assert scoring._pair_beta_syn(w, "DPS", "DPS", "cassidy", "ashe") == pytest.approx(0.65)
+    assert scoring._pair_beta_syn(w, "SUP", "DPS", "mercy", "cassidy") == pytest.approx(1.0)
+    assert scoring._pair_beta_syn(w, "DPS", "SUP", "cassidy", "mercy") == pytest.approx(1.0)
+    # Mercy × TANK e outro SUP × DPS caem no β_syn genérico.
+    assert scoring._pair_beta_syn(w, "SUP", "TANK", "mercy", "winston") == pytest.approx(0.325)
+    assert scoring._pair_beta_syn(w, "SUP", "DPS", "ana", "cassidy") == pytest.approx(0.325)
+
+
 def test_snapshot_meta_first():
     # β_meta=3.0 -> o herói forte no mapa dispara.
     totals = _totals(resolve_weights("meta-first"))

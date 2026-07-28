@@ -4,6 +4,101 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.13] — 2026-07-28
+
+### Sinergia Mercy × DPS: valores próprios, peso 1 e regra do "DPS prioritário"
+
+A linha da Mercy contra os DPS deixou de ser uma edição herói a herói qualquer e
+passou a ser uma **escala própria**: quem ela "pocketa" bem sobe, quem não
+aproveita o dano amplificado desce. Três mudanças, do lado **aliado** do modelo
+(o ajuste de Mercy "pocket" do **Enemy Threat** continua exatamente como estava —
+é outra regra, do lado inimigo).
+
+- **Nova escala de `Y(Mercy, <DPS>)`** em `data/heroes ally.xlsx` (→
+  `data/synergies.csv`), cobrindo os 24 DPS:
+
+  | Valor | Heróis |
+  |---|---|
+  | **+2** | Pharah, Sojourn, Ashe, Freja, Echo |
+  | **+1** | Sierra, Emre, Cassidy, Soldier: 76 |
+  | **0** | Torbjörn, Hanzo |
+  | **−2** | Anran, Bastion, Genji, Junkrat, Mei, Reaper, Shion, Sombra, Symmetra, Tracer, Vendetta, Venture, Widowmaker |
+
+  A direção inversa (`Y(<DPS>, Mercy)`, usada quando o DPS é o candidato) **não**
+  foi tocada — fora dos pares DPS × DPS a assimetria da planilha é intencional.
+- **Peso fixo de 1 no par Mercy × DPS** (`ModelWeights.beta_syn_mercy_dps`), nos
+  **quatro** presets: `Y(Mercy, Cassidy) = 1` passa a contribuir `1 × 1 = 1` em
+  vez de `1 × β_syn`. Mesmo mecanismo do `beta_syn_sup_sup`/`beta_syn_dps_dps`,
+  com a precedência **SUP × SUP → DPS × DPS → Mercy × DPS → `β_syn`**. Como a
+  nova exceção exige roles **distintas** (SUP × DPS) e as duas antigas exigem a
+  **mesma** role, elas nunca competem pelo mesmo par. **Mercy × Tank** e
+  **Mercy × Suporte** seguem com os pesos normais do preset (inclusive a exceção
+  SUP × SUP do Counter-first).
+- **Regra do "DPS prioritário"** no `T_syn` da Mercy: a Mercy só "pocketa" um DPS
+  por partida, então só um par Mercy × DPS deve contar. Havendo no time aliado ao
+  menos um de `Pharah, Sojourn, Ashe, Freja, Echo, Sierra, Emre, Cassidy,
+  Soldier: 76`, entra **apenas** o prioritário de **maior** `Y(Mercy, ·)` — todos
+  os outros DPS (prioritários ou não) são descartados da soma. Sem nenhum
+  prioritário no time, todos os DPS somam normalmente. Tank/Suporte aliados nunca
+  são afetados; a regra vale nos quatro presets e **só** para o `T_syn` do
+  ranking. Exemplos: `[Tracer, Hanzo]` → `−2 + 0`; `[Pharah, Tracer]` → só
+  `+2`; `[Cassidy, Pharah]` → só `+2`.
+- A **explicabilidade** (opção 6) acompanha: um DPS descartado deixa de aparecer
+  entre os motivos da Mercy, então o "por quê" reflete exatamente os termos
+  somados.
+
+### Correção: badge de role como token separado derrubava o OCR do nome
+
+Segunda causa-raiz da mesma classe de bug corrigida na v1.2.12 — a região do nome
+do herói do jogador inclui o **badge de role**, e ele estraga o OCR de **duas**
+formas distintas. A v1.2.12 tratou o caso em que o badge sai **colado** ao nome; a
+fixture `1080p/full3.png` expôs o caso em que ele sai **separado**.
+
+- **Sintoma**: com o jogador de D.Va, o herói não era identificado — o pipeline
+  caía **silenciosamente** para a role manual (`Roles.txt`) e o ranking saía para
+  a role errada, sem nenhum erro visível.
+- **Causa-raiz**: nessa captura o Tesseract lê `"OVA &"` — o `"D"` sai como `"O"`
+  (confusão comum na fonte itálica do jogo) e o badge vira o token `"&"`. Esse
+  token **infla o comprimento da frase** comparada e derruba o `token_set_ratio`
+  para **50.0**, abaixo de `MIN_CONFIDENCE = 60`. O erro de um caractere sozinho
+  não seria fatal (`"OVA"` vs `"DVA"` dá 66.7); o que matava era o token extra.
+- **Correção geral** (não é caso especial da D.Va): `player_hero._strip_upper`
+  passa a descartar **tokens sem nenhum caractere alfanumérico**. Nenhum nome
+  canônico tem token puramente simbólico, então o filtro **nunca** altera o lado
+  dos candidatos — só limpa o texto do OCR. Com ele, `"OVA &"` casa com D.Va em
+  **66.7** e os 52 heróis seguem em 100 mesmo com o badge ao lado (testado contra
+  10 variantes de ruído observadas nas capturas: `&`, `@`, `@&`, `esi`, `ies`,
+  `ses`, `G&S`, `S&S`, `BS`).
+- Um OCR que capture **só** o badge (`"&"`, `"@&"`) agora devolve explicitamente
+  "nenhum herói" em vez de um candidato com score 0 — mesmo resultado prático
+  (fallback para a role manual), caminho mais claro.
+
+**Alternativas medidas e descartadas** (as três fixtures da mesma partida servem
+de banco de prova, já que cada uma erra de um jeito diferente):
+
+| Abordagem | Resultado |
+|---|---|
+| Outro pré-processamento (4×, binarização, inversão) | Nenhum vence em todas: `auto,4x` conserta a `full3` mas quebra a `full4` (`"OVA &"`) e a 2K (`"HAND G&S"`) |
+| `--psm 8` / `--psm 13` no lugar do `7` | Nitidamente pior em todas as fixtures |
+| Whitelist de caracteres no Tesseract | Conserta a `full3` (86), mas **cola** o badge no nome (`"HANZOG"`, `"REAPERS33"`), introduz erro de caractere (`"SIERFA"`) e afetaria o OCR do **mapa** (mesmo `run_ocr`; `King's Row` tem apóstrofo) |
+| `partial_token_set_ratio` | Conserta tudo, mas cria **falsos positivos graves**: `"a"` casaria com Anran em 100 |
+| Ratio token a token como fallback | Conserta tudo, mas lixo de 2 letras vira match: `"AN"` → Ana (80), `"ME"` → Mei (80) |
+
+### Fixtures e testes
+
+- Nova fixture `1080p/full3.png` (gabarito `expected3.json`): a **mesma partida**
+  das fixtures `720p/full4.jpeg` e `1080p/full2.jpeg`, agora em PNG. As três
+  cobrem resolução (720p × 1080p) e formato (JPEG × PNG) sobre conteúdo idêntico —
+  e cada uma expôs um modo de falha diferente do OCR do nome.
+- Testes de regressão ampliados: os três textos **reais** do OCR
+  (`"DVS"`, `"D.VA"`, `"OVA &"`), `detect()` ponta a ponta nas três capturas,
+  varredura dos 52 heróis × 10 variantes de ruído do badge, e a rejeição de um
+  OCR que só pegou o badge.
+- Os 4 bans e o mapa da `full3.png` também são verificados (todos corretos —
+  em 1080p o ban do Bastion marca MAE 0.086, bem abaixo do limiar).
+
+---
+
 ## [v1.2.12] — 2026-07-28
 
 ### Sinergia DPS × DPS: peso próprio no score e exclusão da ameaça

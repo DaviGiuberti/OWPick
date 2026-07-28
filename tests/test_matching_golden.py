@@ -197,16 +197,18 @@ def test_golden_bans_720p_extra(fixture_file, expected_file, tmp_path, monkeypat
 
 
 # ---------------------------------------------------------------------------
-# Fixtures JPEG (v1.2.12): a MESMA partida capturada em 720p e em 1080p
+# A MESMA partida em três capturas (v1.2.12 / v1.2.13)
 # ---------------------------------------------------------------------------
-# 720p/full4.jpeg e 1080p/full2.jpeg são a mesma tela de seleção (D.Va, Soldier:
-# 76, Torbjörn, Juno, Kiriko vs D.Va, Soldier: 76, Cassidy, Kiriko, Ana em New
-# Queen Street) em duas resoluções — e as PRIMEIRAS fixtures em JPEG (as demais
-# são PNG). Servem de regressão dupla: o matching/OCR não pode depender do
-# formato sem perdas nem quebrar na resolução mais baixa.
+# 720p/full4.jpeg, 1080p/full2.jpeg e 1080p/full3.png são a mesma tela de seleção
+# (D.Va, Soldier: 76, Torbjörn, Juno, Kiriko vs D.Va, Soldier: 76, Cassidy,
+# Kiriko, Ana em New Queen Street). As duas primeiras são as PRIMEIRAS fixtures em
+# JPEG (as demais são PNG). Juntas cobrem resolução (720p vs 1080p) e formato
+# (JPEG com perdas vs PNG) sobre um conteúdo idêntico — cada uma expôs um jeito
+# diferente de o OCR do nome do herói errar (ver tests/test_player_hero.py).
 JPEG_FIXTURES = [
     ("720p", "full4.jpeg", "expected4.json"),
     ("1080p", "full2.jpeg", "expected2.json"),
+    ("1080p", "full3.png", "expected3.json"),
 ]
 
 
@@ -233,11 +235,17 @@ def test_golden_mapa_jpeg(res, fixture_file, expected_file, tmp_path, monkeypatc
     )
 
 
-def test_golden_bans_jpeg_1080p(tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "fixture_file,expected_file",
+    [("full2.jpeg", "expected2.json"), ("full3.png", "expected3.json")],
+)
+def test_golden_bans_1080p_mesma_partida(fixture_file, expected_file, tmp_path, monkeypatch):
     """Em 1080p os 4 bans da captura são detectados corretamente."""
-    cap, expected = _capture_fixture("1080p", tmp_path, monkeypatch, "full2.jpeg", "expected2.json")
+    cap, expected = _capture_fixture("1080p", tmp_path, monkeypatch, fixture_file, expected_file)
     bans = matching.match_bans(cap)
-    assert _norm(bans.names()) == _norm(expected["bans"]), f"bans divergem: {bans.names()}"
+    assert _norm(bans.names()) == _norm(expected["bans"]), (
+        f"[{fixture_file}] bans divergem: {bans.names()}"
+    )
 
 
 # Mesmo limite conhecido dos demais bans fora de 2K: em 720p o slot do Bastion

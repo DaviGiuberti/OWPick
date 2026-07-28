@@ -26,7 +26,15 @@ onde:
                                                                 β_syn_dps_dps (0.65) se ambos
                                                                 forem DPS e o preset o definir
                                                                 — todos menos o "conforto+" —;
+                                                                β_syn_mercy_dps (1.0) no par
+                                                                Mercy × DPS, em TODOS os presets;
                                                                 senão β_syn)
+
+Regra do "DPS prioritário" (v1.2.13): quando o candidato é a MERCY e há um DPS
+"prioritário" no time aliado, só o de MAIOR Y(Mercy, ·) entra no T_syn — os
+demais DPS (prioritários ou não) são descartados. Ver
+`_mercy_dps_synergy_filter`. É uma regra do lado ALIADO, distinta do ajuste de
+"pocket" da Mercy no Enemy Threat (`apply_mercy_pocket`).
 
 As estatísticas (DataFrame de winrate/pickrate) e as matrizes já normalizadas
 chegam POR PARÂMETRO — a leitura de xlsx/csv é responsabilidade da infra.
@@ -66,6 +74,11 @@ BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
 # independente — em presets com β_syn diferente (counter-first 0.325,
 # meta-first 0.65) o par DPS × DPS continua valendo 0.65.
 BETA_SYN_DPS_DPS = 0.65
+# Peso FIXO da sinergia no par Mercy × DPS (v1.2.13). Vale em TODOS os presets:
+# a linha da Mercy contra os DPS é uma escala própria (+2 quem ela "pocketa",
+# −2 quem não aproveita o dano amplificado), então ela entra no score com peso
+# cheio em vez do β_syn do preset. Não toca em Mercy × Tank nem Mercy × Suporte.
+BETA_SYN_MERCY_DPS = 1.0
 
 
 # ---------------------------------------------------------------------------
@@ -153,6 +166,9 @@ class ModelWeights:
     # Default = 0.65 (vale em equilibrado/counter-first/meta-first); só o
     # "conforto+" zera a regra (None) e usa o próprio beta_syn nesses pares.
     beta_syn_dps_dps: float | None = BETA_SYN_DPS_DPS
+    # Peso de sinergia específico do par Mercy × DPS; None ⇒ usa `beta_syn`.
+    # Default = 1.0 e NENHUM preset o sobrescreve — a regra vale nos quatro.
+    beta_syn_mercy_dps: float | None = BETA_SYN_MERCY_DPS
 
 
 DEFAULT_WEIGHTS = ModelWeights()
@@ -436,20 +452,65 @@ def compute_threat_weights(
 # ---------------------------------------------------------------------------
 # Score de um herói candidato
 # ---------------------------------------------------------------------------
-def _pair_beta_syn(weights: ModelWeights, role_a: str | None, role_b: str | None) -> float:
-    """β_syn efetivo de um par de aliados, pela role dos dois heróis.
+# --- Regra do "DPS prioritário" no T_syn da Mercy (v1.2.13) ------------------
+# MESMOS heróis da MERCY_POCKET_PRIORITY, mas esta é uma regra SEPARADA, do lado
+# ALIADO: aqui não existe ordem de prioridade — entre os prioritários presentes
+# vence o de MAIOR Y(Mercy, ·) —, e o efeito é DESCARTAR os demais DPS do T_syn
+# (a Mercy só "pocketa" um DPS por partida, então só um par Mercy × DPS deve
+# contar). O ajuste do Enemy Threat continua com a lógica própria dele.
+MERCY_SYNERGY_PRIORITY_DPS: frozenset[str] = frozenset(MERCY_POCKET_PRIORITY)
+
+
+def _mercy_dps_synergy_filter(ally_row: dict[str, float], ally_keys: list[str]) -> frozenset[str]:
+    """Chaves dos DPS aliados DESCARTADOS do `T_syn` da Mercy.
+
+    - Nenhum DPS prioritário no time ⇒ conjunto vazio: todos os DPS somam normalmente.
+    - Ao menos um prioritário presente ⇒ sobra só o prioritário de MAIOR
+      `Y(Mercy, ·)`; todos os outros DPS (prioritários ou não) são descartados.
+      Empate ⇒ vence o primeiro encontrado (o total é o mesmo qualquer que seja).
+
+    Tank/Suporte aliados nunca entram no conjunto. O(nº de aliados).
+    """
+    dps = [k for k in ally_keys if heroes.get_hero_role(k) == "DPS"]
+    best: str | None = None
+    best_value = 0.0
+    for key in dps:
+        if key not in MERCY_SYNERGY_PRIORITY_DPS:
+            continue
+        value = ally_row.get(key, 0.0)
+        if best is None or value > best_value:
+            best, best_value = key, value
+    if best is None:
+        return frozenset()
+    return frozenset(k for k in dps if k != best)
+
+
+def _pair_beta_syn(
+    weights: ModelWeights,
+    role_a: str | None,
+    role_b: str | None,
+    key_a: str | None = None,
+    key_b: str | None = None,
+) -> float:
+    """β_syn efetivo de um par de aliados, pela role (e, no caso da Mercy, nome).
 
     Precedência: SUP × SUP → `beta_syn_sup_sup`; DPS × DPS → `beta_syn_dps_dps`;
-    qualquer outra combinação (ou peso não definido no preset) → `beta_syn`.
-    Vale só para o `T_syn` do ranking — o threat weighting tem regra própria
-    (ver `compute_threat_weights`).
+    Mercy × DPS → `beta_syn_mercy_dps`; qualquer outra combinação (ou peso não
+    definido no preset) → `beta_syn`. As duas primeiras exigem a MESMA role nos
+    dois heróis e a terceira exige roles distintas (SUP × DPS), então elas nunca
+    competem pelo mesmo par. Vale só para o `T_syn` do ranking — o threat
+    weighting tem regra própria (ver `compute_threat_weights`).
     """
-    if role_a != role_b:
+    if role_a == role_b:
+        if role_a == "SUP" and weights.beta_syn_sup_sup is not None:
+            return weights.beta_syn_sup_sup
+        if role_a == "DPS" and weights.beta_syn_dps_dps is not None:
+            return weights.beta_syn_dps_dps
         return weights.beta_syn
-    if role_a == "SUP" and weights.beta_syn_sup_sup is not None:
-        return weights.beta_syn_sup_sup
-    if role_a == "DPS" and weights.beta_syn_dps_dps is not None:
-        return weights.beta_syn_dps_dps
+    if weights.beta_syn_mercy_dps is not None and (
+        (key_a == MERCY_KEY and role_b == "DPS") or (key_b == MERCY_KEY and role_a == "DPS")
+    ):
+        return weights.beta_syn_mercy_dps
     return weights.beta_syn
 
 
@@ -495,10 +556,17 @@ def calculate_hero_score(
                 counter_reasons.append((contribution, f"sofre contra {enemy} ({contribution:.2f})"))
 
     # --- synergy term (× β_syn, diagonal ignorada) ---
-    # O peso do par sai de `_pair_beta_syn`: SUP × SUP e DPS × DPS têm pesos
-    # próprios quando o preset os define; qualquer outra combinação usa β_syn.
+    # O peso do par sai de `_pair_beta_syn`: SUP × SUP, DPS × DPS e Mercy × DPS
+    # têm pesos próprios quando o preset os define; o resto usa β_syn.
     ally_row = ally_matrix.get(hn, {})
     hero_role = heroes.get_hero_role(hn)
+    # Regra do "DPS prioritário": só quando a MERCY é a candidata, e num único
+    # passo pelos aliados (nada muda para os outros 51 heróis do ranking).
+    dropped_allies: frozenset[str] = frozenset()
+    if hn == MERCY_KEY:
+        dropped_allies = _mercy_dps_synergy_filter(
+            ally_row, [normalize_hero_name(a) for a in allies if a]
+        )
     synergy_score = 0.0
     for ally in allies:
         if not ally:
@@ -506,8 +574,10 @@ def calculate_hero_score(
         an = normalize_hero_name(ally)
         if an == hn:
             continue  # diagonal: remove o antigo hack do -11
+        if an in dropped_allies:
+            continue  # DPS descartado pela regra do "DPS prioritário" da Mercy
         if an in ally_row:
-            beta = _pair_beta_syn(weights, hero_role, heroes.get_hero_role(an))
+            beta = _pair_beta_syn(weights, hero_role, heroes.get_hero_role(an), hn, an)
             contribution = ally_row[an] * beta
             synergy_score += contribution
             if contribution >= REASON_MIN:

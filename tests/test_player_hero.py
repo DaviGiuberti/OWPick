@@ -107,18 +107,30 @@ def test_identify_hero_texto_vazio_nao_casa():
 
 
 # ---------------------------------------------------------------------------
-# Regressão v1.2.12: D.Va não era reconhecida em 720p
+# Regressão v1.2.12 / v1.2.13: D.Va não era reconhecida
 # ---------------------------------------------------------------------------
-# A região do nome inclui o badge de role; em 720p ele é lido COLADO ao nome, e o
-# Tesseract não enxerga o ponto de "D.Va" — o OCR devolve "DVS". Contra o nome
-# canônico COM pontuação isso dava token_set_ratio 57.1 (< MIN_CONFIDENCE = 60):
-# o herói era descartado e a role caía para o fallback manual (Roles.txt), então
-# o ranking saía para a role errada silenciosamente. A correção descarta a
-# pontuação dos DOIS lados da comparação (_strip_upper), o que vale para todos os
-# heróis — não é um caso especial da D.Va.
+# A região do nome inclui o BADGE de role, e ele estraga o OCR de DUAS formas
+# diferentes — cada uma pegou uma fixture e cada uma exigiu uma correção:
+#
+#   1. (v1.2.12) O badge é lido COLADO ao nome e o Tesseract não enxerga o ponto
+#      de "D.Va": em 720p/full4.jpeg o OCR devolve "DVS". Contra o nome canônico
+#      COM pontuação isso dava 57.1 -> _strip_upper passou a descartar a
+#      pontuação dos dois lados.
+#   2. (v1.2.13) O badge é lido como um TOKEN SEPARADO e o "D" sai como "O": em
+#      1080p/full3.png o OCR devolve "OVA &". O token "&" infla o comprimento da
+#      frase e derruba o token_set_ratio para 50.0 -> _strip_upper passou a
+#      descartar tokens sem nenhum alfanumérico.
+#
+# Nos dois casos a falha era SILENCIOSA: o herói caía abaixo de MIN_CONFIDENCE, o
+# pipeline usava a role manual (Roles.txt) e o ranking saía para a role errada.
+# Nenhuma das correções é um caso especial da D.Va.
 
-# (fixture, OCR observado) das capturas reais da mesma partida.
-DVA_OCR_READS = [("720p/full4.jpeg", "DVS"), ("1080p/full2.jpeg", "D.VA")]
+# (fixture, texto que o OCR realmente produz) das três capturas da mesma partida.
+DVA_OCR_READS = [
+    ("720p/full4.jpeg", "DVS"),  # badge colado + ponto perdido
+    ("1080p/full2.jpeg", "D.VA"),  # leitura limpa
+    ("1080p/full3.png", "OVA &"),  # badge separado + D lido como O
+]
 
 
 @pytest.mark.parametrize("origem,ocr_text", DVA_OCR_READS)
@@ -131,9 +143,12 @@ def test_dva_reconhecida_apesar_do_ruido_do_badge(origem, ocr_text):
     )
 
 
-@pytest.mark.parametrize("res,fixture_file", [("720p", "full4.jpeg"), ("1080p", "full2.jpeg")])
-def test_detecta_dva_nas_fixtures_jpeg(res, fixture_file):
-    """detect() ponta a ponta: a mesma partida em 720p e 1080p devolve D.Va/TANK."""
+@pytest.mark.parametrize(
+    "res,fixture_file",
+    [("720p", "full4.jpeg"), ("1080p", "full2.jpeg"), ("1080p", "full3.png")],
+)
+def test_detecta_dva_nas_fixtures_da_mesma_partida(res, fixture_file):
+    """detect() ponta a ponta: as três capturas da partida devolvem D.Va/TANK."""
     with Image.open(FIXTURES_DIR / res / fixture_file) as img:
         img.load()
     hero = player_hero.detect(img.convert("RGB"))
@@ -143,15 +158,46 @@ def test_detecta_dva_nas_fixtures_jpeg(res, fixture_file):
 
 
 def test_pontuacao_nao_penaliza_nenhum_nome_canonico():
-    """Causa-raiz, generalizada: com o OCR lendo o nome LIMPO (maiúsculas, sem
-    acento nem pontuação — tudo que o Tesseract consegue emitir), os 52 heróis
-    marcam 100. Antes o ponto/dois-pontos custavam pontos em nomes CURTOS
+    """Causa-raiz nº 1, generalizada: com o OCR lendo o nome LIMPO (maiúsculas,
+    sem acento nem pontuação — tudo que o Tesseract consegue emitir), os 52
+    heróis marcam 100. Antes o ponto/dois-pontos custavam pontos em nomes CURTOS
     ("D.Va" 85.7, "Soldier: 76" 95.2), corroendo a folga até o limiar."""
     for hero in get_all_heroes():
         ocr = player_hero._strip_upper(hero)  # o nome como o OCR o entrega
         name, score = player_hero.identify_hero(ocr)
         assert name == hero, f"{hero!r} lido {ocr!r} casou com {name!r}"
         assert score == 100.0, f"{hero!r} lido {ocr!r} marcou {score:.1f}, não 100"
+
+
+# Ruído do badge observado nas capturas reais, como TOKEN separado.
+BADGE_TOKENS = ["", " &", " @", " @&", " esi", " ies", " ses", " G&S", " S&S", " BS"]
+
+
+def test_badge_como_token_separado_nao_derruba_nenhum_heroi():
+    """Causa-raiz nº 2, generalizada: o token do badge é descartado, então nenhum
+    dos 52 heróis perde pontos por causa dele — todos seguem em 100."""
+    for hero in get_all_heroes():
+        limpo = player_hero._strip_upper(hero)
+        for badge in BADGE_TOKENS:
+            name, score = player_hero.identify_hero(limpo + badge)
+            assert name == hero, f"{hero!r} + badge {badge!r} casou com {name!r}"
+            assert score >= player_hero.MIN_CONFIDENCE, (
+                f"{hero!r} + badge {badge!r} marcou {score:.1f}"
+            )
+
+
+def test_tokens_simbolicos_sao_descartados():
+    """_strip_upper remove tokens sem alfanumérico e preserva os do nome."""
+    assert player_hero._strip_upper("OVA &") == "OVA"
+    assert player_hero._strip_upper("D.VA @&") == "DVA"
+    assert player_hero._strip_upper("WRECKING BALL &") == "WRECKING BALL"
+    assert player_hero._strip_upper("SOLDIER: 76 @") == "SOLDIER 76"
+
+
+def test_ocr_so_com_badge_nao_casa_com_ninguem():
+    """Se o OCR pegou só o badge, não há nome: rejeita (cai no fallback manual)."""
+    for lixo in ("&", "@", "@&", "|", "  "):
+        assert player_hero.identify_hero(lixo) == ("", 0.0), lixo
 
 
 def test_detect_sem_nome_legivel_retorna_none():

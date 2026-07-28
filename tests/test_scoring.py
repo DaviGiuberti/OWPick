@@ -284,6 +284,202 @@ class TestMercyPocket:
 
 
 # ---------------------------------------------------------------------------
+# Sinergia Mercy × DPS no T_syn ALIADO (v1.2.13) — peso 1 + "DPS prioritário"
+# ---------------------------------------------------------------------------
+
+TODOS_OS_PRESETS = ["equilibrado", "counter-first", "meta-first", "conforto+"]
+
+# Linha da Mercy com os valores reais de Y(Mercy, <DPS>) (tarefa 1), mais um
+# Tank e uma SUP para provar que a regra do "DPS prioritário" não os toca.
+_MERCY_Y: dict[str, float] = {
+    **dict.fromkeys(("Pharah", "Sojourn", "Ashe", "Freja", "Echo"), 2.0),
+    **dict.fromkeys(("Sierra", "Emre", "Cassidy", "Soldier: 76"), 1.0),
+    **dict.fromkeys(("Torbjörn", "Hanzo"), 0.0),
+    **dict.fromkeys(
+        (
+            "Anran",
+            "Bastion",
+            "Genji",
+            "Junkrat",
+            "Mei",
+            "Reaper",
+            "Shion",
+            "Sombra",
+            "Symmetra",
+            "Tracer",
+            "Vendetta",
+            "Venture",
+            "Widowmaker",
+        ),
+        -2.0,
+    ),
+    "Winston": 1.0,  # Mercy × TANK
+    "Ana": 2.0,  # Mercy × SUP
+}
+MERCY_ALLY_MATRIX = {
+    "mercy": {scoring.normalize_hero_name(h): v for h, v in _MERCY_Y.items()},
+    # Direção inversa (DPS candidato, Mercy no time) — assimétrica de propósito.
+    "cassidy": {"mercy": 2.0},
+}
+
+
+def _mercy_syn(allies: list[str], preset: str = "equilibrado") -> float:
+    return float(
+        scoring.calculate_hero_score(
+            "Mercy",
+            MERCY_ALLY_MATRIX,
+            {},
+            allies,
+            [],
+            {},
+            {},
+            weights=scoring.resolve_weights(preset),
+        )["synergy_score"]  # pyright: ignore[reportArgumentType]
+    )
+
+
+class TestMercyDpsSynergyWeight:
+    """Par Mercy × DPS usa β = 1 (BETA_SYN_MERCY_DPS) nos QUATRO presets."""
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_peso_fixo_de_1_em_todos_os_presets(self, preset):
+        # Y(Mercy, Cassidy) = 1 -> 1 × 1 = 1 (e não × β_syn do preset).
+        assert _mercy_syn(["Cassidy"], preset) == pytest.approx(1.0)
+        assert _mercy_syn(["Pharah"], preset) == pytest.approx(2.0)
+        assert _mercy_syn(["Tracer"], preset) == pytest.approx(-2.0)
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_mercy_x_tank_e_mercy_x_sup_seguem_o_preset(self, preset):
+        w = scoring.resolve_weights(preset)
+        # Mercy × TANK: β_syn genérico do preset.
+        assert _mercy_syn(["Winston"], preset) == pytest.approx(1.0 * w.beta_syn)
+        # Mercy × SUP: a exceção SUP × SUP continua tendo precedência.
+        beta_sup = w.beta_syn_sup_sup if w.beta_syn_sup_sup is not None else w.beta_syn
+        assert _mercy_syn(["Ana"], preset) == pytest.approx(2.0 * beta_sup)
+
+    def test_vale_tambem_com_o_dps_como_candidato(self):
+        """O peso é do PAR: um DPS candidato com Mercy aliada também usa 1."""
+        for preset in TODOS_OS_PRESETS:
+            syn = float(
+                scoring.calculate_hero_score(
+                    "Cassidy",
+                    MERCY_ALLY_MATRIX,
+                    {},
+                    ["Mercy"],
+                    [],
+                    {},
+                    {},
+                    weights=scoring.resolve_weights(preset),
+                )["synergy_score"]  # pyright: ignore[reportArgumentType]
+            )
+            assert syn == pytest.approx(2.0), preset  # Y(Cassidy, Mercy) = 2
+
+    def test_beta_syn_mercy_dps_definido_em_todos_os_presets(self):
+        for preset in TODOS_OS_PRESETS:
+            w = scoring.resolve_weights(preset)
+            assert w.beta_syn_mercy_dps == scoring.BETA_SYN_MERCY_DPS == 1.0, preset
+
+
+class TestMercyDpsPrioritario:
+    """Com um DPS prioritário no time, só o de MAIOR Y(Mercy, ·) conta."""
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_time_1_sem_prioritario_soma_todos(self, preset):
+        # Tracer (-2) + Hanzo (0): nenhum é prioritário -> nada é descartado.
+        assert _mercy_syn(["Tracer", "Hanzo"], preset) == pytest.approx(-2.0)
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_time_2_prioritario_descarta_os_demais(self, preset):
+        # Pharah (2, prioritário) + Tracer (-2): a Tracer é descartada.
+        assert _mercy_syn(["Pharah", "Tracer"], preset) == pytest.approx(2.0)
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_time_3_empate_conta_um_so(self, preset):
+        # Pharah e Ashe empatadas em 2: só uma conta (tanto faz qual).
+        assert _mercy_syn(["Pharah", "Ashe"], preset) == pytest.approx(2.0)
+        assert _mercy_syn(["Ashe", "Pharah"], preset) == pytest.approx(2.0)
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_time_4_vence_o_de_maior_valor(self, preset):
+        # Cassidy (1) e Pharah (2), ambos prioritários: só a Pharah conta,
+        # qualquer que seja a ordem do lineup.
+        assert _mercy_syn(["Cassidy", "Pharah"], preset) == pytest.approx(2.0)
+        assert _mercy_syn(["Pharah", "Cassidy"], preset) == pytest.approx(2.0)
+
+    @pytest.mark.parametrize("preset", TODOS_OS_PRESETS)
+    def test_time_sem_dps_aliado(self, preset):
+        w = scoring.resolve_weights(preset)
+        beta_sup = w.beta_syn_sup_sup if w.beta_syn_sup_sup is not None else w.beta_syn
+        assert _mercy_syn([], preset) == pytest.approx(0.0)
+        assert _mercy_syn(["Winston", "Ana"], preset) == pytest.approx(
+            1.0 * w.beta_syn + 2.0 * beta_sup
+        )
+
+    def test_tank_e_sup_nao_sao_afetados_pela_regra(self):
+        w = scoring.resolve_weights("equilibrado")
+        # Pharah descarta a Tracer, mas Winston/Ana somam normalmente.
+        esperado = 2.0 + 1.0 * w.beta_syn + 2.0 * w.beta_syn
+        assert _mercy_syn(["Pharah", "Tracer", "Winston", "Ana"]) == pytest.approx(esperado)
+
+    def test_todos_os_prioritarios_no_time(self):
+        # 9 prioritários juntos: sobra só o topo (Pharah/Sojourn/Ashe/Freja/Echo = 2).
+        prioritarios = [
+            "Pharah",
+            "Sojourn",
+            "Ashe",
+            "Freja",
+            "Echo",
+            "Sierra",
+            "Emre",
+            "Cassidy",
+            "Soldier: 76",
+        ]
+        assert _mercy_syn(prioritarios) == pytest.approx(2.0)
+        # Um prioritário de valor BAIXO ainda descarta os não-prioritários.
+        assert _mercy_syn(["Cassidy", "Tracer", "Genji"]) == pytest.approx(1.0)
+
+    def test_reasons_nao_citam_o_dps_descartado(self):
+        r = scoring.calculate_hero_score(
+            "Mercy", MERCY_ALLY_MATRIX, {}, ["Pharah", "Tracer"], [], {}, {}
+        )
+        reasons = r["reasons"]
+        assert isinstance(reasons, list)
+        assert any("Pharah" in motivo for motivo in reasons)
+        assert not any("Tracer" in motivo for motivo in reasons)
+
+    def test_a_regra_vale_so_para_a_mercy(self):
+        """Outro SUP candidato soma todos os DPS aliados normalmente."""
+        ally_matrix = {"ana": {"pharah": 2.0, "tracer": -2.0}}
+        syn = float(
+            scoring.calculate_hero_score("Ana", ally_matrix, {}, ["Pharah", "Tracer"], [], {}, {})[
+                "synergy_score"
+            ]  # pyright: ignore[reportArgumentType]
+        )
+        assert syn == pytest.approx((2.0 - 2.0) * scoring.BETA_SYN)
+
+    def test_nao_afeta_o_enemy_threat(self):
+        """Regressão: o threat weighting mantém a lógica própria (apply_mercy_pocket)."""
+        syn = {
+            "mercy": {"pharah": 2.0, "tracer": -2.0},
+            "pharah": {"mercy": 2.0},
+            "tracer": {"mercy": -2.0},
+        }
+        w = scoring.compute_threat_weights(
+            ["Mercy", "Pharah", "Tracer"], {}, allies=[], synergy_matrix=syn
+        )
+        # Mercy × DPS continua somando na ameaça com o ν do preset (nada é
+        # descartado lá); DPS × DPS é que é excluído. Depois vem o pocket.
+        raw_mercy = scoring.NU_THREAT * (2.0 - 2.0)
+        assert w["mercy"] == pytest.approx(
+            scoring.threat_multiplier(raw_mercy) * scoring.MERCY_POCKET_MERCY_MULT
+        )
+        assert w["pharah"] == pytest.approx(
+            scoring.threat_multiplier(scoring.NU_THREAT * 2.0) * scoring.MERCY_POCKET_DPS_MULT
+        )
+        assert w["tracer"] == pytest.approx(scoring.threat_multiplier(scoring.NU_THREAT * -2.0))
+
+
+# ---------------------------------------------------------------------------
 # calculate_hero_score — lineup sintético, matriz de 3 heróis, valores à mão
 # ---------------------------------------------------------------------------
 
