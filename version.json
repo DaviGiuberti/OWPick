@@ -1,5 +1,5 @@
 {
-    "version": "1.2.11",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.11/OWPick_v1.2.11.zip",
-    "notas": "### Consumo de recursos: o jogo tem prioridade sobre o OWPick Auditoria de performance do programa inteiro, motivada por travamentos do Overwatch em notebook fraco enquanto o OWPick está aberto. **Nenhuma mudança de comportamento**: ranking, detecção de heróis/mapas/bans e textos continuam idênticos (verificado nas fixtures 720p/1080p/2K — mesmos heróis, mesmos bans, mesmo mapa e mesmos scores até"
+    "version": "1.2.12",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.12/OWPick_v1.2.12.zip",
+    "notas": "### Sinergia DPS × DPS: peso próprio no score e exclusão da ameaça - **Peso fixo de 0.65 em pares DPS × DPS no `T_syn`** (`core/scoring.py`): quando os dois heróis de um par de sinergia são DPS, a contribuição do par usa `ModelWeights.beta_syn_dps_dps` (0.65) no lugar do `β_syn` do preset. Vale em **Equilibrado, Counter-first e Meta-first**; o **Conforto+** é a exceção e mantém o próprio `β_syn` ("
 }
