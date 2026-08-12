@@ -662,7 +662,7 @@ lidos dentro dele. `core` não importa `infra` nem `ui`.
 
 Fonte de verdade dos dados embutidos e da normalização:
 
-- `HEROES_ROLES` (24 DPS, 14 TANK, 14 SUP), `MAPS_DATA` (29 mapas), `SLOTS`, `VALID_ROLES`
+- `HEROES_ROLES` (24 DPS, 15 TANK, 14 SUP), `MAPS_DATA` (29 mapas), `SLOTS`, `VALID_ROLES`
 - `MAP_ALIASES` + `get_map_search_index()`: aliases por idioma (ex.: `"Rota 66"`)
   mapeados de volta ao nome **canônico** (chave do `stats_inputs.csv`) — só entram
   aliases ancorados em token distintivo (evita falso positivo com OCR ruidoso)
@@ -839,7 +839,8 @@ respondendo a um modo de falha real (ver
    token puramente simbólico, então esse filtro nunca altera o lado dos
    candidatos.
 
-Com as duas, todos os 52 heróis marcam **100** quando o nome é lido limpo (antes o
+Com as duas, todos os heróis de `HEROES_ROLES` marcam **100** quando o nome é
+lido limpo (antes o
 pior caso era D.Va em 85.7 e `Soldier: 76` em 95.2) e continuam acima do limiar
 com o badge ao lado — a folga é o que absorve os erros de caractere.
 
@@ -894,6 +895,16 @@ Validação dos dados na carga com **aviso claro do que falta**: `validate_matri
 (linhas E colunas ≡ `HEROES_ROLES` — pega órfãos/typos), `validate_stats` (29
 mapas × roles), `validate_templates` (retratos 720p/2k + ícone de ban para todo
 herói), `validate_all` + `report_problems`. Roda nos testes e no boot com `--debug`.
+
+`validate_matrix(matrix, name, columns=None)` confere as **colunas** contra o
+**cabeçalho real** do CSV (`columns`, passado pelo `validate_all`) e não contra os
+valores presentes na matriz normalizada — v1.2.14. Motivo: `build_matrix_dict`
+descarta células vazias, então um herói com a coluna inteiramente vazia sumiria da
+matriz e seria acusado de "ausente" (falso positivo em qualquer herói novo ainda
+[sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)). Sem o parâmetro, o
+comportamento herdado (inferir pelos valores) continua — é o que as matrizes
+sintéticas dos testes usam. O que o validador **detecta** não mudou: coluna
+órfã/typo e herói realmente fora do cabeçalho seguem sendo reportados.
 
 #### `infra/stats_update.py`
 
@@ -1020,7 +1031,7 @@ injetável para testes.
 |---|---|
 | `coletar_stats.py` | Scraper Playwright (owtics.gg) → `stats_inputs.csv`. `argv[1]` = destino (o app passa o override do usuário); `argv[2]`/`argv[3]` = região/tier. Estratégias: JS direto → XHR interceptado → regex no texto |
 | `coletar_stats2.py` | Scraper **alternativo e independente** → mesmo `stats_inputs.csv`, coletado do site **oficial da Blizzard** (`overwatch.blizzard.com/en-us/rates/`). **Sem Playwright**: os dados vêm embutidos no HTML (SSR) como JSON HTML-escapado (`"cells":{"name",…,"winrate",…,"pickrate",…}`) — GET `urllib` + des-escape + regex/`json`. Locale `en-us` para casar os nomes canônicos; slugs do projeto = slugs da Blizzard. `argv[1]` = destino; `argv[2]`/`argv[3]` = região/tier (aliases dos códigos do settings). `banrate` ignorado; página 200 sem dados vira aviso claro |
-| `xlsx_to_csv.py` | Converte as matrizes de **edição** (`heroes ally.xlsx`/`heroes enemy.xlsx`) nos CSVs lidos em runtime (`synergies.csv`/`counters.csv`) — rodar antes de cada release com mudança de dados |
+| `xlsx_to_csv.py` | Converte as matrizes de **edição** (`heroes ally.xlsx`/`heroes enemy.xlsx`) nos CSVs lidos em runtime (`synergies.csv`/`counters.csv`) — rodar antes de cada release com mudança de dados. `preserve_integers` converte as colunas para o dtype nullable `Int64` antes de gravar: uma célula vazia vira `NaN`, o pandas promoveria a coluna a `float64` e o CSV passaria a ter `1.0` onde sempre houve `1` |
 | `enemy_mult.py` | Diagnóstico de threat weight (consumidor do core). **Atenção**: lê o lineup com perspectiva **invertida** (do ponto de vista do herói inimigo avaliado) — intencional |
 | `bump.py` | `python tools/bump.py X.Y.Z`: grava `version.txt` e insere o cabeçalho no `CHANGELOG` (o `version.json` é atualizado pelo workflow de release) |
 | `resolucao.py` | Seletor visual de coordenadas (Tkinter) — uso em recalibração de layout |
@@ -1029,13 +1040,41 @@ injetável para testes.
 
 ## Dados do Jogo
 
-### Heróis Suportados (52 total)
+### Heróis Suportados (53 total)
 
 | Role | Heróis |
 |---|---|
 | **DPS** (24) | Anran, Ashe, Bastion, Cassidy, Echo, Emre, Freja, Genji, Hanzo, Junkrat, Mei, Pharah, Reaper, Shion, Sierra, Sojourn, Soldier: 76, Sombra, Symmetra, Torbjörn, Tracer, Vendetta, Venture, Widowmaker |
-| **TANK** (14) | D.Va, Domina, Doomfist, Hazard, Junker Queen, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Sigma, Winston, Wrecking Ball, Zarya |
+| **TANK** (15) | D.Mon, D.Va, Domina, Doomfist, Hazard, Junker Queen, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Sigma, Winston, Wrecking Ball, Zarya |
 | **SUP** (14) | Ana, Baptiste, Brigitte, Illari, Jetpack Cat, Juno, Kiriko, Lifeweaver, Lúcio, Mercy, Mizuki, Moira, Wuyang, Zenyatta |
+
+> **D.Mon (v1.2.14)** entrou **sem dados de counter/sinergia e sem winrate**: a
+> linha e a coluna dela nas duas matrizes estão **vazias** e o `stats_inputs.csv`
+> traz winrate/pickrate `0.00` nos 29 mapas. Ela é ranqueável e identificável
+> normalmente; o que ainda falta é dado, não suporte. Ver
+> [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0).
+
+### Herói sem dados (linha/coluna vazia e winrate 0)
+
+Um herói recém-lançado entra no OWPick **antes** de existir dado confiável sobre
+ele. O projeto trata isso como estado normal, sem caminho de código especial:
+
+| Onde | Representação | Efeito no modelo |
+|---|---|---|
+| `heroes ally.xlsx` / `heroes enemy.xlsx` (→ CSVs) | linha e coluna presentes no cabeçalho, **células vazias** | `build_matrix_dict` descarta NaN ⇒ a chave nem entra no dicionário ⇒ `C(h,e)` e `Y(h,a)` valem **0** nos dois sentidos, e nenhuma razão aparece na explicabilidade |
+| `stats_inputs.csv` | linha por mapa com **winrate/pickrate vazios** (o que os scrapers gravam) | `dropna(subset=["winrate"])` descarta a linha ⇒ herói sem `MetaStrength` (chave ausente = 0.0) e **sem efeito** na média/desvio da role |
+| `stats_inputs.csv` (caso da D.Mon, v1.2.14) | winrate **`0.00`** e pickrate **`0.00`** | pickrate 0 ⇒ `conf = pr/(pr+k0) ≈ 0.014` ⇒ MetaStrength do próprio herói ≈ −0.11 (neutro). **Mas** o 0 entra na média/desvio da role: veja o aviso abaixo |
+| `assets/heroes/bans/` | ícone ausente | `match_bans` nunca aponta o herói como banido (ele não é removido do ranking se for banido). Nada quebra; o validador reporta a ausência |
+
+> **Winrate `0` não é o mesmo que winrate vazio.** `load_meta_strength` calcula
+> `wr̄_role` e `σ_role` sobre **todas** as linhas com winrate preenchido. Um `0`
+> no meio de winrates de ~45–60% infla o `σ` da role e **comprime o z-score de
+> todos os heróis dela** (com a D.Mon: Orisa em Ilios sai de −2.06 para −0.52;
+> Winston em Antarctic Peninsula, de −1.52 para −0.47 — DPS e SUP não são
+> afetados). Nos mapas que já vêm sem dados nenhum efeito existe, porque nenhuma
+> linha sobrevive ao `dropna`. Se a intenção for "sem dados", a representação
+> **neutra** é a **célula vazia**; o `0` é um valor de winrate como outro
+> qualquer para a estatística por role.
 
 ### Categorias de DPS (sinergias DPS × DPS)
 
@@ -1132,7 +1171,33 @@ nos quatro presets. Exemplos (contribuição final de cada par):
 
 Os templates do **lineup** estão organizados em `assets/heroes/{resolucao}/{role}/` onde `resolucao` é `720p` ou `2k`. Cada arquivo é uma imagem `.png` do retrato ilustrado do herói extraída da tela de seleção do Overwatch 2.
 
+Convenções do banco de lineup (conferidas pelos testes):
+
+- **Dois arquivos por herói** — `<Nome>.png` e `<Nome>.jpg`, dois recortes
+  distintos do mesmo retrato. Ambos são **dados PNG** (a extensão `.jpg` é
+  histórica) e ambos entram no banco como templates independentes do mesmo
+  herói, porque o nome vem do `stem` do arquivo.
+- **Nome do arquivo sem pontuação** (`DVa`, `DMon`, `Soldier 76`) — a
+  `normalize_hero_name` resolve para a mesma chave do nome canônico.
+- **Canal RGB, sem alfa.** O tamanho em pixels não precisa ser exato: o banco 2K
+  é homogêneo em **84×80** e o 720p tem entre 41×41 e 86×86, porque
+  `load_all_templates` redimensiona **todo** template para o tamanho da
+  resolução atual na carga. O que precisa bater é o **enquadramento**.
+- **Sem captura 2K do herói?** Derive o template 2K do 720p por reamostragem
+  **LANCZOS para 84×80 RGB** (foi assim que a D.Mon entrou no banco 2K na
+  v1.2.14). Como o matching normaliza o tamanho na carga, o banco 2K é uma
+  fonte de mais qualidade, não uma geometria diferente: medido nas fixtures, a
+  reconstrução por LANCZOS dos Tanks já existentes mantém correlação mediana de
+  0.75 com o template 2K real e continua elegendo o herói correto na captura 2K.
+
 Os templates dos **bans** ficam em `assets/heroes/bans/` (pasta plana, sem divisão por role ou resolução): um `.png` de 128×128 por herói com o **ícone 3D oficial** — a mesma arte exibida nos slots de ban da UI, que é diferente do retrato ilustrado do lineup. Os nomes de arquivo seguem a mesma convenção dos bancos existentes (`DVa.png`, `Soldier 76.png`, `Lúcio.png`, ...).
+
+> O ícone de ban **não pode ser derivado do retrato do lineup** — é outra arte.
+> Enquanto ele não existir para um herói, `match_bans` apenas nunca o aponta como
+> banido (ele não é removido do ranking se for banido) e o validador reporta a
+> ausência. É o caso da **D.Mon** na v1.2.14: `assets/heroes/bans/DMon.png` ainda
+> não existe. Soltar o `.png` de 128×128 na pasta fecha a lacuna sem nenhuma
+> alteração de código.
 
 ---
 
@@ -1325,16 +1390,54 @@ um observador passivo, indistinguível de um software de captura de tela comum.
    **margem** (1º vs 2º colocado — nesses reads a margem real é de 16 a 30 pontos)
    é o caminho se um dia for preciso apertar a rejeição.
 
+6. **Winrate `0` em `stats_inputs.csv` NÃO é "sem dados"** (v1.2.14): a célula
+   **vazia** é que representa ausência — `load_meta_strength` a descarta antes de
+   calcular `wr̄_role`/`σ_role`. Um `0` explícito é um valor como outro qualquer:
+   ele entra na estatística da role e comprime o z-score de **todos** os heróis
+   dela. É o estado atual da D.Mon; detalhes e números em
+   [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0).
+
 ### Adição de Novos Heróis
 
-Para adicionar um novo herói ao sistema, é necessário atualizar dois lugares:
-1. A constante `HEROES_ROLES` em `src/owpick/core/heroes.py` (fonte de verdade para nome e role)
-2. Os templates de imagem em `assets/heroes/`: retratos do lineup nas resoluções suportadas (`720p` e `2k`) e o ícone 3D oficial em `assets/heroes/bans/` (reconhecimento de bans)
+A adição é **genérica**: nada no código conhece herói por nome (fora das regras
+declaradas da Mercy/Bastion). Tudo deriva de `HEROES_ROLES` + assets + dados.
+A ordem abaixo é a que a v1.2.14 (D.Mon) seguiu.
 
-Depois, atualizar as matrizes (`.xlsx` de edição → `tools/xlsx_to_csv.py`) e as
-stats (`tools/coletar_stats.py`). Nas **sinergias**, um DPS novo deve receber os
-valores da sua categoria (ver [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps))
-e um valor em `Y(Mercy, <DPS>)` na escala do
-[DPS prioritário](#dps-prioritário-sinergia-mercy--dps).
+1. **`HEROES_ROLES`** em `src/owpick/core/heroes.py` — fonte de verdade de nome e
+   role; mantenha a ordem alfabética da lista. Isso sozinho já propaga para
+   favoritos, modo `sim`, OCR do nome do jogador, ranking, validação e a
+   **pickrate neutra** da role (que é `slots/|heróis(role)|`, nunca uma constante).
+   Confira que `normalize_hero_name` resolve o nome novo para uma chave **única**
+   (a regra atual já apaga `: . ' \``: `"D.Va"`→`dva`, `"D.Mon"`→`dmon`).
+2. **Templates do lineup** em `assets/heroes/720p/<role>/` e `assets/heroes/2k/<role>/`
+   — ver as convenções em [Templates de Imagem](#templates-de-imagem), inclusive
+   como derivar o 2K do 720p quando só existe uma captura.
+3. **Ícone de ban** em `assets/heroes/bans/` (128×128, ícone 3D oficial). É o
+   único item **opcional**: sem ele o herói apenas nunca é detectado como banido
+   (o validador avisa). Não improvise a partir do retrato do lineup — é outra arte.
+4. **Matrizes**: edite `data/heroes ally.xlsx` e `data/heroes enemy.xlsx`
+   (linha **e** coluna, na posição alfabética) e rode `python tools/xlsx_to_csv.py`
+   para regenerar `data/synergies.csv` / `data/counters.csv`, que são o que o
+   runtime lê. Nas **sinergias**, um DPS novo deve receber os valores da sua
+   categoria (ver [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps)) e um
+   valor em `Y(Mercy, <DPS>)` na escala do
+   [DPS prioritário](#dps-prioritário-sinergia-mercy--dps). Ainda sem opinião
+   formada sobre o herói? Deixe as células **vazias** — é ausência de dado, e
+   vale 0 nos dois sentidos (ver [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)).
+5. **Stats**: rode `tools/coletar_stats.py` (ou `coletar_stats2.py`) para
+   regenerar `data/stats_inputs.csv` com o herói novo nos 29 mapas. Enquanto o
+   site não tiver dados dele, as células saem **vazias** — leia o aviso sobre
+   winrate `0` vs vazio em [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)
+   antes de preencher à mão.
+6. **Testes**: atualize as contagens oficiais em `tests/test_utils.py`
+   (`TestCanonicalData`) e use `tests/test_dmon.py` como gabarito da aceitação
+   ponta a ponta do herói novo.
+
 O validador (`infra/validation.py`, roda nos testes e no boot com `--debug`)
-aponta exatamente o que estiver faltando.
+aponta exatamente o que estiver faltando em cada um desses pontos.
+
+Alterações de dados em lote (inserir linha/coluna nas planilhas preservando
+estilos e formatação condicional, inserir o herói em todos os mapas do
+`stats_inputs.csv`) foram feitas por um **script Python temporário**, executado
+uma vez e **removido** depois — o repositório só guarda o resultado e as
+ferramentas permanentes de `tools/`.

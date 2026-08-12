@@ -37,7 +37,7 @@ class TestNormalizeHeroName:
     def test_all_heroes_have_unique_keys(self):
         all_heroes = heroes.get_all_heroes()
         keys = {normalize_hero_name(h) for h in all_heroes}
-        assert len(keys) == len(all_heroes) == 52
+        assert len(keys) == len(all_heroes) == 53
 
 
 # ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ class TestGetScaledMapRegion:
 class TestCanonicalData:
     def test_hero_counts(self):
         assert len(heroes.HEROES_ROLES["DPS"]) == 24
-        assert len(heroes.HEROES_ROLES["TANK"]) == 14
+        assert len(heroes.HEROES_ROLES["TANK"]) == 15  # +D.Mon (v1.2.14)
         assert len(heroes.HEROES_ROLES["SUP"]) == 14
 
     def test_map_count(self):
@@ -164,7 +164,7 @@ class TestCanonicalData:
     def test_neutral_pickrates(self):
         pr = heroes.get_role_neutral_pickrates()
         assert pr["DPS"] == pytest.approx(2 / 24)
-        assert pr["TANK"] == pytest.approx(1 / 14)
+        assert pr["TANK"] == pytest.approx(1 / 15)
         assert pr["SUP"] == pytest.approx(2 / 14)
 
 

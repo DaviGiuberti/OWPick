@@ -47,9 +47,9 @@ _ALNUM = re.compile(r"[A-Z0-9]")
 
 # Confiança mínima do fuzzy match do nome (escala do fuzz.token_set_ratio, 0-100).
 # Calibração: simulando o OCR (maiúsculas, sem acento/pontuação, com o artefato do
-# badge de role ao lado) para os 52 heróis, o nome correto vence sempre (0 erros).
+# badge de role ao lado) para TODOS os heróis, o nome correto vence sempre (0 erros).
 # Desde que _strip_upper passou a descartar a pontuação (v1.2.12), o nome lido
-# limpo marca 100 nos 52 — a folga até o limiar é o que absorve o ruído do badge
+# limpo marca 100 em todos — a folga até o limiar é o que absorve o ruído do badge
 # em baixa resolução (ex.: 720p lendo "DVS" por "D.VA": 66.7, 2º em 36.4). 60
 # aceita reads parciais/ruidosos e ainda rejeita lixo de OCR — que cai no fallback
 # (role manual), nunca numa role errada.
@@ -85,8 +85,8 @@ def _strip_upper(s: str) -> str:
     candidatos — só limpa o texto do OCR.
 
     O ganho é geral, não específico da D.Va: com o OCR lendo o nome limpo, TODOS
-    os 52 heróis passam a marcar 100 (antes o pior caso era D.Va 85.7 e
-    "Soldier: 76" 95.2).
+    os heróis de HEROES_ROLES passam a marcar 100 (antes o pior caso era D.Va
+    85.7 e "Soldier: 76" 95.2).
     """
     s = HERO_NAME_PUNCTUATION.sub("", s)
     s = unicodedata.normalize("NFKD", s)

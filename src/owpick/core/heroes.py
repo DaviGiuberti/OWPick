@@ -43,6 +43,7 @@ HEROES_ROLES: dict[str, list[str]] = {
         "Widowmaker",
     ],
     "TANK": [
+        "D.Mon",
         "D.Va",
         "Domina",
         "Doomfist",

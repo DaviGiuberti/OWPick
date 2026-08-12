@@ -4,7 +4,9 @@ Verifica, com AVISOS CLAROS do que está faltando/errado:
 
   - matrizes (synergies/counters): heróis das linhas E colunas == HEROES_ROLES
     (⊆ e ⊇, após normalização) — pega typos históricos (Illarri/Rroadhog) como
-    linhas/colunas órfãs e heróis ausentes;
+    linhas/colunas órfãs e heróis ausentes. As colunas são conferidas contra o
+    CABEÇALHO do CSV, não contra os valores presentes: um herói ainda SEM dados
+    (linha/coluna vazias) continua sendo uma coluna válida;
   - stats_inputs.csv: cobre os 29 mapas e as roles esperadas (DPS/TANK/SUP);
   - templates: todo herói tem retrato no lineup (720p E 2k, na role certa) e um
     ícone de ban em assets/heroes/bans/.
@@ -15,6 +17,7 @@ Usado nos testes (rede da 1.3) e, opcionalmente, no boot em modo --debug.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
 
 from owpick.core.heroes import (
@@ -35,15 +38,28 @@ def _expected_hero_keys() -> set[str]:
     return {normalize_hero_name(h) for h in get_all_heroes()}
 
 
-def validate_matrix(matrix: dict[str, dict[str, float]], name: str) -> list[str]:
-    """Valida uma matriz normalizada (linhas E colunas) contra HEROES_ROLES."""
+def validate_matrix(
+    matrix: dict[str, dict[str, float]], name: str, columns: Iterable[str] | None = None
+) -> list[str]:
+    """Valida uma matriz normalizada (linhas E colunas) contra HEROES_ROLES.
+
+    `columns` é o CABEÇALHO real da planilha/CSV. Passe-o sempre que ele estiver
+    disponível: `build_matrix_dict` descarta as células vazias, então uma coluna
+    que existe mas ainda não tem NENHUM dado (herói recém-adicionado) sumiria da
+    matriz normalizada e seria reportada como "ausente" — um falso positivo. Sem
+    o parâmetro, as colunas são inferidas dos valores presentes (comportamento
+    histórico, mantido para matrizes sintéticas dos testes).
+    """
     problems: list[str] = []
     expected = _expected_hero_keys()
 
     row_keys = set(matrix)
     col_keys: set[str] = set()
-    for row in matrix.values():
-        col_keys |= set(row)
+    if columns is not None:
+        col_keys = {normalize_hero_name(str(c)) for c in columns}
+    else:
+        for row in matrix.values():
+            col_keys |= set(row)
 
     for label, keys in (("linha", row_keys), ("coluna", col_keys)):
         missing = expected - keys
@@ -125,8 +141,14 @@ def validate_all() -> list[str]:
     """Roda todas as validações e devolve a lista consolidada de problemas."""
     problems: list[str] = []
     try:
-        problems += validate_matrix(datasource.get_ally_matrix(), "synergies")
-        problems += validate_matrix(datasource.get_enemy_matrix(), "counters")
+        # As colunas vêm do CABEÇALHO do CSV (e não da matriz normalizada): um
+        # herói sem nenhum dado ainda tem coluna própria na planilha.
+        problems += validate_matrix(
+            datasource.get_ally_matrix(), "synergies", datasource.read_synergies_data().columns
+        )
+        problems += validate_matrix(
+            datasource.get_enemy_matrix(), "counters", datasource.read_counters_data().columns
+        )
     except Exception as e:  # noqa: BLE001
         problems.append(f"[matrizes] falha ao carregar: {e}")
     problems += validate_stats()

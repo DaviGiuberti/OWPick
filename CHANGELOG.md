@@ -4,6 +4,131 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.14] — 2026-08-12
+
+### Nova Tank: D.Mon
+
+O 15º Tank do Overwatch entra como herói **de primeira classe** do OWPick —
+identificado na captura, ranqueável, banível do ranking e presente em todas as
+estruturas de dados. Nenhum caminho de código especial foi criado para ela: a
+adição usa os mecanismos genéricos que já existiam.
+
+- **`HEROES_ROLES`** (`src/owpick/core/heroes.py`): `D.Mon` registrada em `TANK`
+  (24 DPS, **15** TANK, 14 SUP — **53** heróis). Tudo que deriva da constante
+  acompanha sozinho: favoritos, modo `sim`, OCR do nome do jogador, ranking,
+  validação e a **pickrate neutra** da role (`1/14` → `1/15`).
+- **Normalização**: `normalize_hero_name("D.Mon") == "dmon"`, pela mesma regra
+  que já resolvia `"D.Va"` → `"dva"` — o ponto some. Não foi preciso nenhuma
+  regra nova, e a chave não colide com D.Va nem com Domina (conferido em teste).
+- **Templates do lineup** (`assets/heroes/`):
+  - **720p**: os dois retratos fornecidos (`DMon.png` 45×43 e `DMon.jpg` 47×43)
+    foram normalizados de RGBA para **RGB**, o canal usado por todos os demais
+    templates do banco. O alfa recebido era 100% opaco, então **nenhum pixel
+    mudou** (verificado byte a byte).
+  - **2K**: `assets/heroes/2k/tank/DMon.png` e `DMon.jpg` gerados a partir dos
+    720p por reamostragem **LANCZOS para 84×80 RGB** — exatamente as dimensões,
+    o formato e o canal dos demais Tanks do banco 2K. O banco 2K não é um
+    caso especial no código: o matching escolhe o banco pelo **tamanho do
+    retrato** e redimensiona todo template na carga, então o que precisa bater é
+    o **enquadramento** — que é o mesmo do 720p. Medido nas fixtures: a
+    reconstrução por LANCZOS dos 14 Tanks já existentes mantém correlação
+    mediana de 0.75 com o template 2K real e continua elegendo o herói correto
+    no slot de Tank da captura 2K.
+- **Matrizes** (`data/heroes ally.xlsx` / `heroes enemy.xlsx` →
+  `data/synergies.csv` / `counters.csv`): a linha e a coluna `DMon` foram
+  inseridas na **posição alfabética** (entre `Cassidy` e `DVa`) com **todas as
+  células vazias** — nenhum valor de sinergia ou counter foi inventado, copiado
+  de outro Tank ou zerado por conveniência. Célula vazia é a representação que o
+  `build_matrix_dict` já entende como ausência de dado (a chave nem entra no
+  dicionário), então D.Mon **não soma nada** em counter/sinergia, nos dois
+  sentidos, e não gera "motivo" na explicabilidade. Estrutura das planilhas
+  preservada: cabeçalhos, estilos, painéis congelados, larguras e a **formatação
+  condicional de simetria**, cuja faixa foi estendida para cobrir a nova
+  linha/coluna. Nenhuma célula pré-existente mudou de valor.
+- **Stats** (`data/stats_inputs.csv`): D.Mon presente como TANK nos **29 mapas**
+  com **winrate `0.00`** e **pickrate `0.00`** (1537 linhas = 53 × 29). A
+  pickrate 0 é o que impede o winrate 0 de virar penalidade artificial: o termo
+  de confiança `conf = pr/(pr+k0)` cai para ~0.014 e o MetaStrength da própria
+  D.Mon fica em ≈ −0.11 (praticamente neutro).
+
+  > **Atenção — efeito colateral do winrate 0**: `load_meta_strength` calcula a
+  > média e o desvio da winrate **por role**, sobre todas as linhas com winrate
+  > preenchido. Um 0 no meio de winrates de ~45–60% infla o σ da role TANK e
+  > **comprime o z-score de todos os outros Tanks** (ex.: Orisa em Ilios sai de
+  > −2.06 para −0.52; Winston em Antarctic Peninsula, de −1.52 para −0.47). DPS
+  > e SUP não são afetados. Nos 5 mapas que já vêm sem dados (Junkertown,
+  > Midtown, Neon Junction, Oasis, Shambali Monastery) não há efeito algum. Se o
+  > objetivo for "sem dados" sem mexer na régua da role, a representação nativa
+  > do projeto é a **célula vazia** — é o que os scrapers gravam para herói sem
+  > dados e o que `dropna(subset=["winrate"])` descarta antes de calcular as
+  > estatísticas.
+
+- **Usuário com override de stats antigo** (`%APPDATA%\OWPick\stats_inputs.csv`,
+  baixado pela opção 4): degrada com segurança — sem linha para D.Mon, ela fica
+  sem MetaStrength (chave ausente = 0.0) e o ranking continua normalmente. Basta
+  atualizar as stats pela opção 4 para pegar as linhas novas.
+
+### Validação: coluna sem dados deixou de ser falso positivo
+
+`validate_matrix` conferia as **colunas** da matriz olhando os valores presentes
+na matriz já normalizada. Como `build_matrix_dict` descarta células vazias, um
+herói com a coluna inteiramente vazia sumia da matriz e era reportado como
+"AUSENTE nas colunas" — falso positivo genérico, que qualquer herói novo sem
+dados dispararia (não é específico da D.Mon).
+
+- `validate_matrix(matrix, name, columns=None)` ganhou o parâmetro opcional
+  `columns`: quando recebe o **cabeçalho real** do CSV, confere as colunas
+  contra ele. `validate_all` passa `read_synergies_data().columns` /
+  `read_counters_data().columns`. Sem o parâmetro, o comportamento herdado
+  (inferir pelos valores) continua — é o que as matrizes sintéticas dos testes
+  usam.
+- O que o validador detecta **não** mudou: coluna com typo/órfã e herói
+  realmente ausente do cabeçalho seguem sendo reportados.
+
+### `tools/xlsx_to_csv.py`: o CSV continua com números inteiros
+
+Uma célula vazia na planilha vira `NaN` e o pandas promove a coluna inteira a
+`float64` — o `to_csv` passaria a gravar `1.0` onde sempre houve `1`, trocando o
+formato do CSV de runtime inteiro. A conversão passa pelo dtype nullable `Int64`
+(`preserve_integers`), que mantém os inteiros **e** o vazio (gravado como célula
+vazia). Resultado conferido: nas 52 linhas pré-existentes de `synergies.csv` e
+`counters.csv`, o único diff é a nova coluna `DMon` vazia.
+
+### Ícone de ban da D.Mon: lacuna conhecida e aceita
+
+O banco de bans (`assets/heroes/bans/`) usa os **ícones 3D oficiais** — arte
+diferente do retrato do lineup, que **não** pode ser derivada dele. O ícone da
+D.Mon ainda não foi extraído do jogo, então **nenhuma imagem foi inventada** e
+nenhum código finge que o asset existe.
+
+- **Degradação**: `match_bans` simplesmente nunca aponta a D.Mon como banida —
+  ela não é removida do ranking se for banida no Competitivo. Nada mais no
+  pipeline depende do asset, e nada quebra.
+- O **validador continua reportando** a ausência (`--debug` e testes), que é como
+  o autor lembra de adicionar o ícone. `tests/test_validation.py` aceita
+  **exatamente** essa lacuna (`KNOWN_DATA_GAPS`) e nenhum outro problema; basta
+  soltar o `.png` de 128×128 em `assets/heroes/bans/DMon.png` para fechá-la, sem
+  mais nenhuma alteração de código.
+
+### Testes
+
+- Novo `tests/test_dmon.py` (21 testes): aceitação ponta a ponta da hero nova —
+  `HEROES_ROLES`/role, normalização e ausência de colisão, `Hero.from_name`,
+  templates presentes nos **dois** bancos (com o banco realmente carregado em
+  720p/1080p/2K), padrão do banco 2K (84×80 RGB), presença nas matrizes com
+  linha/coluna vazias, ausência de duplicatas, stats com winrate 0 nos 29 mapas,
+  MetaStrength neutro, e o scoring com D.Mon **inimiga**, **aliada**, **candidata**
+  e dentro do ranking completo — sem exceção e sem pontuação inventada. Serve de
+  gabarito para a próxima hero.
+- `tests/test_utils.py`: contagens oficiais (53 heróis, 15 Tanks) e pickrate
+  neutra da role TANK (`1/15`).
+- `tests/test_validation.py`: cobertura do novo parâmetro `columns` (coluna vazia
+  não é "ausente") e a lacuna conhecida do ícone de ban.
+- Suíte completa: **296 passaram, 1 pulado, 4 xfailed** (era 273/1/4). Os golden
+  tests de matching não regrediram com o novo template no banco.
+
+---
+
 ## [v1.2.13] — 2026-07-28
 
 ### Sinergia Mercy × DPS: valores próprios, peso 1 e regra do "DPS prioritário"

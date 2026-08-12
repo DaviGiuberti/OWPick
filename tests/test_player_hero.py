@@ -159,7 +159,7 @@ def test_detecta_dva_nas_fixtures_da_mesma_partida(res, fixture_file):
 
 def test_pontuacao_nao_penaliza_nenhum_nome_canonico():
     """Causa-raiz nº 1, generalizada: com o OCR lendo o nome LIMPO (maiúsculas,
-    sem acento nem pontuação — tudo que o Tesseract consegue emitir), os 52
+    sem acento nem pontuação — tudo que o Tesseract consegue emitir), TODOS os
     heróis marcam 100. Antes o ponto/dois-pontos custavam pontos em nomes CURTOS
     ("D.Va" 85.7, "Soldier: 76" 95.2), corroendo a folga até o limiar."""
     for hero in get_all_heroes():
@@ -175,7 +175,7 @@ BADGE_TOKENS = ["", " &", " @", " @&", " esi", " ies", " ses", " G&S", " S&S", "
 
 def test_badge_como_token_separado_nao_derruba_nenhum_heroi():
     """Causa-raiz nº 2, generalizada: o token do badge é descartado, então nenhum
-    dos 52 heróis perde pontos por causa dele — todos seguem em 100."""
+    herói perde pontos por causa dele — todos seguem acima do limiar."""
     for hero in get_all_heroes():
         limpo = player_hero._strip_upper(hero)
         for badge in BADGE_TOKENS:

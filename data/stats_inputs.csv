@@ -23,6 +23,7 @@ Antarctic Peninsula,Control,antarctic-peninsula,Tracer,DPS,56.00,23.90
 Antarctic Peninsula,Control,antarctic-peninsula,Vendetta,DPS,55.40,3.00
 Antarctic Peninsula,Control,antarctic-peninsula,Venture,DPS,55.60,2.00
 Antarctic Peninsula,Control,antarctic-peninsula,Widowmaker,DPS,52.60,1.60
+Antarctic Peninsula,Control,antarctic-peninsula,D.Mon,TANK,0.00,0.00
 Antarctic Peninsula,Control,antarctic-peninsula,D.Va,TANK,49.80,4.90
 Antarctic Peninsula,Control,antarctic-peninsula,Domina,TANK,58.70,1.30
 Antarctic Peninsula,Control,antarctic-peninsula,Doomfist,TANK,45.20,10.20
@@ -75,6 +76,7 @@ Busan,Control,busan,Tracer,DPS,52.90,26.30
 Busan,Control,busan,Vendetta,DPS,47.80,2.90
 Busan,Control,busan,Venture,DPS,64.80,1.40
 Busan,Control,busan,Widowmaker,DPS,53.30,9.50
+Busan,Control,busan,D.Mon,TANK,0.00,0.00
 Busan,Control,busan,D.Va,TANK,42.80,4.70
 Busan,Control,busan,Domina,TANK,55.70,1.20
 Busan,Control,busan,Doomfist,TANK,44.30,10.00
@@ -127,6 +129,7 @@ Ilios,Control,ilios,Tracer,DPS,49.50,27.20
 Ilios,Control,ilios,Vendetta,DPS,55.70,3.50
 Ilios,Control,ilios,Venture,DPS,53.70,1.70
 Ilios,Control,ilios,Widowmaker,DPS,52.20,7.70
+Ilios,Control,ilios,D.Mon,TANK,0.00,0.00
 Ilios,Control,ilios,D.Va,TANK,50.30,8.10
 Ilios,Control,ilios,Domina,TANK,54.40,0.80
 Ilios,Control,ilios,Doomfist,TANK,50.80,10.90
@@ -179,6 +182,7 @@ Lijiang Tower,Control,lijiang-tower,Tracer,DPS,50.30,22.30
 Lijiang Tower,Control,lijiang-tower,Vendetta,DPS,57.70,3.70
 Lijiang Tower,Control,lijiang-tower,Venture,DPS,48.80,2.00
 Lijiang Tower,Control,lijiang-tower,Widowmaker,DPS,41.50,3.00
+Lijiang Tower,Control,lijiang-tower,D.Mon,TANK,0.00,0.00
 Lijiang Tower,Control,lijiang-tower,D.Va,TANK,44.00,4.20
 Lijiang Tower,Control,lijiang-tower,Domina,TANK,53.50,1.50
 Lijiang Tower,Control,lijiang-tower,Doomfist,TANK,50.00,11.10
@@ -231,6 +235,7 @@ Nepal,Control,nepal,Tracer,DPS,48.00,22.30
 Nepal,Control,nepal,Vendetta,DPS,44.70,3.50
 Nepal,Control,nepal,Venture,DPS,45.10,1.70
 Nepal,Control,nepal,Widowmaker,DPS,45.80,2.40
+Nepal,Control,nepal,D.Mon,TANK,0.00,0.00
 Nepal,Control,nepal,D.Va,TANK,50.90,4.30
 Nepal,Control,nepal,Domina,TANK,52.20,1.60
 Nepal,Control,nepal,Doomfist,TANK,46.30,10.40
@@ -283,6 +288,7 @@ Oasis,Control,oasis,Tracer,DPS,,
 Oasis,Control,oasis,Vendetta,DPS,,
 Oasis,Control,oasis,Venture,DPS,,
 Oasis,Control,oasis,Widowmaker,DPS,,
+Oasis,Control,oasis,D.Mon,TANK,0.00,0.00
 Oasis,Control,oasis,D.Va,TANK,,
 Oasis,Control,oasis,Domina,TANK,,
 Oasis,Control,oasis,Doomfist,TANK,,
@@ -335,6 +341,7 @@ Samoa,Control,samoa,Tracer,DPS,51.90,25.00
 Samoa,Control,samoa,Vendetta,DPS,55.20,3.60
 Samoa,Control,samoa,Venture,DPS,28.20,1.20
 Samoa,Control,samoa,Widowmaker,DPS,41.00,2.10
+Samoa,Control,samoa,D.Mon,TANK,0.00,0.00
 Samoa,Control,samoa,D.Va,TANK,45.00,4.40
 Samoa,Control,samoa,Domina,TANK,49.60,2.10
 Samoa,Control,samoa,Doomfist,TANK,45.50,9.90
@@ -387,6 +394,7 @@ Circuit Royal,Escort,circuit-royal,Tracer,DPS,44.90,4.10
 Circuit Royal,Escort,circuit-royal,Vendetta,DPS,54.60,1.60
 Circuit Royal,Escort,circuit-royal,Venture,DPS,49.90,1.50
 Circuit Royal,Escort,circuit-royal,Widowmaker,DPS,56.40,12.10
+Circuit Royal,Escort,circuit-royal,D.Mon,TANK,0.00,0.00
 Circuit Royal,Escort,circuit-royal,D.Va,TANK,43.50,2.90
 Circuit Royal,Escort,circuit-royal,Domina,TANK,63.00,6.60
 Circuit Royal,Escort,circuit-royal,Doomfist,TANK,43.80,7.50
@@ -439,6 +447,7 @@ Dorado,Escort,dorado,Tracer,DPS,51.60,23.70
 Dorado,Escort,dorado,Vendetta,DPS,46.20,2.90
 Dorado,Escort,dorado,Venture,DPS,57.40,2.40
 Dorado,Escort,dorado,Widowmaker,DPS,71.10,7.80
+Dorado,Escort,dorado,D.Mon,TANK,0.00,0.00
 Dorado,Escort,dorado,D.Va,TANK,45.30,8.70
 Dorado,Escort,dorado,Domina,TANK,40.50,1.50
 Dorado,Escort,dorado,Doomfist,TANK,50.70,8.50
@@ -491,6 +500,7 @@ Havana,Escort,havana,Tracer,DPS,48.20,9.60
 Havana,Escort,havana,Vendetta,DPS,41.70,1.90
 Havana,Escort,havana,Venture,DPS,69.80,1.50
 Havana,Escort,havana,Widowmaker,DPS,64.90,16.20
+Havana,Escort,havana,D.Mon,TANK,0.00,0.00
 Havana,Escort,havana,D.Va,TANK,47.70,3.90
 Havana,Escort,havana,Domina,TANK,62.90,7.30
 Havana,Escort,havana,Doomfist,TANK,47.40,8.40
@@ -543,6 +553,7 @@ Junkertown,Escort,junkertown,Tracer,DPS,,
 Junkertown,Escort,junkertown,Vendetta,DPS,,
 Junkertown,Escort,junkertown,Venture,DPS,,
 Junkertown,Escort,junkertown,Widowmaker,DPS,,
+Junkertown,Escort,junkertown,D.Mon,TANK,0.00,0.00
 Junkertown,Escort,junkertown,D.Va,TANK,,
 Junkertown,Escort,junkertown,Domina,TANK,,
 Junkertown,Escort,junkertown,Doomfist,TANK,,
@@ -595,6 +606,7 @@ Rialto,Escort,rialto,Tracer,DPS,50.60,14.60
 Rialto,Escort,rialto,Vendetta,DPS,43.50,2.20
 Rialto,Escort,rialto,Venture,DPS,40.20,1.90
 Rialto,Escort,rialto,Widowmaker,DPS,49.50,12.50
+Rialto,Escort,rialto,D.Mon,TANK,0.00,0.00
 Rialto,Escort,rialto,D.Va,TANK,51.10,7.90
 Rialto,Escort,rialto,Domina,TANK,49.90,2.60
 Rialto,Escort,rialto,Doomfist,TANK,48.90,10.10
@@ -647,6 +659,7 @@ Route 66,Escort,route-66,Tracer,DPS,59.20,16.30
 Route 66,Escort,route-66,Vendetta,DPS,60.90,2.00
 Route 66,Escort,route-66,Venture,DPS,19.10,1.30
 Route 66,Escort,route-66,Widowmaker,DPS,54.30,10.10
+Route 66,Escort,route-66,D.Mon,TANK,0.00,0.00
 Route 66,Escort,route-66,D.Va,TANK,54.40,7.10
 Route 66,Escort,route-66,Domina,TANK,47.90,1.90
 Route 66,Escort,route-66,Doomfist,TANK,54.80,10.40
@@ -699,6 +712,7 @@ Shambali Monastery,Escort,shambali-monastery,Tracer,DPS,,
 Shambali Monastery,Escort,shambali-monastery,Vendetta,DPS,,
 Shambali Monastery,Escort,shambali-monastery,Venture,DPS,,
 Shambali Monastery,Escort,shambali-monastery,Widowmaker,DPS,,
+Shambali Monastery,Escort,shambali-monastery,D.Mon,TANK,0.00,0.00
 Shambali Monastery,Escort,shambali-monastery,D.Va,TANK,,
 Shambali Monastery,Escort,shambali-monastery,Domina,TANK,,
 Shambali Monastery,Escort,shambali-monastery,Doomfist,TANK,,
@@ -751,6 +765,7 @@ Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Tracer,DPS,56.00,27.10
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Vendetta,DPS,41.20,2.20
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Venture,DPS,59.10,1.90
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Widowmaker,DPS,57.60,11.00
+Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,D.Mon,TANK,0.00,0.00
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,D.Va,TANK,56.40,9.70
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Domina,TANK,33.20,1.10
 Watchpoint: Gibraltar,Escort,watchpoint-gibraltar,Doomfist,TANK,53.80,10.50
@@ -803,6 +818,7 @@ Blizzard World,Hybrid,blizzard-world,Tracer,DPS,43.10,18.40
 Blizzard World,Hybrid,blizzard-world,Vendetta,DPS,41.40,2.10
 Blizzard World,Hybrid,blizzard-world,Venture,DPS,93.30,0.70
 Blizzard World,Hybrid,blizzard-world,Widowmaker,DPS,50.40,12.60
+Blizzard World,Hybrid,blizzard-world,D.Mon,TANK,0.00,0.00
 Blizzard World,Hybrid,blizzard-world,D.Va,TANK,44.00,6.00
 Blizzard World,Hybrid,blizzard-world,Domina,TANK,54.10,2.10
 Blizzard World,Hybrid,blizzard-world,Doomfist,TANK,45.20,8.60
@@ -855,6 +871,7 @@ Eichenwalde,Hybrid,eichenwalde,Tracer,DPS,55.00,16.30
 Eichenwalde,Hybrid,eichenwalde,Vendetta,DPS,43.70,3.80
 Eichenwalde,Hybrid,eichenwalde,Venture,DPS,62.00,2.30
 Eichenwalde,Hybrid,eichenwalde,Widowmaker,DPS,42.00,5.10
+Eichenwalde,Hybrid,eichenwalde,D.Mon,TANK,0.00,0.00
 Eichenwalde,Hybrid,eichenwalde,D.Va,TANK,40.80,4.70
 Eichenwalde,Hybrid,eichenwalde,Domina,TANK,59.90,2.60
 Eichenwalde,Hybrid,eichenwalde,Doomfist,TANK,46.60,8.70
@@ -907,6 +924,7 @@ Hollywood,Hybrid,hollywood,Tracer,DPS,43.40,20.20
 Hollywood,Hybrid,hollywood,Vendetta,DPS,59.40,1.90
 Hollywood,Hybrid,hollywood,Venture,DPS,37.20,2.40
 Hollywood,Hybrid,hollywood,Widowmaker,DPS,54.10,8.70
+Hollywood,Hybrid,hollywood,D.Mon,TANK,0.00,0.00
 Hollywood,Hybrid,hollywood,D.Va,TANK,52.30,6.10
 Hollywood,Hybrid,hollywood,Domina,TANK,43.60,1.80
 Hollywood,Hybrid,hollywood,Doomfist,TANK,37.40,9.20
@@ -959,6 +977,7 @@ King's Row,Hybrid,kings-row,Tracer,DPS,41.90,12.60
 King's Row,Hybrid,kings-row,Vendetta,DPS,47.10,2.90
 King's Row,Hybrid,kings-row,Venture,DPS,37.20,1.80
 King's Row,Hybrid,kings-row,Widowmaker,DPS,47.60,10.00
+King's Row,Hybrid,kings-row,D.Mon,TANK,0.00,0.00
 King's Row,Hybrid,kings-row,D.Va,TANK,44.30,4.10
 King's Row,Hybrid,kings-row,Domina,TANK,56.30,2.80
 King's Row,Hybrid,kings-row,Doomfist,TANK,47.40,9.80
@@ -1011,6 +1030,7 @@ Midtown,Hybrid,midtown,Tracer,DPS,,
 Midtown,Hybrid,midtown,Vendetta,DPS,,
 Midtown,Hybrid,midtown,Venture,DPS,,
 Midtown,Hybrid,midtown,Widowmaker,DPS,,
+Midtown,Hybrid,midtown,D.Mon,TANK,0.00,0.00
 Midtown,Hybrid,midtown,D.Va,TANK,,
 Midtown,Hybrid,midtown,Domina,TANK,,
 Midtown,Hybrid,midtown,Doomfist,TANK,,
@@ -1063,6 +1083,7 @@ Numbani,Hybrid,numbani,Tracer,DPS,50.20,23.90
 Numbani,Hybrid,numbani,Vendetta,DPS,42.20,3.00
 Numbani,Hybrid,numbani,Venture,DPS,52.70,0.90
 Numbani,Hybrid,numbani,Widowmaker,DPS,50.60,5.10
+Numbani,Hybrid,numbani,D.Mon,TANK,0.00,0.00
 Numbani,Hybrid,numbani,D.Va,TANK,45.20,7.50
 Numbani,Hybrid,numbani,Domina,TANK,17.50,0.80
 Numbani,Hybrid,numbani,Doomfist,TANK,54.30,9.60
@@ -1115,6 +1136,7 @@ Paraíso,Hybrid,paraiso,Tracer,DPS,47.70,16.70
 Paraíso,Hybrid,paraiso,Vendetta,DPS,62.70,2.60
 Paraíso,Hybrid,paraiso,Venture,DPS,21.90,1.90
 Paraíso,Hybrid,paraiso,Widowmaker,DPS,57.70,11.60
+Paraíso,Hybrid,paraiso,D.Mon,TANK,0.00,0.00
 Paraíso,Hybrid,paraiso,D.Va,TANK,47.70,9.50
 Paraíso,Hybrid,paraiso,Domina,TANK,59.40,2.50
 Paraíso,Hybrid,paraiso,Doomfist,TANK,40.60,8.40
@@ -1167,6 +1189,7 @@ Colosseo,Push,colosseo,Tracer,DPS,53.70,24.20
 Colosseo,Push,colosseo,Vendetta,DPS,42.70,3.00
 Colosseo,Push,colosseo,Venture,DPS,63.30,1.30
 Colosseo,Push,colosseo,Widowmaker,DPS,39.90,7.70
+Colosseo,Push,colosseo,D.Mon,TANK,0.00,0.00
 Colosseo,Push,colosseo,D.Va,TANK,43.40,4.40
 Colosseo,Push,colosseo,Domina,TANK,44.40,1.50
 Colosseo,Push,colosseo,Doomfist,TANK,50.40,11.70
@@ -1219,6 +1242,7 @@ Esperança,Push,esperanca,Tracer,DPS,49.10,30.40
 Esperança,Push,esperanca,Vendetta,DPS,42.90,3.20
 Esperança,Push,esperanca,Venture,DPS,51.50,1.60
 Esperança,Push,esperanca,Widowmaker,DPS,40.90,3.70
+Esperança,Push,esperanca,D.Mon,TANK,0.00,0.00
 Esperança,Push,esperanca,D.Va,TANK,48.30,7.50
 Esperança,Push,esperanca,Domina,TANK,31.00,1.30
 Esperança,Push,esperanca,Doomfist,TANK,52.10,10.50
@@ -1271,6 +1295,7 @@ New Queen Street,Push,new-queen-street,Tracer,DPS,55.10,27.40
 New Queen Street,Push,new-queen-street,Vendetta,DPS,50.50,2.50
 New Queen Street,Push,new-queen-street,Venture,DPS,55.00,1.50
 New Queen Street,Push,new-queen-street,Widowmaker,DPS,40.10,3.90
+New Queen Street,Push,new-queen-street,D.Mon,TANK,0.00,0.00
 New Queen Street,Push,new-queen-street,D.Va,TANK,48.40,6.60
 New Queen Street,Push,new-queen-street,Domina,TANK,50.80,1.00
 New Queen Street,Push,new-queen-street,Doomfist,TANK,50.90,9.50
@@ -1323,6 +1348,7 @@ Runasapi,Push,runasapi,Tracer,DPS,49.10,25.50
 Runasapi,Push,runasapi,Vendetta,DPS,57.40,3.30
 Runasapi,Push,runasapi,Venture,DPS,47.90,1.80
 Runasapi,Push,runasapi,Widowmaker,DPS,49.00,3.20
+Runasapi,Push,runasapi,D.Mon,TANK,0.00,0.00
 Runasapi,Push,runasapi,D.Va,TANK,41.30,4.60
 Runasapi,Push,runasapi,Domina,TANK,48.60,1.60
 Runasapi,Push,runasapi,Doomfist,TANK,48.90,9.00
@@ -1375,6 +1401,7 @@ New Junk City,Flashpoint,new-junk-city,Tracer,DPS,54.50,25.40
 New Junk City,Flashpoint,new-junk-city,Vendetta,DPS,60.10,4.80
 New Junk City,Flashpoint,new-junk-city,Venture,DPS,33.20,2.00
 New Junk City,Flashpoint,new-junk-city,Widowmaker,DPS,32.70,1.20
+New Junk City,Flashpoint,new-junk-city,D.Mon,TANK,0.00,0.00
 New Junk City,Flashpoint,new-junk-city,D.Va,TANK,48.40,2.60
 New Junk City,Flashpoint,new-junk-city,Domina,TANK,48.70,1.40
 New Junk City,Flashpoint,new-junk-city,Doomfist,TANK,40.40,9.50
@@ -1427,6 +1454,7 @@ Suravasa,Flashpoint,suravasa,Tracer,DPS,49.50,25.50
 Suravasa,Flashpoint,suravasa,Vendetta,DPS,49.60,3.20
 Suravasa,Flashpoint,suravasa,Venture,DPS,49.70,1.90
 Suravasa,Flashpoint,suravasa,Widowmaker,DPS,33.60,1.40
+Suravasa,Flashpoint,suravasa,D.Mon,TANK,0.00,0.00
 Suravasa,Flashpoint,suravasa,D.Va,TANK,38.80,4.60
 Suravasa,Flashpoint,suravasa,Domina,TANK,55.70,1.40
 Suravasa,Flashpoint,suravasa,Doomfist,TANK,52.00,9.90
@@ -1479,6 +1507,7 @@ Neon Junction,Hybrid,neon-junction,Tracer,DPS,,
 Neon Junction,Hybrid,neon-junction,Vendetta,DPS,,
 Neon Junction,Hybrid,neon-junction,Venture,DPS,,
 Neon Junction,Hybrid,neon-junction,Widowmaker,DPS,,
+Neon Junction,Hybrid,neon-junction,D.Mon,TANK,0.00,0.00
 Neon Junction,Hybrid,neon-junction,D.Va,TANK,,
 Neon Junction,Hybrid,neon-junction,Domina,TANK,,
 Neon Junction,Hybrid,neon-junction,Doomfist,TANK,,
