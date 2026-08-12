@@ -1,5 +1,5 @@
 {
-    "version": "1.2.13",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.13/OWPick_v1.2.13.zip",
-    "notas": "### Sinergia Mercy × DPS: valores próprios, peso 1 e regra do \"DPS prioritário\" A linha da Mercy contra os DPS deixou de ser uma edição herói a herói qualquer e passou a ser uma **escala própria**: quem ela \"pocketa\" bem sobe, quem não aproveita o dano amplificado desce. Três mudanças, do lado **aliado** do modelo (o ajuste de Mercy \"pocket\" do **Enemy Threat** continua exatamente como estava — é "
+    "version": "1.2.14",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.14/OWPick_v1.2.14.zip",
+    "notas": "### Nova Tank: D.Mon O 15º Tank do Overwatch entra como herói **de primeira classe** do OWPick — identificado na captura, ranqueável, banível do ranking e presente em todas as estruturas de dados. Nenhum caminho de código especial foi criado para ela: a adição usa os mecanismos genéricos que já existiam. - **`HEROES_ROLES`** (`src/owpick/core/heroes.py`): `D.Mon` registrada em `TANK` (24 DPS, **15"
 }
