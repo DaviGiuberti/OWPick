@@ -1,5 +1,5 @@
 {
-    "version": "1.2.14",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.14/OWPick_v1.2.14.zip",
-    "notas": "### Nova Tank: D.Mon O 15º Tank do Overwatch entra como herói **de primeira classe** do OWPick — identificado na captura, ranqueável, banível do ranking e presente em todas as estruturas de dados. Nenhum caminho de código especial foi criado para ela: a adição usa os mecanismos genéricos que já existiam. - **`HEROES_ROLES`** (`src/owpick/core/heroes.py`): `D.Mon` registrada em `TANK` (24 DPS, **15"
+    "version": "1.2.15",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.15/OWPick_v1.2.15.zip",
+    "notas": "### Correção: jogando de Mei, o ranking saía de Suporte Terceiro (e mais silencioso) modo de falha da detecção automática da role — a mesma família dos bugs corrigidos nas v1.2.12/v1.2.13, mas com uma causa diferente: desta vez o problema **não estava no fuzzy match**, e sim na **binarização** que o Tesseract faz internamente. - **Sintoma**: com o jogador de **Mei** (DPS), o ranking vinha com opçõ"
 }
