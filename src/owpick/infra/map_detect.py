@@ -13,6 +13,7 @@ UNKNOWN e o MetaStrength fica neutro (0), sem quebrar o ranking.
 from __future__ import annotations
 
 import os
+from collections.abc import Callable
 
 from PIL import Image, ImageOps
 from rapidfuzz import fuzz, process
@@ -50,17 +51,37 @@ def full_image_path() -> str:
 # ---------------------------------------------------------------------------
 # OCR
 # ---------------------------------------------------------------------------
-def extract_text_from_image(full_img: Image.Image, region: tuple[int, int, int, int]) -> str:
-    """Recorta a região do mapa (em memória), pré-processa e roda o OCR."""
+def preprocess_for_ocr(img: Image.Image) -> Image.Image:
+    """Pré-processo padrão do OCR: escala de cinza + autocontraste + upscale 2x.
+
+    É o pré-processo com que TODOS os limiares de confiança foram calibrados (do
+    mapa e do nome do herói). Exposto como função para que um chamador possa
+    passar uma alternativa a `extract_text_from_image` sem duplicar o recorte nem
+    a chamada ao backend — ver `infra/player_hero`, que tenta um segundo
+    pré-processo quando este não devolve um nome legível.
+    """
+    img = img.convert("L")
+    img = ImageOps.autocontrast(img)
+    w, h = img.size
+    return img.resize((max(1, w * 2), max(1, h * 2)), Image.Resampling.LANCZOS)
+
+
+def extract_text_from_image(
+    full_img: Image.Image,
+    region: tuple[int, int, int, int],
+    preprocess: Callable[[Image.Image], Image.Image] | None = None,
+    psm: int = ocr_backends.DEFAULT_PSM,
+) -> str:
+    """Recorta a região (em memória), pré-processa e roda o OCR.
+
+    `preprocess`/`psm` permitem trocar o pré-processo e o modo de segmentação sem
+    duplicar recorte/backend; os defaults reproduzem exatamente o comportamento
+    calibrado (preprocess_for_ocr + DEFAULT_PSM).
+    """
     try:
-        img = full_img.crop(region)
-        # Pré-processamento: escala de cinza + autocontraste + upscale.
-        img = img.convert("L")
-        img = ImageOps.autocontrast(img)
-        w, h = img.size
-        img = img.resize((max(1, w * 2), max(1, h * 2)), Image.Resampling.LANCZOS)
+        img = (preprocess or preprocess_for_ocr)(full_img.crop(region))
         # OCR via backend selecionado (Tesseract padrão; ver infra/ocr_backends).
-        return ocr_backends.run_ocr(img)
+        return ocr_backends.run_ocr(img, psm=psm)
     except Exception as e:  # noqa: BLE001
         # Degradação segura: sem OCR o mapa vira UNKNOWN e o MetaStrength fica
         # neutro — o ranking continua funcionando.

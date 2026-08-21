@@ -1,27 +1,26 @@
 """Testes da detecção automática do herói/role do jogador (v1.2.10).
 
 Cobre o módulo infra/player_hero (OCR do nome + fuzzy match + role) sobre as
-capturas reais em tests/fixtures/<res>/ (full1.png em 720p/1080p, full.png em
-2K), o fallback quando não há herói legível, o escalonamento da região por
-resolução e a integração no pipeline (role detectada tem prioridade sobre a role
-manual, com fallback ao Roles.txt).
+capturas reais em tests/fixtures/<res>/full1.png, o fallback quando não há herói
+legível, o escalonamento da região por resolução e a integração no pipeline
+(role detectada tem prioridade sobre a role manual, com fallback ao Roles.txt).
 """
 
 from pathlib import Path
 
 import pytest
-from PIL import Image
+from PIL import Image, ImageDraw
 
 from owpick import pipeline
 from owpick.core.heroes import get_all_heroes, normalize_hero_name
-from owpick.infra import capture, player_hero, storage
+from owpick.infra import capture, ocr_backends, player_hero, storage
 
 FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
 
 # Nome do arquivo da fixture por resolução (v1.2.11: 720p/full.png -> full1.png;
-# v1.2.12: 1080p/full.png -> full1.png).
-FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full.png"}
+# v1.2.12: 1080p/full.png -> full1.png; v1.2.15: 2k/full.png -> full1.png).
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full1.png"}
 
 # Herói que o JOGADOR está usando em cada captura (retrato/nome grande na
 # scoreboard) — distinto do gabarito de lineup em expected.json.
@@ -155,6 +154,93 @@ def test_detecta_dva_nas_fixtures_da_mesma_partida(res, fixture_file):
     assert hero is not None, f"[{res}/{fixture_file}] herói do jogador não identificado"
     assert hero.key == normalize_hero_name("D.Va")
     assert hero.role == "TANK"
+
+
+# ---------------------------------------------------------------------------
+# Regressão v1.2.15: nome CURTO ilegível para o pré-processo padrão (Mei)
+# ---------------------------------------------------------------------------
+# Terceiro modo de falha da mesma família — e o primeiro que NÃO é do fuzzy match.
+# Em 2k/full2.jpg (jogador de Mei) o pré-processo padrão (autocontraste GLOBAL do
+# recorte) devolve "" — string vazia, nenhum caractere. Não é o badge estragando o
+# score: o Tesseract simplesmente não acha texto. Medido antes da correção, o
+# recorte lia "" com todos os psm de linha (3/6/7/11/12), com e sem dicionário
+# (load_system_dawg=0), com e sem whitelist de caracteres e nos dois engines
+# (--oem 1 e 3). A causa é a binarização: o recorte é quase todo preto (88% dos
+# pixels ficam abaixo de 38 depois do autocontraste) porque o autocontraste global
+# é puxado pelo ponto mais brilhante — o badge de role — e as hastes finas do nome
+# em itálico continuam cinza.
+#
+# A falha era SILENCIOSA e reproduzia o mesmo sintoma das v1.2.12/v1.2.13: sem
+# herói identificado, o pipeline usava a role manual (Roles.txt) e o ranking saía
+# na role errada — com o Roles.txt em SUP, opções de Suporte para quem estava de
+# Mei (DPS). A correção é um segundo pré-processo (contraste LOCAL via CLAHE +
+# Otsu), tentado só quando o padrão não devolve nome — ver player_hero._OCR_RECIPES.
+
+
+def test_mei_detectada_na_fixture_2k():
+    """detect() ponta a ponta na captura que motivou a correção."""
+    with Image.open(FIXTURES_DIR / "2k" / "full2.jpg") as img:
+        img.load()
+    hero = player_hero.detect(img.convert("RGB"))
+    assert hero is not None, "herói do jogador não identificado em 2k/full2.jpg"
+    assert hero.key == normalize_hero_name("Mei")
+    assert hero.role == "DPS"
+
+
+def test_preprocesso_padrao_sozinho_nao_le_o_nome_da_fixture_2k():
+    """Documenta a causa-raiz: com APENAS o recipe padrão o nome sai vazio.
+
+    Se um dia o pré-processo padrão passar a ler esse recorte, este teste falha e
+    o recipe alternativo pode ser reavaliado — é o gatilho para revisitar, não um
+    comportamento desejado.
+    """
+    from owpick.infra import map_detect
+
+    with Image.open(FIXTURES_DIR / "2k" / "full2.jpg") as img:
+        img.load()
+    full = img.convert("RGB")
+    texto = map_detect.extract_text_from_image(full, player_hero.name_region(*full.size))
+    assert player_hero.identify_hero(texto)[1] < player_hero.MIN_CONFIDENCE
+
+
+def test_contraste_local_le_o_nome_curto():
+    """O recipe alternativo lê "MEI" no recorte em que o padrão falha."""
+    with Image.open(FIXTURES_DIR / "2k" / "full2.jpg") as img:
+        img.load()
+    full = img.convert("RGB")
+    nome, score = player_hero.read_hero_name(full)
+    assert nome == "Mei"
+    assert score >= player_hero.MIN_CONFIDENCE_FALLBACK
+
+
+def test_recipes_comecam_pelo_preprocesso_calibrado():
+    """O primeiro recipe é o de sempre (mesmo pré-processo e mesmo limiar).
+
+    Garante que a cascata é ADITIVA: nenhuma captura que já era lida corretamente
+    passa a depender de um pré-processo alternativo, e o custo no caminho feliz
+    continua sendo uma única chamada ao OCR.
+    """
+    recipe, preprocess, psm, threshold = player_hero._OCR_RECIPES[0]
+    assert preprocess is None  # None => map_detect.preprocess_for_ocr
+    assert psm == ocr_backends.DEFAULT_PSM
+    assert threshold == player_hero.MIN_CONFIDENCE
+    assert recipe == "padrao"
+    # Os alternativos são mais exigentes: só sobrescrevem a role manual com uma
+    # leitura limpa (ver MIN_CONFIDENCE_FALLBACK).
+    assert all(r[3] == player_hero.MIN_CONFIDENCE_FALLBACK for r in player_hero._OCR_RECIPES[1:])
+
+
+def test_contraste_local_produz_texto_preto_sobre_branco():
+    """A binarização entrega o formato em que o Tesseract foi treinado."""
+    ruidoso = Image.new("RGB", (60, 20), (10, 10, 12))
+    ImageDraw.Draw(ruidoso).rectangle((10, 5, 30, 14), fill=(230, 230, 235))
+    binario = player_hero._local_contrast_binary(ruidoso)
+
+    cores = {tom for tom, qtd in enumerate(binario.convert("L").histogram()) if qtd}
+    assert cores <= {0, 255}, f"binarização deixou tons intermediários: {sorted(cores)[:5]}"
+    # Fundo branco (a margem/quiet zone) e traço preto: maioria branca.
+    assert binario.convert("L").getpixel((0, 0)) == 255
+    assert 0 in cores
 
 
 def test_pontuacao_nao_penaliza_nenhum_nome_canonico():

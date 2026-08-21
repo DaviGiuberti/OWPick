@@ -4,6 +4,84 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.15] — 2026-08-21
+
+### Correção: jogando de Mei, o ranking saía de Suporte
+
+Terceiro (e mais silencioso) modo de falha da detecção automática da role — a
+mesma família dos bugs corrigidos nas v1.2.12/v1.2.13, mas com uma causa
+diferente: desta vez o problema **não estava no fuzzy match**, e sim na
+**binarização** que o Tesseract faz internamente.
+
+- **Sintoma**: com o jogador de **Mei** (DPS), o ranking vinha com opções de
+  **Suporte**. Sem erro, sem aviso — `player_hero.detect` devolvia `None`, o
+  pipeline caía para a role manual do `Roles.txt` e usava aquela role.
+- **Causa-raiz** (fixture nova `tests/fixtures/2k/full2.jpg`): o recorte do nome
+  é lido pelo OCR como **string vazia**. Medido, o mesmo recorte devolve `""` com
+  todos os `psm` de linha (3/6/7/11/12), com e sem dicionário
+  (`load_system_dawg=0`), com e sem whitelist de caracteres e nos **dois** engines
+  (`--oem 1` e `3`) — ou seja, não é o `token_set_ratio` nem o limiar. O fundo
+  dessa tela é quase preto (**88%** dos pixels ficam abaixo de 38 depois do
+  autocontraste) e o **autocontraste global** é puxado pelo ponto mais claro do
+  recorte, o badge de role; as hastes finas do nome em itálico continuam **cinza**
+  e o Tesseract não acha texto nenhum. Nomes **curtos** ("MEI") são o pior caso:
+  sobra pouco traço para o OCR se agarrar.
+- **Correção — cascata de leituras** (`player_hero._OCR_RECIPES`): cada tentativa
+  é um trio `(pré-processo, psm, limiar)` e a execução **para na primeira** que
+  devolve um nome acima do seu limiar.
+
+  | # | Pré-processo | `psm` | Limiar |
+  |---|---|---|---|
+  | 1 | `map_detect.preprocess_for_ocr` (autocontraste global + 2×) | 7 (linha) | `MIN_CONFIDENCE` = 60 |
+  | 2 | `_local_contrast_binary` (CLAHE + Otsu + margem branca, 3×) | 7 (linha) | `MIN_CONFIDENCE_FALLBACK` = 80 |
+  | 3 | `_local_contrast_binary` | 11 (esparso) | `MIN_CONFIDENCE_FALLBACK` = 80 |
+
+  A tentativa 1 é **exatamente** a leitura calibrada de sempre, com o mesmo
+  limiar: a mudança é **aditiva**, nenhuma captura que já funcionava passa a
+  depender de um pré-processo alternativo e o caminho feliz continua custando
+  **uma** chamada ao Tesseract (as 8 fixtures anteriores param na tentativa 1).
+- **`_local_contrast_binary`**: o **CLAHE** equaliza o contraste por *ladrilho*
+  (o brilho do badge deixa de afetar a vizinhança do nome), o **Otsu** corta pelo
+  histograma já equalizado e a inversão entrega **texto preto sobre fundo
+  branco** — o formato em que o Tesseract foi treinado. O upscale entra **antes**
+  da binarização, e uma margem branca de 25 px dá a *quiet zone* que o Tesseract
+  espera. Com isso o mesmo recorte lê `"MEI"` e marca **100**.
+- **Por que o limiar dos alternativos é mais alto (80)**: se o pré-processo
+  calibrado não achou nome nenhum, a leitura é difícil — e sobrescrever a role
+  manual com um palpite marginal é pior do que cair no fallback. Nas 9 fixtures,
+  quando um recipe alternativo lê o nome **certo** ele marca 91–100 (Mei 100,
+  D.Va 100, Hanzo 100, Mizuki 91); quando **erra**, marca no máximo 55 (Sombra
+  50, Symmetra 53, Bastion 46). 80 fica no meio de uma faixa vazia larga.
+
+#### Costura reaproveitada, não duplicada
+
+- **`map_detect.preprocess_for_ocr`**: o pré-processo padrão (grayscale →
+  autocontraste → upscale 2× LANCZOS) virou função nomeada, e
+  `extract_text_from_image` ganhou os parâmetros opcionais `preprocess` e `psm`.
+  Assim o `player_hero` troca de pré-processo **sem** reimplementar o recorte nem
+  a chamada ao backend. Os defaults reproduzem o comportamento anterior byte a
+  byte, e a detecção do **mapa** continua usando só eles.
+- **`ocr_backends.run_ocr(img, psm=DEFAULT_PSM)`**: `DEFAULT_PSM = 7` (uma linha)
+  segue sendo o padrão; `SPARSE_PSM = 11` é usado pela última tentativa. O
+  parâmetro é **ignorado** no backend do Windows, que faz o próprio layout
+  analysis e não expõe equivalente.
+
+#### Fixtures e testes
+
+- **Nova fixture `tests/fixtures/2k/full2.jpg`** (Paraíso, **sem bans**) com
+  gabarito `expected2.json`. O lineup completo, os 5 slots de ban vazios e o nome
+  do mapa (`Paraíso`, com acento) são conferidos pelos golden tests.
+- **`2k/full.png` → `2k/full1.png`**, alinhando 2K à convenção que 720p e 1080p
+  já seguiam. As referências em `test_matching_golden.py`, `test_player_hero.py`
+  e `test_pipeline.py` acompanham.
+- Testes de regressão em `tests/test_player_hero.py`: detecção ponta a ponta de
+  Mei; um teste que **documenta a causa-raiz** (só com o recipe padrão o nome sai
+  ilegível — se um dia passar a ler, o teste falha e avisa que o alternativo pode
+  ser reavaliado); um que garante que o primeiro recipe continua sendo o
+  calibrado; e um sobre a saída binária de `_local_contrast_binary`.
+
+---
+
 ## [v1.2.14] — 2026-08-12
 
 ### Nova Tank: D.Mon

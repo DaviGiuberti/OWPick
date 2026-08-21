@@ -1,9 +1,10 @@
 """Golden tests do matching — o coração do produto.
 
 Roda o pipeline REAL em memória (capture.capture -> matching -> map_detect.detect)
-sobre capturas reais em tests/fixtures/<res>/ (full1.png em 720p e 1080p,
-full.png em 2K; mais as fixtures adicionais full2/full3.png de 720p da v1.2.11 e
-os JPEGs full4.jpeg/full2.jpeg da v1.2.12), sem capturar a tela: o `mss` é
+sobre capturas reais em tests/fixtures/<res>/ (full1.png nas três resoluções;
+mais as fixtures adicionais full2/full3.png de 720p da v1.2.11, os JPEGs
+full4.jpeg/full2.jpeg da v1.2.12 e o full2.jpg de 2K da v1.2.15), sem capturar a
+tela: o `mss` é
 substituído por um fake que devolve a imagem da fixture. Cada fixture tem um
 gabarito expected*.json (lineup, bans, mapa); a comparação usa nomes
 normalizados (core.heroes.normalize_hero_name).
@@ -27,10 +28,10 @@ FIXTURES_DIR = Path(__file__).resolve().parent / "fixtures"
 RESOLUTIONS = ["720p", "1080p", "2k"]
 
 # Nome do arquivo da fixture por resolução: na v1.2.11 o full.png de 720p foi
-# renomeado para full1.png (e ganhou os companheiros full2/full3.png) e na
-# v1.2.12 o mesmo aconteceu com o de 1080p (que ganhou o full2.jpeg); 2k
-# continua com full.png.
-FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full.png"}
+# renomeado para full1.png (e ganhou os companheiros full2/full3.png), na
+# v1.2.12 o mesmo aconteceu com o de 1080p (que ganhou o full2.jpeg) e na
+# v1.2.15 com o de 2K (que ganhou o full2.jpg).
+FIXTURE_FILE = {"720p": "full1.png", "1080p": "full1.png", "2k": "full1.png"}
 
 
 class _FakeGrab:
@@ -193,6 +194,44 @@ def test_golden_bans_720p_extra(fixture_file, expected_file, tmp_path, monkeypat
     bans = matching.match_bans(cap)
     assert _norm(bans.names()) == _norm(expected["bans"]), (
         f"[{fixture_file}] bans divergem: {bans.names()}"
+    )
+
+
+# ---------------------------------------------------------------------------
+# Fixture 2K adicional (v1.2.15): full2.jpg
+# ---------------------------------------------------------------------------
+# Scoreboard de uma partida em Paraíso SEM bans (o gabarito guarda uma lista de
+# bans vazia — os 5 slots são corretamente rejeitados). É a captura que expôs a
+# falha do OCR do nome do jogador com nomes curtos: ver tests/test_player_hero.py.
+
+
+def test_golden_lineup_2k_extra(tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("2k", tmp_path, monkeypatch, "full2.jpg", "expected2.json")
+    lineup, slot_results = matching.match_lineup(cap)
+
+    assert len(slot_results) == 10  # 5 aliados + 5 inimigos (sem Roles.txt)
+    assert _norm(lineup.ally_names()) == _norm(expected["allies"]), (
+        f"[2k/full2.jpg] aliados divergem: {lineup.ally_names()}"
+    )
+    assert _norm(lineup.enemy_names()) == _norm(expected["enemies"]), (
+        f"[2k/full2.jpg] inimigos divergem: {lineup.enemy_names()}"
+    )
+
+
+def test_golden_bans_2k_extra(tmp_path, monkeypatch):
+    """Partida sem bans: nenhum dos 5 slots pode virar um ban fantasma."""
+    cap, expected = _capture_fixture("2k", tmp_path, monkeypatch, "full2.jpg", "expected2.json")
+    bans = matching.match_bans(cap)
+    assert _norm(bans.names()) == _norm(expected["bans"]), (
+        f"[2k/full2.jpg] bans divergem: {bans.names()}"
+    )
+
+
+def test_golden_mapa_2k_extra(tmp_path, monkeypatch):
+    cap, expected = _capture_fixture("2k", tmp_path, monkeypatch, "full2.jpg", "expected2.json")
+    detection = map_detect.detect(cap.full)
+    assert normalize_hero_name(detection.name) == normalize_hero_name(expected["map"]), (
+        f"[2k/full2.jpg] mapa diverge: '{detection.name}'"
     )
 
 

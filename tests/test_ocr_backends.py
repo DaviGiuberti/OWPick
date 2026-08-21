@@ -27,8 +27,23 @@ def test_run_ocr_despacha_para_backend_selecionado(monkeypatch):
     monkeypatch.setenv(ocr_backends.ENV_BACKEND, "windows")
     monkeypatch.setattr(ocr_backends, "windows_ocr_available", lambda: True)
     monkeypatch.setattr(ocr_backends, "windows_ocr", lambda img: "WINDOWS")
-    monkeypatch.setattr(ocr_backends, "tesseract_ocr", lambda img: "TESS")
+    monkeypatch.setattr(ocr_backends, "tesseract_ocr", lambda img, psm=None: "TESS")
     assert ocr_backends.run_ocr(object()) == "WINDOWS"  # type: ignore[arg-type]
+
+
+def test_psm_chega_ao_tesseract_e_nao_ao_windows(monkeypatch):
+    """`psm` é repassado ao Tesseract; o backend do Windows não tem equivalente."""
+    vistos = []
+    monkeypatch.setattr(ocr_backends, "tesseract_ocr", lambda img, psm: vistos.append(psm) or "")
+    monkeypatch.setenv(ocr_backends.ENV_BACKEND, "tesseract")
+    ocr_backends.run_ocr(object())  # type: ignore[arg-type]
+    ocr_backends.run_ocr(object(), psm=ocr_backends.SPARSE_PSM)  # type: ignore[arg-type]
+    assert vistos == [ocr_backends.DEFAULT_PSM, ocr_backends.SPARSE_PSM]
+
+    monkeypatch.setenv(ocr_backends.ENV_BACKEND, "windows")
+    monkeypatch.setattr(ocr_backends, "windows_ocr_available", lambda: True)
+    monkeypatch.setattr(ocr_backends, "windows_ocr", lambda img: "WINDOWS")
+    assert ocr_backends.run_ocr(object(), psm=ocr_backends.SPARSE_PSM) == "WINDOWS"  # type: ignore[arg-type]
 
 
 @pytest.mark.skipif(

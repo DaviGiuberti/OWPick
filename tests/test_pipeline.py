@@ -50,7 +50,7 @@ def test_analyze_paralelo_reune_lineup_bans_mapa(tmp_path, monkeypatch):
     monkeypatch.setenv("APPDATA", str(tmp_path))
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
     monkeypatch.chdir(tmp_path)
-    with Image.open(FIXTURES_DIR / "2k" / "full.png") as img:
+    with Image.open(FIXTURES_DIR / "2k" / "full1.png") as img:
         img.load()
     monkeypatch.setattr(capture, "mss", _FakeMss(img))
     expected = json.loads((FIXTURES_DIR / "2k" / "expected.json").read_text(encoding="utf-8"))

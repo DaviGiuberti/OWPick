@@ -1,0 +1,7 @@
+{
+    "allies": ["Doomfist", "Mei", "Genji", "Mizuki", "Jetpack Cat"],
+    "enemies": ["Junker Queen", "Freja", "Emre", "Wuyang", "Kiriko"],
+    "bans": [],
+    "map": "Paraíso",
+    "player_hero": "Mei"
+}

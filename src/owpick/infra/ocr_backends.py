@@ -45,6 +45,13 @@ _TESSDATA_DIR = resource_path(os.path.join("assets", "ocr", "tessdata"))
 ENV_BACKEND = "OWPICK_OCR_BACKEND"
 DEFAULT_BACKEND = "tesseract"
 
+# Modo de segmentacao de pagina do Tesseract (--psm) usado por padrao: 7 = trata
+# a imagem como UMA linha de texto, que e o formato dos dois recortes do OWPick
+# (nome do mapa e nome do heroi). Os chamadores podem pedir outro modo — o
+# player_hero recorre ao 11 (texto esparso) quando a leitura padrao falha.
+DEFAULT_PSM = 7
+SPARSE_PSM = 11
+
 
 # ---------------------------------------------------------------------------
 # Backend: Tesseract (padrão, validado)
@@ -62,11 +69,15 @@ def _configure_tesseract() -> bool:
     return True
 
 
-def tesseract_ocr(img: Image.Image) -> str:
-    """OCR via Tesseract embutido (psm 7, linha única). '' em caso de falha."""
+def tesseract_ocr(img: Image.Image, psm: int = DEFAULT_PSM) -> str:
+    """OCR via Tesseract embutido. '' em caso de falha.
+
+    `psm` = modo de segmentação de página (--psm); DEFAULT_PSM (7, linha única) é
+    o padrão dos dois recortes do OWPick.
+    """
     if not _configure_tesseract() or pytesseract is None:
         return ""
-    return pytesseract.image_to_string(img, lang="eng", config="--oem 3 --psm 7").strip()
+    return pytesseract.image_to_string(img, lang="eng", config=f"--oem 3 --psm {psm}").strip()
 
 
 # ---------------------------------------------------------------------------
@@ -142,9 +153,14 @@ def selected_backend() -> str:
     return choice if choice in ("tesseract", "windows") else "tesseract"
 
 
-def run_ocr(img: Image.Image) -> str:
-    """Roda o OCR no backend selecionado. '' em caso de falha (→ UNKNOWN)."""
+def run_ocr(img: Image.Image, psm: int = DEFAULT_PSM) -> str:
+    """Roda o OCR no backend selecionado. '' em caso de falha (→ UNKNOWN).
+
+    `psm` só tem efeito no Tesseract: o Windows.Media.Ocr não expõe um controle
+    equivalente de segmentação de página (faz o próprio layout analysis), então
+    o parâmetro é ignorado nesse backend.
+    """
     backend = selected_backend()
     if backend == "windows":
         return windows_ocr(img)
-    return tesseract_ocr(img)
+    return tesseract_ocr(img, psm=psm)

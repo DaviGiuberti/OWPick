@@ -797,10 +797,17 @@ o MAE; melhor MAE acima do limiar = slot **vazio**. Validação em captura real 
    (MetaStrength neutro, ranking continua)
 
 `executar()` é o fluxo CLI (lê `cache/print/full.png`, grava `current_map.txt`).
-`extract_text_from_image(full_img, region)` é **genérico** (recorta a região, faz
-grayscale → autocontraste → upscale 2× → OCR) e é **reutilizado** pelo
-`player_hero` para ler o nome do herói do jogador — mesmo pré-processamento, sem
-duplicação.
+
+`extract_text_from_image(full_img, region, preprocess=None, psm=DEFAULT_PSM)` é
+**genérico** (recorta a região → pré-processa → OCR) e é **reutilizado** pelo
+`player_hero` para ler o nome do herói do jogador — mesmo recorte e mesmo
+backend, sem duplicação. O pré-processo padrão é `preprocess_for_ocr` (grayscale
+→ autocontraste → upscale 2× LANCZOS), a função com que **todos** os limiares de
+confiança foram calibrados; os dois parâmetros opcionais existem para que um
+chamador possa **tentar outro pré-processo/psm** sem reimplementar o recorte (o
+`player_hero` usa isso na v1.2.15 — ver a cascata de leituras abaixo). Os
+defaults reproduzem o comportamento anterior byte a byte, e a detecção do **mapa**
+continua usando só eles.
 
 #### `infra/player_hero.py`
 
@@ -812,16 +819,54 @@ no lugar da manual.
    em `data/layouts/ow_hero_select.json → player_hero.name_region`, base 720p),
    escalada por `resolution.scale_and_clamp` — **mesmo mecanismo** dos demais
    recortes, compatível com 720p/1080p/2K/4K sem lógica por resolução
-2. OCR do recorte via `map_detect.extract_text_from_image` (reuso do pré-processo
-   e do backend de OCR)
+2. `read_hero_name`: OCR do recorte via `map_detect.extract_text_from_image`
+   (reuso do recorte e do backend de OCR), percorrendo a cascata `_OCR_RECIPES`
+   descrita abaixo
 3. `identify_hero`: **uma** chamada a `rapidfuzz.process.extractOne` com
    `fuzz.token_set_ratio` contra `heroes.get_all_heroes()`, com um processor
    (`_strip_upper`) que deixa o match tolerante a caixa/acentos **e a pontuação**
    preservando os espaços (o ruído do OCR ao lado do nome — ex.: o badge de role —
    vira token separado e não contamina o nome). Devolve o nome **canônico**
-4. `MIN_CONFIDENCE = 60.0` (score do fuzzy): abaixo disso → `None` (o pipeline usa
-   a role manual como **fallback**). A role sai de `Hero.from_name(nome).role`
-   (`HEROES_ROLES`)
+4. `MIN_CONFIDENCE = 60.0` (score do fuzzy): nenhuma tentativa acima do seu limiar
+   → `None` (o pipeline usa a role manual como **fallback**). A role sai de
+   `Hero.from_name(nome).role` (`HEROES_ROLES`)
+
+**A cascata de leituras (`_OCR_RECIPES`, v1.2.15)**: cada tentativa é um trio
+`(pré-processo, psm, limiar)` e a execução **para na primeira** que devolve um
+nome acima do seu limiar — no caminho feliz o custo continua sendo **uma** chamada
+ao Tesseract.
+
+| # | Pré-processo | `psm` | Limiar |
+|---|---|---|---|
+| 1 | `map_detect.preprocess_for_ocr` (autocontraste global + 2×) | 7 (linha) | `MIN_CONFIDENCE` = 60 |
+| 2 | `_local_contrast_binary` (CLAHE + Otsu + margem branca, 3×) | 7 (linha) | `MIN_CONFIDENCE_FALLBACK` = 80 |
+| 3 | `_local_contrast_binary` | 11 (esparso) | `MIN_CONFIDENCE_FALLBACK` = 80 |
+
+A tentativa 1 é **exatamente** a leitura de sempre, com o mesmo limiar: a cascata
+é aditiva, nenhuma captura que já funcionava passa a depender de um pré-processo
+alternativo. As tentativas 2 e 3 existem por causa da fixture `2k/full2.jpg`
+(jogador de **Mei**), em que o pré-processo padrão devolve **string vazia** — ver
+[Pontos que podem confundir](#pontos-que-podem-confundir).
+
+**Por que o limiar dos alternativos é mais alto (80)**: se o pré-processo
+calibrado não achou nome nenhum, a leitura é difícil, e **sobrescrever a role
+manual com um palpite marginal é pior do que cair no fallback**. Nas 9 fixtures,
+quando um recipe alternativo lê o nome **certo** ele marca 91–100 (Mei 100, D.Va
+100, Hanzo 100, Mizuki 91); quando **erra**, marca no máximo 55 (Sombra 50,
+Symmetra 53, Bastion 46). 80 fica no meio de uma faixa vazia larga.
+
+**O que `_local_contrast_binary` faz, e por quê**: o pré-processo padrão estica o
+contraste do recorte **inteiro de uma vez**. Quando o recorte é quase todo preto e
+tem um único ponto muito claro — o badge de role, que em algumas telas é o pixel
+mais brilhante — o autocontraste global é dominado por esse ponto e as hastes
+finas do nome em itálico continuam **cinza**; o Tesseract binariza esse cinza
+contra o fundo e não acha texto nenhum. O CLAHE equaliza o contraste **por
+ladrilho** (o brilho do badge deixa de afetar a vizinhança do nome), o Otsu corta
+pelo histograma já equalizado, e a inversão entrega **texto preto sobre fundo
+branco**, o formato em que o Tesseract foi treinado. O upscale entra **antes** da
+binarização (interpolar tons dá bordas mais suaves do que ampliar pixels já
+binários) e a margem branca de 25 px é a *quiet zone* que o Tesseract espera ao
+redor do texto.
 
 **O que `_strip_upper` descarta, e por quê**: a região do nome inclui o **badge de
 role**, que o OCR sempre transforma em algum lixo. Duas limpezas, cada uma
@@ -849,7 +894,7 @@ do retrato **grande** da scoreboard tem enquadramento/zoom diferentes do busto
 pequeno (84×80) do banco do lineup, então o template matching é **não confiável**
 para esse recorte (em capturas reais o herói correto some no meio do ranking de
 similaridade). O nome em texto é lido de forma robusta pelo OCR já existente
-(validado nas fixtures 720p/1080p/2K).
+(validado nas **9** fixtures de 720p/1080p/2K).
 
 #### `infra/ocr_backends.py`
 
@@ -857,6 +902,12 @@ Backends de OCR plugáveis, selecionados pela env `OWPICK_OCR_BACKEND`:
 `tesseract` (default — `assets/ocr/tesseract.exe` + `tessdata/`, embutidos) e
 `windows` (`Windows.Media.Ocr` via `winsdk`, **experimental**, grupo opcional
 `ocr-win`; fallback automático para o Tesseract se indisponível).
+
+`run_ocr(img, psm=DEFAULT_PSM)` aceita o **modo de segmentação de página** do
+Tesseract: `DEFAULT_PSM = 7` (uma linha de texto) é o formato dos dois recortes do
+OWPick e continua sendo o padrão; `SPARSE_PSM = 11` (texto esparso) é usado pela
+última tentativa de leitura do nome do herói. O parâmetro é **ignorado** no
+backend do Windows, que faz o próprio layout analysis e não expõe equivalente.
 
 #### `infra/perf.py`
 
@@ -1362,9 +1413,9 @@ um observador passivo, indistinguível de um software de captura de tela comum.
    também. Trocar por `csv` da stdlib mudaria assinaturas do `core` e as fixtures
    dos testes, então **não** é um ajuste pontual: fica registrado como
    oportunidade, a ser feita só com a suíte golden como rede de segurança.
-5. **O badge de role e o OCR do nome do jogador** (bugs corrigidos nas v1.2.12 e
-   v1.2.13): a região do nome inclui o **badge de role**, e ele estraga o OCR de
-   **duas** formas — que exigiram correções diferentes:
+5. **O badge de role e o OCR do nome do jogador** (bugs corrigidos nas v1.2.12,
+   v1.2.13 e v1.2.15): a região do nome inclui o **badge de role**, e ele estraga o
+   OCR de **três** formas — que exigiram correções diferentes:
    - **Colado ao nome** (720p, `full4.jpeg`): o OCR devolve `"DVS"` por "D.Va".
      Contra o nome canônico **com** o ponto o score caía a 57.1 → a v1.2.12 passou
      a descartar a **pontuação** dos dois lados.
@@ -1373,16 +1424,35 @@ um observador passivo, indistinguível de um software de captura de tela comum.
      frase e derrubava o score a 50.0 → a v1.2.13 passou a descartar **tokens sem
      alfanumérico**. (O erro de caractere sozinho não seria fatal: `"OVA"` vs
      `"DVA"` dá 66.7.)
+   - **Como o pixel mais brilhante do recorte** (2K, `full2.jpg`, jogador de
+     **Mei**): aqui o OCR não devolve nada — **string vazia**, nenhum caractere.
+     Não é o fuzzy match: medido, o mesmo recorte lê `""` com todos os `psm` de
+     linha (3/6/7/11/12), com e sem dicionário (`load_system_dawg=0`), com e sem
+     whitelist de caracteres e nos **dois** engines (`--oem 1` e `3`). A causa é a
+     **binarização**: o fundo dessa tela é quase preto (88% dos pixels ficam abaixo
+     de 38 depois do autocontraste), o autocontraste **global** é puxado pelo badge
+     — o ponto mais claro do recorte — e as hastes finas do nome em itálico
+     continuam cinza. → a v1.2.15 acrescentou um **segundo pré-processo** (contraste
+     **local**, CLAHE + Otsu), tentado só quando o padrão não devolve nome; com ele
+     o mesmo recorte lê `"MEI"` e marca **100**. Ver a cascata `_OCR_RECIPES` em
+     [`infra/player_hero.py`](#infraplayer_heropy).
 
-   Nos dois casos a falha era **silenciosa**: o herói ficava abaixo de
+   Nos três casos a falha era **silenciosa**: o herói ficava abaixo de
    `MIN_CONFIDENCE = 60`, o pipeline usava a role manual (`Roles.txt`) e o ranking
-   saía para a role errada sem nenhum erro visível. Nenhuma das correções é caso
-   especial da D.Va — as duas valem para qualquer nome. Se um bug parecido
-   reaparecer, olhe primeiro o **texto cru do OCR** no log de `--debug`
-   (`player_hero.detect` loga o texto lido, o melhor candidato e o score) antes de
+   saía para a role errada sem nenhum erro visível — com o `Roles.txt` em SUP, era
+   exatamente o sintoma relatado de "jogando de Mei, aparecem opções de Suporte".
+   Nenhuma das correções é caso especial de um herói — as três valem para qualquer
+   nome, e a última ajuda **todo** recorte escuro. Se um bug parecido reaparecer,
+   olhe primeiro o **texto cru do OCR** no log de `--debug` (`read_hero_name` loga,
+   **por tentativa**, o texto lido, o melhor candidato e o score) antes de
    suspeitar da região ou do formato da imagem: as **três** fixtures da mesma
    partida (720p JPEG, 1080p JPEG, 1080p PNG) leem o mesmo conteúdo e erram de
    formas diferentes, então nem a resolução nem o formato explicam sozinhos.
+
+   **Nomes curtos são o pior caso** dos três modos de falha, e por um motivo
+   estrutural: cada caractere ilegível vale muito mais no ratio quando o nome tem
+   3–4 letras. É por isso que D.Va e Mei — e não `Wrecking Ball` — foram os heróis
+   que expuseram cada bug.
 
    **Nota de calibração**: os reads degradados ficam em **66.7**, e lixo curto de
    OCR (`"HAND"`, `"VAS"`) também alcança 66.7. Ou seja, `MIN_CONFIDENCE` **não**
