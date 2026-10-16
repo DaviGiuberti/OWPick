@@ -37,7 +37,7 @@ class TestNormalizeHeroName:
     def test_all_heroes_have_unique_keys(self):
         all_heroes = heroes.get_all_heroes()
         keys = {normalize_hero_name(h) for h in all_heroes}
-        assert len(keys) == len(all_heroes) == 53
+        assert len(keys) == len(all_heroes) == 54
 
 
 # ---------------------------------------------------------------------------
@@ -154,18 +154,18 @@ class TestGetScaledMapRegion:
 
 class TestCanonicalData:
     def test_hero_counts(self):
-        assert len(heroes.HEROES_ROLES["DPS"]) == 24
+        assert len(heroes.HEROES_ROLES["DPS"]) == 23  # -Sombra (v1.2.16, virou SUP)
         assert len(heroes.HEROES_ROLES["TANK"]) == 15  # +D.Mon (v1.2.14)
-        assert len(heroes.HEROES_ROLES["SUP"]) == 14
+        assert len(heroes.HEROES_ROLES["SUP"]) == 16  # +Doctrine, +Sombra (v1.2.16)
 
     def test_map_count(self):
-        assert len(heroes.MAPS_DATA) == 29
+        assert len(heroes.MAPS_DATA) == 30  # +Watchpoint: Grímsvötn (v1.2.16)
 
     def test_neutral_pickrates(self):
         pr = heroes.get_role_neutral_pickrates()
-        assert pr["DPS"] == pytest.approx(2 / 24)
+        assert pr["DPS"] == pytest.approx(2 / 23)
         assert pr["TANK"] == pytest.approx(1 / 15)
-        assert pr["SUP"] == pytest.approx(2 / 14)
+        assert pr["SUP"] == pytest.approx(2 / 16)
 
 
 # ---------------------------------------------------------------------------

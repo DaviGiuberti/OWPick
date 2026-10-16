@@ -7,7 +7,7 @@ Verifica, com AVISOS CLAROS do que está faltando/errado:
     linhas/colunas órfãs e heróis ausentes. As colunas são conferidas contra o
     CABEÇALHO do CSV, não contra os valores presentes: um herói ainda SEM dados
     (linha/coluna vazias) continua sendo uma coluna válida;
-  - stats_inputs.csv: cobre os 29 mapas e as roles esperadas (DPS/TANK/SUP);
+  - stats_inputs.csv: cobre os 30 mapas e as roles esperadas (DPS/TANK/SUP);
   - templates: todo herói tem retrato no lineup (720p E 2k, na role certa) e um
     ícone de ban em assets/heroes/bans/.
 
@@ -74,7 +74,7 @@ def validate_matrix(
 
 
 def validate_stats(map_names: list[str] | None = None) -> list[str]:
-    """Valida que stats_inputs.csv cobre os 29 mapas e as roles esperadas."""
+    """Valida que stats_inputs.csv cobre os 30 mapas e as roles esperadas."""
     problems: list[str] = []
     try:
         df = datasource.read_stats_inputs()

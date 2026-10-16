@@ -91,19 +91,28 @@ def load_favorites(path: str | None = None) -> list[str]:
         return []
 
 
+_ROLE_FILES = (("DPS", "DPS.txt"), ("SUP", "SUP.txt"), ("TANK", "TANK.txt"))
+
+
+def _favorites_by_role(heroes_list: list[str], role_of) -> dict[str, list[str]]:
+    """Favoritos (já sem duplicatas) separados pela role que `role_of` devolve."""
+    heroes_by_role: dict[str, list[str]] = {role: [] for role, _ in _ROLE_FILES}
+    for hero in heroes_list:
+        role = role_of(hero)
+        if role in heroes_by_role:
+            heroes_by_role[role].append(hero)
+    return heroes_by_role
+
+
 def save_heroes_to_files(heroes_list: list[str], role_of) -> None:
     """
     Persiste os favoritos: um arquivo por role (DPS/SUP/TANK.txt) + ALL.txt.
     `role_of(hero)` devolve a role do herói (injetado pela ui/favorites).
     """
     heroes_list = list(dict.fromkeys(heroes_list))  # dedup preservando ordem
-    heroes_by_role: dict[str, list[str]] = {"DPS": [], "SUP": [], "TANK": []}
-    for hero in heroes_list:
-        role = role_of(hero)
-        if role in heroes_by_role:
-            heroes_by_role[role].append(hero)
+    heroes_by_role = _favorites_by_role(heroes_list, role_of)
 
-    for role, filename in [("DPS", "DPS.txt"), ("SUP", "SUP.txt"), ("TANK", "TANK.txt")]:
+    for role, filename in _ROLE_FILES:
         with open(paths.user_file(filename), "w", encoding="utf-8") as f:
             if heroes_by_role[role]:
                 f.write("\n".join(heroes_by_role[role]))
@@ -111,6 +120,37 @@ def save_heroes_to_files(heroes_list: list[str], role_of) -> None:
     with open(favorites_path(), "w", encoding="utf-8") as f:
         if heroes_list:
             f.write("\n".join(heroes_list))
+
+
+def sync_role_files(role_of) -> bool:
+    """
+    Regrava DPS/SUP/TANK.txt a partir do ALL.txt com a role ATUAL de cada herói.
+
+    Os arquivos por role são derivados do ALL.txt no momento em que os favoritos
+    são salvos. Quando um herói muda de role entre versões (v1.2.16: Sombra
+    DPS → SUP), quem já o tinha como favorito ficaria com ele no arquivo da role
+    antiga: ele apareceria no ranking errado e sumiria do certo. Chamado no boot;
+    só grava quando algo mudou (no caso normal é só leitura). Devolve True se
+    regravou os arquivos.
+
+    ALL.txt ausente, vazio ou ilegível: não toca em nada (regravar a partir de
+    uma lista vazia apagaria os favoritos do usuário).
+    """
+    favorites = list(dict.fromkeys(load_favorites()))
+    if not favorites:
+        return False
+    expected = _favorites_by_role(favorites, role_of)
+    for role, filename in _ROLE_FILES:
+        path = paths.user_file(filename)
+        try:
+            with open(path, encoding="utf-8") as f:
+                current = [line.strip() for line in f if line.strip()]
+        except (OSError, UnicodeDecodeError):
+            current = None  # arquivo ausente/ilegível: regrava (é derivado do ALL.txt)
+        if current != expected[role]:
+            save_heroes_to_files(favorites, role_of)
+            return True
+    return False
 
 
 # ---------------------------------------------------------------------------

@@ -5,7 +5,7 @@ import math
 import pandas as pd
 import pytest
 
-from owpick.core import scoring
+from owpick.core import heroes, scoring
 
 # ---------------------------------------------------------------------------
 # load_meta_strength — DataFrame sintético com valores calculados à mão
@@ -16,8 +16,9 @@ class TestLoadMetaStrength:
     @pytest.fixture()
     def stats_df(self):
         # 3 DPS no mesmo mapa, pickrate exatamente na taxa neutra da role
-        # (2/24 -> conf = 0.5). winrates 50/55/45: média 50, std (ddof=1) = 5.
-        neutral_pct = 100.0 * 2 / 24
+        # (slots/|DPS| -> conf = 0.5; derivada de HEROES_ROLES, nunca fixa).
+        # winrates 50/55/45: média 50, std (ddof=1) = 5.
+        neutral_pct = 100.0 * heroes.get_role_neutral_pickrates()["DPS"]
         return pd.DataFrame(
             {
                 "map": ["TestMap"] * 3,
@@ -304,7 +305,6 @@ _MERCY_Y: dict[str, float] = {
             "Mei",
             "Reaper",
             "Shion",
-            "Sombra",
             "Symmetra",
             "Tracer",
             "Vendetta",

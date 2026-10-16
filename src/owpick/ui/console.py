@@ -15,6 +15,7 @@ import keyboard
 
 from owpick import log as applog
 from owpick import paths, pipeline, settings
+from owpick.core.heroes import get_hero_role
 from owpick.i18n import t
 from owpick.infra import perf, resources, stats_update, storage, updater, validation
 from owpick.log import get_logger, setup_logging
@@ -344,6 +345,11 @@ def main():
         log.info(
             "dados do usuário migrados para %s: %s", paths.user_data_dir(), ", ".join(migrated)
         )
+    # Favoritos por role refeitos com a role ATUAL de cada herói: um herói que
+    # mudou de role numa atualização (v1.2.16: Sombra DPS -> SUP) sai do arquivo
+    # da role antiga e entra no da nova. Só grava quando algo mudou.
+    if storage.sync_role_files(get_hero_role):
+        log.info("favoritos por role atualizados: um herói favorito mudou de role")
     log.debug(
         "OWPick v%s iniciado (frozen=%s)",
         updater.get_local_version(),

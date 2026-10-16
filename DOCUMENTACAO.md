@@ -238,7 +238,7 @@ e os fluxos CLI (`matching.executar()`, `map_detect.executar()`,
 
 1. O usuário executa `OWPick.exe` (pelo atalho criado pelo instalador) ou `python src\owpick\__main__.py` (dev)
 2. `infra.resources.configure_windows_app_identity()` registra o AppUserModelID e o ícone da janela (identidade na taskbar do Windows)
-3. `paths.ensure_dirs()` cria os diretórios de dados do usuário/cache e `paths.migrate_legacy_user_data()` migra `Roles.txt`/favoritos de versões antigas (que gravavam ao lado do exe); `settings.get()` carrega o `settings.json` validado e `setup_logging()` inicia o log — com `--debug` (ou `settings.debug`), a validação de dados (`validation.report_problems`) também roda
+3. `paths.ensure_dirs()` cria os diretórios de dados do usuário/cache e `paths.migrate_legacy_user_data()` migra `Roles.txt`/favoritos de versões antigas (que gravavam ao lado do exe); `settings.get()` carrega o `settings.json` validado e `setup_logging()` inicia o log — com `--debug` (ou `settings.debug`), a validação de dados (`validation.report_problems`) também roda. Logo depois do log, `storage.sync_role_files()` refaz os favoritos por role se algum herói favorito mudou de role (ver [`infra/storage.py`](#infrastoragepy))
 4. `perf.tune_runtime()` aplica os ajustes de **consumo de recursos**: prioridade do processo abaixo do normal e OpenCV limitado a 1 thread sem OpenCL (ver [Consumo de recursos](#consumo-de-recursos-o-jogo-tem-prioridade))
 5. `updater.cleanup_old_backup()` apaga o backup `OWPick.old` de um update
    anterior bem-sucedido; em seguida `updater.start_background_check()` verifica
@@ -662,7 +662,7 @@ lidos dentro dele. `core` não importa `infra` nem `ui`.
 
 Fonte de verdade dos dados embutidos e da normalização:
 
-- `HEROES_ROLES` (24 DPS, 15 TANK, 14 SUP), `MAPS_DATA` (29 mapas), `SLOTS`, `VALID_ROLES`
+- `HEROES_ROLES` (23 DPS, 15 TANK, 16 SUP), `MAPS_DATA` (30 mapas), `SLOTS`, `VALID_ROLES`
 - `MAP_ALIASES` + `get_map_search_index()`: aliases por idioma (ex.: `"Rota 66"`)
   mapeados de volta ao nome **canônico** (chave do `stats_inputs.csv`) — só entram
   aliases ancorados em token distintivo (evita falso positivo com OCR ruidoso)
@@ -943,7 +943,7 @@ Leitura/cache dos dados do modelo (tudo `lru_cache`):
 #### `infra/validation.py`
 
 Validação dos dados na carga com **aviso claro do que falta**: `validate_matrix`
-(linhas E colunas ≡ `HEROES_ROLES` — pega órfãos/typos), `validate_stats` (29
+(linhas E colunas ≡ `HEROES_ROLES` — pega órfãos/typos), `validate_stats` (30
 mapas × roles), `validate_templates` (retratos 720p/2k + ícone de ban para todo
 herói), `validate_all` + `report_problems`. Roda nos testes e no boot com `--debug`.
 
@@ -976,6 +976,14 @@ em `%APPDATA%\OWPick`) e artefatos do **fluxo CLI** (`lineup.txt`, `bans.txt`,
 `read_playable_heroes`, `load_favorites`/`save_heroes_to_files`,
 `read/write_lineup|bans|current_map`.
 
+`sync_role_files(role_of)` (v1.2.16) refaz `DPS/SUP/TANK.txt` a partir do `ALL.txt`
+com a role **atual** de cada herói. Os arquivos por role são derivados no momento
+em que os favoritos são salvos, então um herói que muda de role numa atualização
+ficaria no arquivo errado (a Sombra favorita apareceria no ranking de DPS e
+sumiria do de Suporte). Roda no boot, só grava quando algo mudou e não toca em
+nada se o `ALL.txt` estiver ausente, vazio ou ilegível; um arquivo por role
+corrompido é regenerado.
+
 #### `infra/resources.py`
 
 `resource_path(rel)`: resolve recursos pela **raiz do repositório** em dev
@@ -1007,8 +1015,8 @@ O fluxo completo (rollback + não bloqueante) está descrito na seção
 #### `ui/console.py`
 
 `main()` (boot): identidade Windows → `paths.ensure_dirs` + migração →
-`updater.cleanup_old_backup` → settings + logging → validação de dados (só
-`--debug`) → `updater.start_background_check` → role/favoritos se ausentes →
+`updater.cleanup_old_backup` → settings + logging → `storage.sync_role_files`
+(favoritos por role com a role atual) → validação de dados (só `--debug`) → `updater.start_background_check` → role/favoritos se ausentes →
 registra a hotkey → `input_loop` em thread daemon.
 
 Menu: `2` role · `3` favoritos · `4` atualizar stats · `5` hotkey · `6` explicação
@@ -1091,19 +1099,29 @@ injetável para testes.
 
 ## Dados do Jogo
 
-### Heróis Suportados (53 total)
+### Heróis Suportados (54 total)
 
 | Role | Heróis |
 |---|---|
-| **DPS** (24) | Anran, Ashe, Bastion, Cassidy, Echo, Emre, Freja, Genji, Hanzo, Junkrat, Mei, Pharah, Reaper, Shion, Sierra, Sojourn, Soldier: 76, Sombra, Symmetra, Torbjörn, Tracer, Vendetta, Venture, Widowmaker |
+| **DPS** (23) | Anran, Ashe, Bastion, Cassidy, Echo, Emre, Freja, Genji, Hanzo, Junkrat, Mei, Pharah, Reaper, Shion, Sierra, Sojourn, Soldier: 76, Symmetra, Torbjörn, Tracer, Vendetta, Venture, Widowmaker |
 | **TANK** (15) | D.Mon, D.Va, Domina, Doomfist, Hazard, Junker Queen, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Sigma, Winston, Wrecking Ball, Zarya |
-| **SUP** (14) | Ana, Baptiste, Brigitte, Illari, Jetpack Cat, Juno, Kiriko, Lifeweaver, Lúcio, Mercy, Mizuki, Moira, Wuyang, Zenyatta |
+| **SUP** (16) | Ana, Baptiste, Brigitte, Doctrine, Illari, Jetpack Cat, Juno, Kiriko, Lifeweaver, Lúcio, Mercy, Mizuki, Moira, Sombra, Wuyang, Zenyatta |
 
-> **D.Mon (v1.2.14)** entrou **sem dados de counter/sinergia e sem winrate**: a
-> linha e a coluna dela nas duas matrizes estão **vazias** e o `stats_inputs.csv`
-> traz winrate/pickrate `0.00` nos 29 mapas. Ela é ranqueável e identificável
-> normalmente; o que ainda falta é dado, não suporte. Ver
-> [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0).
+> **D.Mon** entrou na v1.2.14 com a linha/coluna **vazias** nas duas matrizes. Na
+> **v1.2.16** elas foram preenchidas por pesquisa (ver
+> [Tabela da D.Mon](#tabela-da-dmon-pesquisa-v1216)) e o ícone de ban foi gerado.
+> O `stats_inputs.csv` continua com winrate/pickrate `0.00` nos 30 mapas.
+>
+> **Doctrine (v1.2.16)** — Suporte novo da Season 5. Só o bloco SUP × SUP das
+> sinergias (categoria Flex, igual à Kiriko) e o cruzamento com a D.Mon têm valor;
+> o resto das matrizes e as stats estão **vazios** (ver
+> [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)).
+>
+> **Sombra (v1.2.16)** passou de **DPS para Suporte** (rework da Season 5). As
+> stats ficaram vazias (os números antigos eram da Sombra DPS, outro kit), as
+> matrizes têm só o bloco SUP × SUP (categoria Meio, igual à Mizuki) e o cruzamento
+> com a D.Mon, e os templates do lineup foram para `sup/`. Ver
+> [Mudança de role de um herói](#mudança-de-role-de-um-herói).
 
 ### Herói sem dados (linha/coluna vazia e winrate 0)
 
@@ -1113,7 +1131,7 @@ ele. O projeto trata isso como estado normal, sem caminho de código especial:
 | Onde | Representação | Efeito no modelo |
 |---|---|---|
 | `heroes ally.xlsx` / `heroes enemy.xlsx` (→ CSVs) | linha e coluna presentes no cabeçalho, **células vazias** | `build_matrix_dict` descarta NaN ⇒ a chave nem entra no dicionário ⇒ `C(h,e)` e `Y(h,a)` valem **0** nos dois sentidos, e nenhuma razão aparece na explicabilidade |
-| `stats_inputs.csv` | linha por mapa com **winrate/pickrate vazios** (o que os scrapers gravam) | `dropna(subset=["winrate"])` descarta a linha ⇒ herói sem `MetaStrength` (chave ausente = 0.0) e **sem efeito** na média/desvio da role |
+| `stats_inputs.csv` (casos do Doctrine e da Sombra Suporte, v1.2.16) | linha por mapa com **winrate/pickrate vazios** (o que os scrapers gravam) | `dropna(subset=["winrate"])` descarta a linha ⇒ herói sem `MetaStrength` (chave ausente = 0.0) e **sem efeito** na média/desvio da role |
 | `stats_inputs.csv` (caso da D.Mon, v1.2.14) | winrate **`0.00`** e pickrate **`0.00`** | pickrate 0 ⇒ `conf = pr/(pr+k0) ≈ 0.014` ⇒ MetaStrength do próprio herói ≈ −0.11 (neutro). **Mas** o 0 entra na média/desvio da role: veja o aviso abaixo |
 | `assets/heroes/bans/` | ícone ausente | `match_bans` nunca aponta o herói como banido (ele não é removido do ranking se for banido). Nada quebra; o validador reporta a ausência |
 
@@ -1138,8 +1156,11 @@ complementares, não.
 |---|---|
 | **Hitscan** | Ashe, Cassidy, Emre, Hanzo, Sierra, Sojourn, Soldier: 76 |
 | **Meio Hitscan** | Bastion, Torbjörn |
-| **Flex** | Anran, Genji, Mei, Sombra, Vendetta, Venture, Widowmaker |
+| **Flex** | Anran, Genji, Mei, Vendetta, Venture, Widowmaker |
 | **Meio Flex** | Echo, Freja, Junkrat, Pharah, Reaper, Shion, Symmetra |
+
+> A **Sombra** era Flex até a v1.2.15. Na v1.2.16 ela virou Suporte e passou a
+> seguir as [Categorias de Suporte](#categorias-de-suporte-sinergias-sup--sup).
 
 Valor da sinergia por par de categorias (**tabela simétrica** — o valor é gravado
 nas duas células, `Y(h,a)` e `Y(a,h)`):
@@ -1155,7 +1176,7 @@ nas duas células, `Y(h,a)` e `Y(a,h)`):
 qualquer outro DPS**, com **precedência** sobre a tabela.
 
 A tabela cobre **todos** os pares de categorias, então **todo** par DPS × DPS
-(276 = C(24,2)) tem valor definido. O que a regra **não** toca: a diagonal
+(253 = C(23,2)) tem valor definido. O que a regra **não** toca: a diagonal
 (mantida em −11) e qualquer par que envolva Tank/Suporte — esses continuam sendo
 valores editados à mão, e a assimetria `Y(h,a) ≠ Y(a,h)` que existe fora dos pares
 DPS × DPS é preservada de propósito.
@@ -1163,6 +1184,43 @@ DPS × DPS é preservada de propósito.
 > Ao adicionar um DPS novo, coloque-o em uma das quatro categorias e preencha a
 > linha/coluna dele conforme a tabela — senão ele fica com sinergia herdada/vazia
 > contra os demais DPS.
+
+### Categorias de Suporte (sinergias SUP × SUP)
+
+As sinergias **entre dois suportes** em `data/heroes ally.xlsx` também saem de uma
+classificação, por **estilo de suporte**. A divisão já existia nos valores da
+planilha; a v1.2.16 a registrou aqui e mudou um valor da tabela.
+
+| Categoria | Heróis |
+|---|---|
+| **Flex Sup** | Ana, Baptiste, Doctrine, Kiriko, Moira |
+| **Main Sup** | Brigitte, Jetpack Cat, Lúcio, Mercy, Zenyatta |
+| **Meio do caminho** | Illari, Juno, Lifeweaver, Mizuki, Sombra, Wuyang |
+
+Valor da sinergia por par de categorias (**tabela simétrica** — o valor é gravado
+nas duas células, `Y(h,a)` e `Y(a,h)`):
+
+| | Flex | Main | Meio |
+|---|---|---|---|
+| **Flex** | −2 | +2 | +2 |
+| **Main** | +2 | −12 | −8 |
+| **Meio** | +2 | −8 | −4 |
+
+- **Meio × Flex** valia **0** até a v1.2.15 e passou a **+2** nos dois sentidos:
+  um suporte "meio do caminho" funciona bem ao lado de um Flex.
+- Dois do mesmo estilo se anti-sinergizam (Flex × Flex −2, Main × Main −12, Meio
+  × Meio −4) — o par disputa a mesma função no time.
+- A diagonal continua em −11 e é ignorada pelo scoring.
+- **Doctrine** (v1.2.16) é Flex: a linha/coluna SUP × SUP dele é a da Kiriko, com
+  Doctrine × Kiriko = −2. **Sombra** (v1.2.16) é Meio: a dela é a da Mizuki.
+- No **Counter-first** esses pares usam `beta_syn_sup_sup` (0.65); nos demais
+  presets, o `β_syn` do preset — ver a exceção SUP × SUP no
+  [Modelo de Scoring](#modelo-de-scoring). No Enemy Threat, pares SUP × SUP não
+  contam.
+
+> Ao adicionar um Suporte novo, coloque-o em uma das três categorias e preencha o
+> bloco SUP × SUP dele conforme a tabela (linha **e** coluna). `tests/test_suportes.py`
+> confere os 16 × 16 pares contra a tabela.
 
 ### DPS prioritário (sinergia Mercy × DPS)
 
@@ -1175,7 +1233,11 @@ amplificado, sustain e mobilidade do *guardian angel*.
 | **+2** | Pharah, Sojourn, Ashe, Freja, Echo |
 | **+1** | Sierra, Emre, Cassidy, Soldier: 76 |
 | **0** | Torbjörn, Hanzo |
-| **−2** | Anran, Bastion, Genji, Junkrat, Mei, Reaper, Shion, Sombra, Symmetra, Tracer, Vendetta, Venture, Widowmaker |
+| **−2** | Anran, Bastion, Genji, Junkrat, Mei, Reaper, Shion, Symmetra, Tracer, Vendetta, Venture, Widowmaker |
+
+A Sombra saiu desta escala na v1.2.16: virou Suporte, e o par Mercy × Sombra agora
+segue as [Categorias de Suporte](#categorias-de-suporte-sinergias-sup--sup) (Main ×
+Meio = −8), sem o peso fixo de Mercy × DPS.
 
 Os **9** heróis das duas primeiras faixas (`+2` e `+1`) — Pharah, Sojourn, Ashe,
 Freja, Echo, Sierra, Emre, Cassidy, Soldier: 76 — são os **DPS prioritários**: a
@@ -1208,12 +1270,80 @@ nos quatro presets. Exemplos (contribuição final de cada par):
 > multiplicar e escolhe pelo **maior `Y(Mercy, ·)`**, não pela ordem. As duas
 > regras compartilham só a lista de 9 heróis; são independentes.
 
-### Mapas Suportados (29 total)
+### Tabela da D.Mon (pesquisa, v1.2.16)
+
+A linha e a coluna da D.Mon, vazias desde a v1.2.14, foram preenchidas nas duas
+matrizes a partir de pesquisa. Como os demais valores das planilhas são opinião
+do autor, a conversão de dado externo para a escala inteira foi **calibrada
+contra o que já estava preenchido**, não escolhida à mão.
+
+**Kit relevante** (Season 5): Tank *Stalwart* (−40% de knockback e slow), sabre
+corpo a corpo (60 de dano, 5,5 m), Power Barrier frontal (650; o melee a
+atravessa), Propulsors (dash **só horizontal** — sem alcance vertical), Surging
+Strike (avanço com knockback), Fusion Repeater (metralhadora curta) e o ult Limit
+Break (corte em área, sobrevida e debuff que **amplifica o dano** recebido pelos
+inimigos). Perfil do counterwatch: Poke 20% / **Rush 100%** / Dive 50%.
+
+**Counters** (`heroes enemy.xlsx`):
+
+- Fonte: o *counter rating* do counterwatch.gg contra a D.Mon (Season 5, 149 mil
+  partidas, todas as ranks), que cobre os 53 outros heróis. O rating é
+  antissimétrico entre páginas (Reinhardt → D.Mon +1.4, D.Mon → Reinhardt −1.4),
+  como a matriz.
+- Calibração: o mesmo rating foi coletado para **9 tanques já preenchidos**
+  (Reinhardt, Junker Queen, D.Va, Ramattra, Winston, Hazard, Sigma, Zarya, Orisa;
+  441 pares, sem Roadhog/Sombra/Doctrine) e comparado com `C(X, Tank)` da
+  planilha. A concordância é moderada (Spearman ≈ 0.40; quando os dois são ≠ 0, o
+  sinal bate em ~80%) e a curva de erro é plana entre 2.5 e 4.0. Limiares de menor
+  erro: `|rating| < 3.0 → 0`, `3.0 ≤ |rating| < 11.5 → ±1`, `≥ 11.5 → ±2`.
+- `C(X, D.Mon)` = rating convertido e `C(D.Mon, X) = −C(X, D.Mon)`; o espelho
+  D.Mon × D.Mon é 0.
+
+| Quem countera a D.Mon (`C(X, D.Mon)`) | Valor |
+|---|---|
+| Torbjörn, Illari (torreta/pilão no alto, onde ela não chega) | **+2** |
+| Mauga, Ramattra, D.Va, Roadhog, Orisa, Bastion, Freja, Pharah, Jetpack Cat, Zenyatta | +1 |
+| Mercy, Kiriko, Lifeweaver, Brigitte, Sombra, Anran, Widowmaker, Venture, Sierra, Soldier: 76, Shion, Genji, Vendetta, Winston, Wrecking Ball | −1 (a D.Mon leva vantagem) |
+| Os outros 26 (inclusive Doctrine) | 0 |
+
+**Sinergias** (`heroes ally.xlsx`) — não há rating público completo de duplas,
+então a regra é:
+
+1. **Evidência específica da D.Mon decide**, com o mesmo valor nos dois sentidos.
+   Pontos: dado de dupla do counterwatch ("acima do esperado", ≥ 200 partidas por
+   par) vale 2; cada guia vale 1 (allthings.how, playerauctions, esports.gg,
+   mobalytics, bo3.gg, gamer.org, elevateboost.fr, overpicker). Soma ≥ 3 → **+2**;
+   1–2 → **+1**; negativa → **−1**.
+   - **+2**: Lúcio e Juno (speed boost para o engage), Tracer, Echo, Shion
+     (seguem o dash).
+   - **+1**: Ana, Mei, Sombra (dado de dupla), Genji, Anran, Freja, Zenyatta
+     (peel para o Zen), D.Va (dupla MEKA, 6v6), Doctrine.
+   - **−1**: Ashe, Pharah, Widowmaker ("o poke a deixa sozinha na linha de
+     frente"), Junkrat, Jetpack Cat.
+2. **Sem evidência**: média do que a planilha já dava aos 4 tanques de perfil mais
+   próximo — **Junker Queen, Hazard, Mauga** (distância 30 no perfil
+   poke/rush/dive) e **Reinhardt** (40; os guias também a comparam com ele) —,
+   arredondada em direção ao neutro (`|média| ≤ 0.5 → 0`). `Y(D.Mon, a)` usa as
+   linhas desses tanques e `Y(a, D.Mon)` as colunas, então as assimetrias da
+   planilha se repetem (ex.: `Y(Cassidy, D.Mon) = +2`, `Y(D.Mon, Cassidy) = 0`).
+3. Diagonal −11.
+
+> **Descartado como evidência**: os "melhores parceiros por win rate combinado"
+> (Torbjörn, Vendetta, Zenyatta, Mei, Symmetra). As mesmas listas do Reinhardt e da
+> Junker Queen trazem os mesmos nomes — o número mede o win rate do parceiro, que
+> já entra pelo MetaStrength, e não a sinergia com a D.Mon.
+
+As duas células da linha da D.Mon que já estavam preenchidas e discordavam da
+pesquisa mudaram: `C(D.Mon, Bastion)` 0 → −1 e `C(D.Mon, Illari)` 0 → −2. Os
+números e scripts da coleta não ficam no repositório (como nas outras alterações
+de dados em lote); os valores finais são conferidos em `tests/test_dmon.py`.
+
+### Mapas Suportados (30 total)
 
 | Modo | Mapas |
 |---|---|
 | **Control** (7) | Antarctic Peninsula, Busan, Ilios, Lijiang Tower, Nepal, Oasis, Samoa |
-| **Escort** (8) | Circuit Royal, Dorado, Havana, Junkertown, Rialto, Route 66, Shambali Monastery, Watchpoint: Gibraltar |
+| **Escort** (9) | Circuit Royal, Dorado, Havana, Junkertown, Rialto, Route 66, Shambali Monastery, Watchpoint: Gibraltar, Watchpoint: Grímsvötn |
 | **Hybrid** (8) | Blizzard World, Eichenwalde, Hollywood, King's Row, Midtown, Neon Junction, Numbani, Paraíso |
 | **Push** (4) | Colosseo, Esperança, New Queen Street, Runasapi |
 | **Flashpoint** (2) | New Junk City, Suravasa |
@@ -1240,15 +1370,32 @@ Convenções do banco de lineup (conferidas pelos testes):
   fonte de mais qualidade, não uma geometria diferente: medido nas fixtures, a
   reconstrução por LANCZOS dos Tanks já existentes mantém correlação mediana de
   0.75 com o template 2K real e continua elegendo o herói correto na captura 2K.
+- **Só tem recorte no tamanho 2K?** (caso do Doctrine na v1.2.16.) No banco 2K
+  use o recorte nativo; no 720p, **reduza com LANCZOS para 41×41 RGB** em vez de
+  copiar o arquivo 2K. Medido em 102 heróis com retrato real nos dois bancos,
+  após a mesma transformação de carga do matching: o 2K reduzido com LANCZOS
+  correlaciona 0.765 (CCOEFF médio) com o 720p real, contra 0.696 do 2K usado
+  direto — melhor em 98% dos pares. (Shion e Sierra ainda usam a cópia 2K no
+  banco 720p.)
+- **Um herói por role.** O matching compara cada slot só com a pasta da role do
+  slot (`FILE_TO_CATEGORY`), então o template precisa estar na pasta da role
+  **atual** do herói.
 
 Os templates dos **bans** ficam em `assets/heroes/bans/` (pasta plana, sem divisão por role ou resolução): um `.png` de 128×128 por herói com o **ícone 3D oficial** — a mesma arte exibida nos slots de ban da UI, que é diferente do retrato ilustrado do lineup. Os nomes de arquivo seguem a mesma convenção dos bancos existentes (`DVa.png`, `Soldier 76.png`, `Lúcio.png`, ...).
+
+**Como gerar um ícone de ban**: baixe o retrato oficial do herói (campo
+`portrait` de `https://overfast-api.tekrop.fr/heroes`, PNG 256×256 com alfa,
+servido pela CDN da Blizzard), componha sobre um fundo sólido **(40, 40, 40)** e
+reduza com **LANCZOS para 128×128**, gravando em RGB. Regerando 7 ícones
+existentes por esse caminho a diferença foi **zero** pixel a pixel — é o mesmo
+processo dos 52 originais. Foi assim que a D.Mon e o Doctrine ganharam o ícone na
+v1.2.16.
 
 > O ícone de ban **não pode ser derivado do retrato do lineup** — é outra arte.
 > Enquanto ele não existir para um herói, `match_bans` apenas nunca o aponta como
 > banido (ele não é removido do ranking se for banido) e o validador reporta a
-> ausência. É o caso da **D.Mon** na v1.2.14: `assets/heroes/bans/DMon.png` ainda
-> não existe. Soltar o `.png` de 128×128 na pasta fecha a lacuna sem nenhuma
-> alteração de código.
+> ausência. A D.Mon ficou nessa situação entre a v1.2.14 e a v1.2.15; desde a
+> v1.2.16 os 54 heróis têm ícone.
 
 ---
 
@@ -1482,29 +1629,64 @@ A ordem abaixo é a que a v1.2.14 (D.Mon) seguiu.
 2. **Templates do lineup** em `assets/heroes/720p/<role>/` e `assets/heroes/2k/<role>/`
    — ver as convenções em [Templates de Imagem](#templates-de-imagem), inclusive
    como derivar o 2K do 720p quando só existe uma captura.
-3. **Ícone de ban** em `assets/heroes/bans/` (128×128, ícone 3D oficial). É o
-   único item **opcional**: sem ele o herói apenas nunca é detectado como banido
-   (o validador avisa). Não improvise a partir do retrato do lineup — é outra arte.
+3. **Ícone de ban** em `assets/heroes/bans/` (128×128, ícone 3D oficial — ver
+   [como gerar](#templates-de-imagem)). É o único item **opcional**: sem ele o
+   herói apenas nunca é detectado como banido (o validador avisa). Não improvise a
+   partir do retrato do lineup — é outra arte.
 4. **Matrizes**: edite `data/heroes ally.xlsx` e `data/heroes enemy.xlsx`
-   (linha **e** coluna, na posição alfabética) e rode `python tools/xlsx_to_csv.py`
-   para regenerar `data/synergies.csv` / `data/counters.csv`, que são o que o
-   runtime lê. Nas **sinergias**, um DPS novo deve receber os valores da sua
-   categoria (ver [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps)) e um
-   valor em `Y(Mercy, <DPS>)` na escala do
-   [DPS prioritário](#dps-prioritário-sinergia-mercy--dps). Ainda sem opinião
-   formada sobre o herói? Deixe as células **vazias** — é ausência de dado, e
-   vale 0 nos dois sentidos (ver [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)).
+   (linha **e** coluna, na posição alfabética — a ordem das planilhas é a ASCII,
+   com maiúsculas antes: `DMon`, `DVa`, `Doctrine`, `Domina`) e rode
+   `python tools/xlsx_to_csv.py` para regenerar `data/synergies.csv` /
+   `data/counters.csv`, que são o que o runtime lê. Nas **sinergias**, um DPS novo
+   deve receber os valores da sua categoria (ver
+   [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps)) e um valor em
+   `Y(Mercy, <DPS>)` na escala do
+   [DPS prioritário](#dps-prioritário-sinergia-mercy--dps); um Suporte novo, os
+   valores da sua [categoria de suporte](#categorias-de-suporte-sinergias-sup--sup).
+   Ainda sem opinião formada sobre o herói? Deixe as células **vazias** — é
+   ausência de dado, e vale 0 nos dois sentidos (ver
+   [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)). Para
+   preencher a partir de dados externos, veja como a
+   [Tabela da D.Mon](#tabela-da-dmon-pesquisa-v1216) calibrou a conversão.
 5. **Stats**: rode `tools/coletar_stats.py` (ou `coletar_stats2.py`) para
-   regenerar `data/stats_inputs.csv` com o herói novo nos 29 mapas. Enquanto o
+   regenerar `data/stats_inputs.csv` com o herói novo nos 30 mapas. Enquanto o
    site não tiver dados dele, as células saem **vazias** — leia o aviso sobre
    winrate `0` vs vazio em [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)
    antes de preencher à mão.
 6. **Testes**: atualize as contagens oficiais em `tests/test_utils.py`
-   (`TestCanonicalData`) e use `tests/test_dmon.py` como gabarito da aceitação
+   (`TestCanonicalData`) e use `tests/test_dmon.py` (Tank) ou
+   `tests/test_doctrine.py` (Suporte com dados vazios) como gabarito da aceitação
    ponta a ponta do herói novo.
 
 O validador (`infra/validation.py`, roda nos testes e no boot com `--debug`)
 aponta exatamente o que estiver faltando em cada um desses pontos.
+`tests/test_doctrine.py::test_nenhum_template_com_nome_orfao` pega o erro inverso:
+um arquivo cujo nome não resolve para herói nenhum (ex.: `Doctrine.jpg.png`, que
+vira a chave `doctrine-jpg`).
+
+### Mudança de role de um herói
+
+Quando o jogo troca a role de um herói (v1.2.16: Sombra, DPS → Suporte), o nome
+não muda — então as planilhas não mudam de posição —, mas tudo que é indexado por
+role precisa acompanhar:
+
+1. **`HEROES_ROLES`**: tire o herói da lista antiga e ponha na nova, em ordem
+   alfabética.
+2. **Templates do lineup**: mova `<Nome>.png`/`<Nome>.jpg` para a pasta da nova
+   role nos **dois** bancos (`assets/heroes/{720p,2k}/<role>/`). O ícone de ban não
+   muda de lugar (a pasta é plana).
+3. **Matrizes**: os pares do herói com a role antiga e a nova seguiam regras de
+   categoria que não valem mais. Classifique-o na categoria da role nova e
+   reavalie/limpe o resto da linha e da coluna.
+4. **Stats**: a coluna `role` do `stats_inputs.csv` decide com quem o herói é
+   comparado no MetaStrength. Troque a role nas 30 linhas e mova-as para o bloco
+   da role nova (a ordem de `HEROES_ROLES` é a que os scrapers gravam). Se o
+   rework mudou o kit, os números antigos descrevem outro herói — deixe vazio até
+   a próxima coleta.
+5. **Favoritos dos usuários**: nada a fazer. `storage.sync_role_files` roda no
+   boot e refaz `DPS/SUP/TANK.txt` a partir do `ALL.txt` com a role atual.
+6. **Testes que fixam contagens** (`tests/test_utils.py`) e listas por role nos
+   testes sintéticos (ex.: a escala de `Y(Mercy, <DPS>)` em `tests/test_scoring.py`).
 
 Alterações de dados em lote (inserir linha/coluna nas planilhas preservando
 estilos e formatação condicional, inserir o herói em todos os mapas do

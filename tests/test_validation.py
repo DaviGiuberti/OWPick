@@ -7,29 +7,31 @@ from owpick.infra import validation
 # ---------------------------------------------------------------------------
 # Dados REAIS — a rede de segurança contra typos/omissões (roda no CI)
 # ---------------------------------------------------------------------------
-# LACUNA CONHECIDA E ACEITA (v1.2.14): a D.Mon ainda não tem o ícone 3D oficial
-# em assets/heroes/bans/. O ícone de ban usa uma ARTE DIFERENTE do retrato do
-# lineup (não dá para derivar um do outro), então o asset não existe até ser
-# extraído do jogo. A degradação é segura e local: `match_bans` simplesmente
-# nunca aponta a D.Mon como banida (ela não é removida do ranking se for banida);
-# nada mais no pipeline depende disso. O validador CONTINUA reportando a
-# ausência — é assim que o autor lembra de adicionar o ícone — e este teste
-# aceita EXATAMENTE esse problema e nenhum outro.
-KNOWN_DATA_GAPS = ["[templates] ícones de BAN ausentes: D.Mon"]
+# LACUNAS CONHECIDAS E ACEITAS: problemas que o validador reporta de propósito
+# enquanto um asset não existe (o validador continua reportando — é assim que o
+# autor lembra de completá-lo — e este teste aceita EXATAMENTE esses e nenhum
+# outro). A v1.2.14 aceitava o ícone de ban da D.Mon; a v1.2.16 gerou os ícones
+# da D.Mon e do Doctrine pelo MESMO processo dos 52 anteriores (retrato oficial
+# composto sobre cinza 40,40,40 e LANCZOS 128x128, conferido pixel a pixel contra
+# os existentes), então hoje não há lacuna aceita.
+KNOWN_DATA_GAPS: list[str] = []
 
 
-def test_dados_reais_sao_validos():
+def test_dados_reais_sao_validos(tmp_path, monkeypatch):
+    # Só os dados VERSIONADOS: sem isso, um override de stats antigo em
+    # %APPDATA% (opção 4) acusaria mapa/herói novo como ausente.
+    monkeypatch.setenv("APPDATA", str(tmp_path))
     problems = validation.validate_all()
     unexpected = [p for p in problems if p not in KNOWN_DATA_GAPS]
     assert unexpected == [], "Problemas nos dados reais:\n" + "\n".join(unexpected)
 
 
-def test_lacuna_conhecida_continua_sendo_reportada():
-    """O validador não pode 'esquecer' a lacuna aceita: enquanto o ícone de ban
-    da D.Mon não existir, ele precisa aparecer no relatório."""
+def test_lacunas_de_ban_sao_exatamente_as_conhecidas():
+    """O validador não pode 'esquecer' uma lacuna aceita nem ganhar uma nova: os
+    ícones de ban ausentes são exatamente os de KNOWN_DATA_GAPS."""
     problems = validation.validate_all()
     missing_bans = [p for p in problems if "ícones de BAN ausentes" in p]
-    assert missing_bans == KNOWN_DATA_GAPS or missing_bans == [], (
+    assert missing_bans == KNOWN_DATA_GAPS, (
         f"lacuna de bans mudou de forma inesperada: {missing_bans}"
     )
 

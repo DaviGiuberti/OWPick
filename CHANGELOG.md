@@ -4,6 +4,178 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.16] — 2026-10-16
+
+Season 5: novo Suporte **Doctrine**, **Sombra** passa de DPS para Suporte,
+sinergias entre suportes reorganizadas por categoria (Meio x Flex agora +2) e a
+tabela de counters/sinergias da **D.Mon** preenchida por pesquisa. Favoritos
+antigos com a Sombra são corrigidos sozinhos no boot.
+
+### Novo Suporte: Doctrine
+
+- **`HEROES_ROLES`**: `Doctrine` em `SUP` (23 DPS, 15 TANK, **16** SUP — **54**
+  heróis). Pickrate neutra de SUP `2/14` → `2/16`.
+- **Templates do lineup**: os dois recortes fornecidos (`Doctrine.png` 87×88 e
+  `Doctrine.jpg.png` 82×84, RGBA 100% opaco) foram normalizados para **RGB** sem
+  mudar nenhum pixel. `Doctrine.jpg.png` virou **`Doctrine.jpg`** — o nome antigo
+  tinha stem `doctrine-jpg` e o matching o trataria como um herói inexistente.
+  - **2K**: recortes no tamanho nativo (o matching redimensiona na carga).
+  - **720p**: reduzidos com **LANCZOS para 41×41**, o formato nativo do banco.
+    Medido em 102 heróis com retrato real nos dois bancos: o 2K reduzido com
+    LANCZOS fica bem mais parecido com o 720p real do que o 2K usado direto
+    (CCOEFF médio **0.765 vs 0.696**, melhor em 98% dos pares).
+- **Ícone de ban**: `assets/heroes/bans/Doctrine.png`, gerado do retrato oficial
+  (OverFast API → CDN da Blizzard) pelo **mesmo processo dos 52 ícones
+  existentes** — 256×256 composto sobre cinza (40,40,40) e LANCZOS para 128×128
+  RGB. O processo foi conferido regerando 7 ícones existentes: diferença **zero**
+  pixel a pixel.
+- **Matrizes**: linha e coluna `Doctrine` inseridas na posição alfabética (entre
+  `DVa` e `Domina`) nas duas planilhas, com estilos copiados da vizinha e a
+  formatação condicional de simetria estendida. Só têm valor o bloco **SUP × SUP**
+  das sinergias (igual ao da **Kiriko**: Doctrine é Flex Sup, e Doctrine × Kiriko
+  = **−2**) e o cruzamento com a D.Mon (pesquisa abaixo). **Todo o resto está
+  vazio** — ausência de dado, vale 0 nos dois sentidos.
+- **Stats**: presente nos 29 mapas como SUP com winrate/pickrate **vazios** (a
+  representação nativa de "sem dados" — não entra na média/desvio dos suportes).
+
+### Sombra: DPS → Suporte
+
+A Sombra virou Suporte no jogo na Season 5 (06/10/2026, Hack e Virus saíram do
+kit; entraram cura e o debuff Weaken).
+
+- **`HEROES_ROLES`**: sai de `DPS` e entra em `SUP`.
+- **Templates do lineup**: `Sombra.png`/`Sombra.jpg` movidos de `dps/` para
+  `sup/` nos dois bancos (bytes intactos). O matching só compara cada slot com a
+  pasta da role do slot — na pasta de DPS ela nunca seria achada num slot de
+  suporte. O ícone de ban continua o mesmo: o retrato oficial não mudou com o
+  rework (conferido pixel a pixel).
+- **Matrizes**: a linha/coluna dela já tinha sido limpa nas planilhas. Entrou o
+  bloco **SUP × SUP igual ao da Mizuki** (categoria Meio) e o cruzamento com a
+  D.Mon; o resto continua vazio.
+- **Stats**: role `SUP` nos 29 mapas, com winrate/pickrate **vazios**. Os números
+  antigos eram da Sombra DPS — outro kit — e, rotulados como SUP, entrariam na
+  média/desvio dos suportes (winrates de 33% a 64%) e distorceriam o z-score de
+  todos eles.
+- **Efeitos no scoring que mudam sozinhos**: o par Mercy × Sombra deixa de usar o
+  peso fixo de Mercy × DPS (1.0) e passa a ser SUP × SUP; a Sombra saiu das
+  Categorias de DPS (Flex) e da escala do "DPS prioritário" da Mercy.
+
+#### Correção: favorito que muda de role
+
+Os arquivos `DPS.txt`/`SUP.txt`/`TANK.txt` são derivados do `ALL.txt` no momento
+em que os favoritos são salvos. Quem já tinha a Sombra como favorita ficaria com
+ela no `DPS.txt`: ela continuaria aparecendo no ranking de **DPS** e sumiria do de
+**Suporte**.
+
+- Nova **`storage.sync_role_files(role_of)`**, chamada no boot: refaz os arquivos
+  por role a partir do `ALL.txt` com a role **atual** de cada herói. Só grava
+  quando algo mudou (no caso normal é só leitura) e loga uma linha quando corrige.
+- `ALL.txt` ausente, vazio ou ilegível: não toca em nada (regravar a partir de uma
+  lista vazia apagaria os favoritos). Arquivo por role corrompido: é regenerado.
+
+### Sinergias entre suportes por categoria
+
+O bloco SUP × SUP de `heroes ally.xlsx` já seguia três categorias, só que sem
+nenhum lugar registrando quais. Agora estão documentadas em `DOCUMENTACAO.md`
+("Categorias de Suporte"):
+
+| Categoria | Heróis |
+|---|---|
+| **Flex Sup** | Ana, Baptiste, Doctrine, Kiriko, Moira |
+| **Main Sup** | Brigitte, Jetpack Cat, Lúcio, Mercy, Zenyatta |
+| **Meio do caminho** | Illari, Juno, Lifeweaver, Mizuki, Sombra, Wuyang |
+
+| | Flex | Main | Meio |
+|---|---|---|---|
+| **Flex** | −2 | +2 | **+2** |
+| **Main** | +2 | −12 | −8 |
+| **Meio** | **+2** | −8 | −4 |
+
+- **Meio × Flex: 0 → +2, nos dois sentidos** — 40 células entre os heróis que já
+  existiam (5 Meio × 4 Flex × 2), além das linhas novas de Doctrine e Sombra.
+- A tabela é **simétrica** e a diagonal segue em −11. Nenhuma outra célula
+  SUP × SUP mudou.
+
+### Tabela da D.Mon preenchida por pesquisa
+
+As duas matrizes da D.Mon (vazias desde a v1.2.14) foram preenchidas — linha e
+coluna completas, nos dois sentidos. Metodologia completa em `DOCUMENTACAO.md`
+("Tabela da D.Mon").
+
+- **Counters** (`heroes enemy.xlsx`): fonte = *counter rating* do
+  [counterwatch.gg](https://www.counterwatch.gg/stats/overwatch/counters/dmon)
+  (Season 5, 149 mil partidas), que cobre os 53 heróis. Para converter na escala
+  inteira da matriz, os limiares foram **calibrados contra 9 tanques que já
+  estavam preenchidos** (Reinhardt, Junker Queen, D.Va, Ramattra, Winston, Hazard,
+  Sigma, Zarya, Orisa — 441 pares): `|rating| < 3.0 → 0`, `< 11.5 → ±1`,
+  `≥ 11.5 → ±2`, o ponto de menor erro em relação aos valores já existentes. A
+  linha da D.Mon é o espelho exato da coluna (`C(D.Mon, X) = −C(X, D.Mon)`).
+  - **Counteram a D.Mon**: Torbjörn e Illari (**+2**); Mauga, Ramattra, D.Va,
+    Roadhog, Orisa, Bastion, Freja, Pharah, Jetpack Cat e Zenyatta (+1).
+  - **A D.Mon countera**: Mercy, Kiriko, Lifeweaver, Brigitte, Sombra, Anran,
+    Widowmaker, Venture, Sierra, Soldier: 76, Shion, Genji, Vendetta, Winston e
+    Wrecking Ball (+1 na linha dela).
+  - **Duas células que já estavam preenchidas mudaram**: `C(D.Mon, Bastion)`
+    0 → −1 e `C(D.Mon, Illari)` 0 → −2 (Illari é o 2º counter mais forte do
+    dado). As outras duas que já existiam (Moira, Sojourn) seguiram em 0.
+- **Sinergias** (`heroes ally.xlsx`): onde há evidência específica da D.Mon, ela
+  decide — dado de dupla do counterwatch (pontuação "acima do esperado") e guias
+  (allthings.how, playerauctions, esports.gg, mobalytics, bo3.gg, gamer.org,
+  elevateboost.fr, overpicker). Onde as fontes não dizem nada, a base é a média do
+  que já estava dado aos 4 tanques de **perfil mais próximo** (Junker Queen,
+  Hazard, Mauga, Reinhardt — perfil poke/rush/dive do counterwatch), arredondada
+  em direção ao neutro.
+  - **+2**: Lúcio, Juno, Tracer, Echo, Shion. **+1**: Ana, Anran, D.Va,
+    Doctrine, Freja, Genji, Mei, Sombra, Zenyatta. **−1**: Ashe, Pharah,
+    Widowmaker, Junkrat, Jetpack Cat.
+  - Os "melhores parceiros por win rate combinado" **não** foram usados como
+    evidência: as listas do Reinhardt e da Junker Queen trazem os mesmos nomes
+    (Torbjörn, Symmetra, Vendetta, Zenyatta) — refletem o win rate do parceiro,
+    não sinergia com a D.Mon.
+- **Ícone de ban da D.Mon**: `assets/heroes/bans/DMon.png`, gerado pelo mesmo
+  processo do Doctrine. Fecha a lacuna aceita desde a v1.2.14 — o validador não
+  reporta mais nenhum ícone de ban ausente.
+
+### Novo mapa: Watchpoint: Grímsvötn
+
+- `MAPS_DATA`: novo mapa de **Escort** da Season 5 (slug `watchpoint-grimsvotn`),
+  agora **30 mapas**. O OCR passa a reconhecê-lo em vez de cair em `UNKNOWN`;
+  alias PT-BR `Observatório: Grímsvötn` (mesmo padrão do Gibraltar).
+- `stats_inputs.csv`: bloco do mapa com winrate/pickrate **vazios** (D.Mon com
+  `0.00`, como nos outros mapas) — MetaStrength neutro até a próxima coleta.
+- `tests/test_validation.py`: o teste dos dados reais agora valida só os dados
+  versionados (um override antigo de stats em `%APPDATA%` acusava o mapa novo).
+
+### Suas edições nas planilhas entraram no runtime
+
+As planilhas tinham edições ainda não convertidas para CSV (limpeza da Sombra,
+counters revistos da Shion e da Ana, Orisa × Roadhog 3 → 2). Elas foram
+preservadas e agora estão em `synergies.csv`/`counters.csv`, junto com o resto.
+
+### Testes
+
+- Novos `tests/test_doctrine.py` (aceitação do herói novo, incluindo um teste que
+  pega template com nome órfão como `Doctrine.jpg.png`) e `tests/test_suportes.py`
+  (tabela de categorias nos 16 × 16 pares, Meio × Flex nos dois sentidos, Sombra
+  como Suporte = Mizuki, peso SUP × SUP no par Mercy × Sombra e a ressincronização
+  dos favoritos).
+- `tests/test_dmon.py` reescrito para a tabela preenchida: completa, antissimétrica
+  nos counters, dentro da escala e ancorada nos achados da pesquisa; ícone de ban.
+- `tests/test_validation.py`: nenhuma lacuna aceita. `tests/test_utils.py`:
+  contagens oficiais (54 heróis, 23 DPS, 16 SUP). `tests/test_scoring.py`: a
+  pickrate neutra do teste de MetaStrength passou a vir de `HEROES_ROLES` em vez de
+  `2/24` fixo.
+- Suíte completa: **391 passaram, 1 pulado, 4 xfailed**. Os golden tests de
+  matching não regrediram com a Sombra e o Doctrine no banco de suportes.
+
+### Ainda sem dados
+
+- Winrate/pickrate de **Doctrine** e da **Sombra Suporte**: vazios até a próxima
+  atualização de stats (`tools/coletar_stats.py`/`coletar_stats2.py`).
+- Counters/sinergias de Doctrine e Sombra fora do bloco SUP × SUP (e da D.Mon).
+
+---
+
 ## [v1.2.15] — 2026-08-21
 
 ### Correção: jogando de Mei, o ranking saía de Suporte
