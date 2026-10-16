@@ -1,5 +1,5 @@
 {
-    "version": "1.2.15",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.15/OWPick_v1.2.15.zip",
-    "notas": "### Correção: jogando de Mei, o ranking saía de Suporte Terceiro (e mais silencioso) modo de falha da detecção automática da role — a mesma família dos bugs corrigidos nas v1.2.12/v1.2.13, mas com uma causa diferente: desta vez o problema **não estava no fuzzy match**, e sim na **binarização** que o Tesseract faz internamente. - **Sintoma**: com o jogador de **Mei** (DPS), o ranking vinha com opçõ"
+    "version": "1.2.16",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.16/OWPick_v1.2.16.zip",
+    "notas": "Season 5: novo Suporte **Doctrine**, **Sombra** passa de DPS para Suporte, sinergias entre suportes reorganizadas por categoria (Meio x Flex agora +2) e a tabela de counters/sinergias da **D.Mon** preenchida por pesquisa. Favoritos antigos com a Sombra são corrigidos sozinhos no boot. ### Novo Suporte: Doctrine - **`HEROES_ROLES`**: `Doctrine` em `SUP` (23 DPS, 15 TANK, **16** SUP — **54** heróis)"
 }
