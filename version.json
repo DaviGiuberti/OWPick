@@ -1,5 +1,5 @@
 {
-    "version": "1.2.16",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.16/OWPick_v1.2.16.zip",
-    "notas": "Season 5: novo Suporte **Doctrine**, **Sombra** passa de DPS para Suporte, sinergias entre suportes reorganizadas por categoria (Meio x Flex agora +2) e a tabela de counters/sinergias da **D.Mon** preenchida por pesquisa. Favoritos antigos com a Sombra são corrigidos sozinhos no boot. ### Novo Suporte: Doctrine - **`HEROES_ROLES`**: `Doctrine` em `SUP` (23 DPS, 15 TANK, **16** SUP — **54** heróis)"
+    "version": "1.2.17",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.17/OWPick_v1.2.17.zip",
+    "notas": "A sinergia entre dois DPS por categoria saiu. No lugar dela, a **dupla de DPS** do seu time ganha ou perde prioridade conforme o **tank inimigo**, numa coluna nova do ranking (**DUO**). Jogando de Suporte ou Tank, a dupla aliada também mexe na ameaça do tank inimigo. Sete counters tank × DPS foram revistos. ### Regra de dupla de DPS por tank inimigo (coluna DUO) Os 23 DPS ganharam duas classificaç"
 }
