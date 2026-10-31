@@ -9,7 +9,9 @@ Verifica, com AVISOS CLAROS do que está faltando/errado:
     (linha/coluna vazias) continua sendo uma coluna válida;
   - stats_inputs.csv: cobre os 30 mapas e as roles esperadas (DPS/TANK/SUP);
   - templates: todo herói tem retrato no lineup (720p E 2k, na role certa) e um
-    ícone de ban em assets/heroes/bans/.
+    ícone de ban em assets/heroes/bans/;
+  - regras de dupla de DPS (data/dps_duo_rules.json): cada eixo cobre os DPS,
+    cada tank tem exatamente uma regra, pares e trios só com classes conhecidas.
 
 Cada função devolve uma lista de PROBLEMAS (strings legíveis). Lista vazia = ok.
 Usado nos testes (rede da 1.3) e, opcionalmente, no boot em modo --debug.
@@ -20,6 +22,7 @@ from __future__ import annotations
 from collections.abc import Iterable
 from pathlib import Path
 
+from owpick.core.duo import parse_class_pair, parse_duo_rules
 from owpick.core.heroes import (
     HEROES_ROLES,
     get_all_heroes,
@@ -32,6 +35,9 @@ from owpick.infra.resources import resource_path
 # Role (HEROES_ROLES) -> subpasta de templates do lineup.
 _ROLE_TO_FOLDER = {"DPS": "dps", "TANK": "tank", "SUP": "sup"}
 _IMAGE_SUFFIXES = {".png", ".jpg", ".jpeg", ".bmp"}
+
+# A Flanker é declarada como subconjunto do Dano Médio: (eixo, classe).
+FLANKER_PARENT = ("dano", "Médio")
 
 
 def _expected_hero_keys() -> set[str]:
@@ -137,6 +143,128 @@ def validate_templates(base_dir: Path | None = None) -> list[str]:
     return problems
 
 
+def _role_keys(role: str) -> set[str]:
+    return {normalize_hero_name(h) for h in HEROES_ROLES[role]}
+
+
+def _is_number(value: object) -> bool:
+    return isinstance(value, (int, float)) and not isinstance(value, bool)
+
+
+def _check_pairs(
+    label: str, axis: str, pairs: Iterable[str], axis_classes: dict[str, set[str]]
+) -> list[str]:
+    """Pares 'A+B' de uma regra/trio: eixo existente e as duas classes nele.
+
+    Só roda depois de `parse_duo_rules` aceitar a estrutura, então todo par já
+    tem exatamente duas classes."""
+    if axis not in axis_classes:
+        return [f"[duo] {label}: eixo desconhecido '{axis}'"]
+    problems: list[str] = []
+    for pair in pairs:
+        unknown = set(parse_class_pair(pair)) - axis_classes[axis]
+        if unknown:
+            problems.append(
+                f"[duo] {label}: classe(s) fora do eixo '{axis}' em '{pair}': "
+                f"{', '.join(sorted(unknown))}"
+            )
+    return problems
+
+
+def validate_duo_rules(data: dict | None = None) -> list[str]:
+    """Valida as regras de dupla de DPS (data/dps_duo_rules.json) contra HEROES_ROLES.
+
+    - cada eixo cobre os DPS, cada um em UMA classe, sem herói inexistente ou de
+      outra role (um DPS novo sem classe aparece aqui);
+    - a Flanker é subconjunto da classe Médio do eixo "dano";
+    - cada tank está em EXATAMENTE uma regra (um tank novo sem regra aparece
+      aqui); pares só com classes do eixo da regra; valores numéricos;
+    - trios: suporte é SUP, tanks são TANK, par com classes do eixo.
+
+    `data=None` lê o arquivo do repositório/bundle.
+    """
+    if data is None:
+        try:
+            data = datasource.read_duo_rules_data()
+        except Exception as e:  # noqa: BLE001
+            return [f"[duo] não foi possível ler {datasource.DUO_RULES_FILE}: {e}"]
+    try:
+        parse_duo_rules(data)
+    except Exception as e:  # noqa: BLE001
+        return [f"[duo] estrutura inválida em {datasource.DUO_RULES_FILE}: {e!r}"]
+
+    problems: list[str] = []
+    dps, tanks, sups = _role_keys("DPS"), _role_keys("TANK"), _role_keys("SUP")
+
+    axis_classes: dict[str, set[str]] = {}
+    for axis, by_class in data["axes"].items():
+        axis_classes[axis] = set(by_class)
+        class_of: dict[str, str] = {}
+        for cls, names in by_class.items():
+            for name in names:
+                key = normalize_hero_name(name)
+                if key not in dps:
+                    problems.append(
+                        f"[duo] eixo '{axis}', classe '{cls}': '{name}' não é DPS de HEROES_ROLES"
+                    )
+                elif key in class_of:
+                    problems.append(
+                        f"[duo] eixo '{axis}': '{name}' em duas classes "
+                        f"('{class_of[key]}' e '{cls}')"
+                    )
+                else:
+                    class_of[key] = cls
+        missing = dps - set(class_of)
+        if missing:
+            problems.append(f"[duo] eixo '{axis}': DPS SEM classe: {', '.join(sorted(missing))}")
+
+    parent_axis, parent_class = FLANKER_PARENT
+    parent = {
+        normalize_hero_name(h) for h in data["axes"].get(parent_axis, {}).get(parent_class, [])
+    }
+    for name in data.get("flanker", []):
+        key = normalize_hero_name(name)
+        if key not in dps:
+            problems.append(f"[duo] flanker: '{name}' não é DPS de HEROES_ROLES")
+        elif key not in parent:
+            problems.append(
+                f"[duo] flanker: '{name}' fora da classe '{parent_class}' do eixo '{parent_axis}'"
+            )
+
+    rule_of: dict[str, str] = {}
+    for rule in data["rules"]:
+        label = f"regra '{rule['name']}'"
+        problems += _check_pairs(label, rule["axis"], rule["pairs"], axis_classes)
+        for pair, value in rule["pairs"].items():
+            if not _is_number(value):
+                problems.append(f"[duo] {label}: valor não numérico em '{pair}': {value!r}")
+        for tank in rule["tanks"]:
+            key = normalize_hero_name(tank)
+            if key not in tanks:
+                problems.append(f"[duo] {label}: '{tank}' não é TANK de HEROES_ROLES")
+            elif key in rule_of:
+                problems.append(
+                    f"[duo] '{tank}' em duas regras ('{rule_of[key]}' e '{rule['name']}')"
+                )
+            else:
+                rule_of[key] = rule["name"]
+    missing_tanks = tanks - set(rule_of)
+    if missing_tanks:
+        problems.append(f"[duo] tanks SEM regra: {', '.join(sorted(missing_tanks))}")
+
+    for trio in data.get("trios", []):
+        label = f"trio com '{trio['support']}'"
+        if normalize_hero_name(trio["support"]) not in sups:
+            problems.append(f"[duo] {label}: '{trio['support']}' não é SUP de HEROES_ROLES")
+        problems += _check_pairs(label, trio["axis"], [trio["pair"]], axis_classes)
+        if not _is_number(trio["value"]):
+            problems.append(f"[duo] {label}: valor não numérico: {trio['value']!r}")
+        for tank in trio["tanks"]:
+            if normalize_hero_name(tank) not in tanks:
+                problems.append(f"[duo] {label}: '{tank}' não é TANK de HEROES_ROLES")
+    return problems
+
+
 def validate_all() -> list[str]:
     """Roda todas as validações e devolve a lista consolidada de problemas."""
     problems: list[str] = []
@@ -153,13 +281,14 @@ def validate_all() -> list[str]:
         problems.append(f"[matrizes] falha ao carregar: {e}")
     problems += validate_stats()
     problems += validate_templates()
+    problems += validate_duo_rules()
     return problems
 
 
 def report_problems(problems: list[str], echo=print) -> bool:
     """Imprime os problemas de forma clara. Devolve True se estiver tudo ok."""
     if not problems:
-        echo("[validação] OK — matrizes, stats e templates consistentes.")
+        echo("[validação] OK — matrizes, stats, templates e regras de dupla consistentes.")
         return True
     echo("=" * 70)
     echo(f"[validação] {len(problems)} PROBLEMA(S) encontrado(s) nos dados:")

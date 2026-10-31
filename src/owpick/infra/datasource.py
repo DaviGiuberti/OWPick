@@ -2,7 +2,8 @@
 
 Camada infra: faz o I/O com pandas/json e devolve estruturas prontas (matrizes
 normalizadas via core.heroes.build_matrix_dict, DataFrame de stats, dict de
-config). Todas as leituras são cacheadas (uma vez por execução).
+config, regras de dupla de DPS via core.duo.parse_duo_rules). Todas as leituras
+são cacheadas (uma vez por execução).
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from functools import lru_cache
 import pandas as pd
 
 from owpick import paths
+from owpick.core.duo import EMPTY_DUO_RULES, DuoRules, parse_duo_rules
 from owpick.core.heroes import build_matrix_dict
 from owpick.infra.resources import resource_path
 from owpick.log import get_logger
@@ -29,6 +31,7 @@ SYNERGIES_FILE = "data/synergies.csv"  # matriz de sinergias (ex-heroes ally.xls
 COUNTERS_FILE = "data/counters.csv"  # matriz de counters (ex-heroes enemy.xlsx)
 STATS_FILE = "data/stats_inputs.csv"
 LAYOUT_FILE = "data/layouts/ow_hero_select.json"
+DUO_RULES_FILE = "data/dps_duo_rules.json"  # classes de DPS + regras por tank (coluna DUO)
 
 
 @lru_cache(maxsize=1)
@@ -110,3 +113,27 @@ def load_capture_config() -> dict:
     config.json), extraídas do layout. Consumido por resolution.get_scaled_map_region.
     """
     return load_layout().get("map_region_anchors", {})
+
+
+@lru_cache(maxsize=1)
+def read_duo_rules_data(path: str = DUO_RULES_FILE) -> dict:
+    """JSON cru das regras de dupla de DPS (cacheado). Levanta em caso de falha —
+    o validador relata o erro; o ranking usa `load_duo_rules`, que degrada."""
+    with open(resource_path(path), encoding="utf-8") as f:
+        return json.load(f)
+
+
+@lru_cache(maxsize=1)
+def load_duo_rules() -> DuoRules:
+    """
+    Regras de dupla de DPS por tank inimigo, prontas para o core (cacheadas).
+    Em caso de falha (arquivo ausente/ilegível/malformado) avisa e devolve regras
+    VAZIAS: o ranking segue, só que sem a coluna DUO e sem o termo de dupla na
+    ameaça.
+    """
+    try:
+        return parse_duo_rules(read_duo_rules_data())
+    except Exception as e:  # noqa: BLE001
+        log.warning("não foi possível ler %s: %s", DUO_RULES_FILE, e)
+        print(f"[datasource] AVISO: não foi possível ler {DUO_RULES_FILE}: {e}")
+        return EMPTY_DUO_RULES

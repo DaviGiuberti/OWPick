@@ -117,11 +117,16 @@ class CaptureResult:
 
 @dataclass
 class Recommendation:
-    """Linha do ranking final. `reasons` alimenta a explicabilidade (tarefa 6.4)."""
+    """Linha do ranking final. `reasons` alimenta a explicabilidade (tarefa 6.4).
+
+    `duo` é a coluna da regra de dupla de DPS por tank inimigo (v1.2.17);
+    total = meta + counter + synergy + duo.
+    """
 
     hero: Hero
     meta: float
     counter: float
     synergy: float
     total: float
+    duo: float = 0.0
     reasons: list[str] = field(default_factory=list)

@@ -86,9 +86,10 @@ def test_counter_first_sinergia_sup_x_sup_usa_peso_dobrado():
     ) == pytest.approx(scoring.BETA_SYN)
 
 
-def test_sinergia_dps_x_dps_usa_peso_fixo_de_065():
-    """Pares DPS × DPS usam β_syn_dps_dps=0.65 em TODOS os presets, menos o
-    "conforto+" (que mantém o β_syn próprio, 1.25)."""
+def test_par_dps_x_dps_usa_o_beta_syn_do_preset():
+    """O peso fixo de DPS × DPS (β_syn_dps_dps, v1.2.12) saiu na v1.2.17 junto com
+    os valores DPS × DPS da matriz: se um par desses tiver valor, ele usa o β_syn
+    do preset como qualquer outro par."""
     ally_matrix = {"cassidy": {"ana": 1.0, "ashe": -6.0}}
 
     def _syn(preset: str, ally: str) -> float:
@@ -98,23 +99,16 @@ def test_sinergia_dps_x_dps_usa_peso_fixo_de_065():
             )["synergy_score"]  # pyright: ignore[reportArgumentType]
         )
 
-    # Y(Cassidy, Ashe) = -6 (DPS × DPS): peso fixo 0.65 -> -3.9 nos 3 presets.
-    for preset in ("equilibrado", "counter-first", "meta-first"):
-        assert _syn(preset, "Ashe") == pytest.approx(-6 * 0.65), preset
-    # Y(Cassidy, Ana) = 1 (DPS × SUP): usa o β_syn NORMAL de cada preset.
-    assert _syn("counter-first", "Ana") == pytest.approx(0.325)
-    assert _syn("equilibrado", "Ana") == pytest.approx(0.65)
-    # "conforto+" não tem a regra: DPS × DPS usa o β_syn cheio (1.25).
-    assert _syn("conforto+", "Ashe") == pytest.approx(-6 * 1.25)
-    assert _syn("conforto+", "Ana") == pytest.approx(1.25)
+    for preset in ("equilibrado", "counter-first", "meta-first", "conforto+"):
+        beta = resolve_weights(preset).beta_syn
+        assert _syn(preset, "Ashe") == pytest.approx(-6 * beta), preset
+        assert _syn(preset, "Ana") == pytest.approx(1 * beta), preset
 
 
-def test_precedencia_sup_sup_sobre_dps_dps_e_beta_syn():
-    """Precedência: SUP × SUP -> β_syn_sup_sup; DPS × DPS -> β_syn_dps_dps; senão β_syn."""
+def test_precedencia_sup_sup_sobre_beta_syn():
+    """Precedência: SUP × SUP -> β_syn_sup_sup; senão β_syn (DPS × DPS incluso)."""
     w = resolve_weights("counter-first")
     assert w.beta_syn_sup_sup == 0.325 * 2  # 0.65
-    assert w.beta_syn_dps_dps == 0.65
-    # Um par SUP × SUP nunca cai na regra de DPS (roles distintas não se cruzam).
     ally_matrix = {"ana": {"mercy": 1.0}, "cassidy": {"ashe": 1.0}}
     sup = float(
         calculate_hero_score("Ana", ally_matrix, {}, ["Mercy"], [], {}, {}, weights=w)[
@@ -127,7 +121,7 @@ def test_precedencia_sup_sup_sobre_dps_dps_e_beta_syn():
         ]  # pyright: ignore[reportArgumentType]
     )
     assert sup == pytest.approx(0.65)
-    assert dps == pytest.approx(0.65)
+    assert dps == pytest.approx(0.325)
     # Par de roles diferentes: β_syn normal do preset.
     misto = float(
         calculate_hero_score(
@@ -158,12 +152,12 @@ def test_sinergia_mercy_x_dps_usa_peso_fixo_de_1():
         assert _syn(preset, "Ana") == pytest.approx(2.0 * beta_sup), preset
 
 
-def test_precedencia_mercy_dps_nunca_colide_com_as_excecoes_de_mesma_role():
-    """SUP × SUP → DPS × DPS → Mercy × DPS → β_syn (as duas primeiras exigem a
-    MESMA role; a terceira, roles distintas — nunca competem pelo mesmo par)."""
+def test_precedencia_mercy_dps_nunca_colide_com_a_excecao_de_mesma_role():
+    """SUP × SUP → Mercy × DPS → β_syn (a primeira exige a MESMA role; a segunda,
+    roles distintas — nunca competem pelo mesmo par)."""
     w = resolve_weights("counter-first")
     assert scoring._pair_beta_syn(w, "SUP", "SUP", "mercy", "ana") == pytest.approx(0.65)
-    assert scoring._pair_beta_syn(w, "DPS", "DPS", "cassidy", "ashe") == pytest.approx(0.65)
+    assert scoring._pair_beta_syn(w, "DPS", "DPS", "cassidy", "ashe") == pytest.approx(0.325)
     assert scoring._pair_beta_syn(w, "SUP", "DPS", "mercy", "cassidy") == pytest.approx(1.0)
     assert scoring._pair_beta_syn(w, "DPS", "SUP", "cassidy", "mercy") == pytest.approx(1.0)
     # Mercy × TANK e outro SUP × DPS caem no β_syn genérico.

@@ -96,6 +96,7 @@ def print_ranking(result: RankingResult) -> None:
     table.add_column("MAP META", justify="right")
     table.add_column("COUNTER", justify="right")
     table.add_column("SYNERGY", justify="right")
+    table.add_column("DUO", justify="right")  # regra de dupla de DPS por tank inimigo
     table.add_column("TOTAL", justify="right")
     table.add_column("")  # barra de score
 
@@ -114,6 +115,7 @@ def print_ranking(result: RankingResult) -> None:
             f"{rec.meta:.2f}",
             f"{rec.counter:.2f}",
             f"{rec.synergy:.2f}",
+            f"{rec.duo:.2f}",
             f"{rec.total:.2f}",
             _score_bar(rec.total, max_abs),
             style=row_style,

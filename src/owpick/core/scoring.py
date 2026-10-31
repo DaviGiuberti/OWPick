@@ -2,7 +2,7 @@
 
 Score final de cada herói candidato h:
 
-    S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
+    S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h) + DUO(h)
 
 onde:
     m_scaled(h, k) = MetaStrength do herói no mapa atual k. É o z-score da
@@ -12,10 +12,13 @@ onde:
                          z_role = (wr(h) − wr̄_role) / σ_role
                          conf   = pr / (pr + k0_role),  k0_role = pickrate neutra da role
     T_ctr(h)       = Σ_e  w_e · C(h, e)                        (counter com threat weighting)
-    raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')
+    raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e') − λ · D(e)
                                                                (sinal bruto de ameaça; 0 = neutro:
                                                                 counters + força no mapa + sinergia
-                                                                do inimigo com o time inimigo)
+                                                                do inimigo com o time inimigo +
+                                                                dupla de DPS aliada já formada
+                                                                contra o tank inimigo, D(e) —
+                                                                ver core.duo.duo_threat_value)
     w_e            = exp(A · tanh(raw_e / S))                  (multiplicador de ameaça — ver
                      threat_multiplier: w_e(0)=1, log-simétrico, ancorado em
                      w(−6)=0.5 e w(8)=2.5)
@@ -23,12 +26,12 @@ onde:
                                                                 β_syn(h,a) = β_syn_sup_sup se
                                                                 ambos forem SUP e o preset o
                                                                 definir — só o "counter-first" —;
-                                                                β_syn_dps_dps (0.65) se ambos
-                                                                forem DPS e o preset o definir
-                                                                — todos menos o "conforto+" —;
                                                                 β_syn_mercy_dps (1.0) no par
                                                                 Mercy × DPS, em TODOS os presets;
                                                                 senão β_syn)
+    DUO(h)         = β_duo · Σ termos da regra de dupla        (dupla de DPS por tank inimigo +
+                                                                trio com suporte; ver
+                                                                core.duo.duo_terms)
 
 Regra do "DPS prioritário" (v1.2.13): quando o candidato é a MERCY e há um DPS
 "prioritário" no time aliado, só o de MAIOR Y(Mercy, ·) entra no T_syn — os
@@ -49,6 +52,7 @@ import numpy as np
 import pandas as pd
 
 from owpick.core import heroes
+from owpick.core.duo import DuoRules, duo_terms, duo_threat_value
 from owpick.core.heroes import normalize_hero_name
 from owpick.core.models import BanList, Hero, Lineup, Recommendation
 from owpick.log import get_logger
@@ -68,12 +72,10 @@ NU_THREAT = 0.10  # intensidade do threat weighting (componente sinergia DENTRO 
 BETA_META = 1.5  # peso do MetaStrength no score (preset "equilibrado"; era 2.0)
 BETA_CTR = 1.0  # peso do counter term no score
 BETA_SYN = 0.65  # peso da sinergia (mantido do modelo anterior)
-# Peso FIXO da sinergia em pares DPS × DPS (v1.2.12). Vale em todos os presets
-# MENOS o "conforto+" (que mantém o β_syn próprio, mais alto, para todos os
-# pares). Note que 0.65 só coincide com BETA_SYN por acaso: aqui é uma âncora
-# independente — em presets com β_syn diferente (counter-first 0.325,
-# meta-first 0.65) o par DPS × DPS continua valendo 0.65.
-BETA_SYN_DPS_DPS = 0.65
+# Peso da coluna DUO (v1.2.17): a regra de dupla de DPS por tank inimigo
+# (core.duo, data/dps_duo_rules.json) já vem na escala própria (±2 por dupla,
+# +2 pelo trio), então entra com peso cheio nos quatro presets.
+BETA_DUO = 1.0
 # Peso FIXO da sinergia no par Mercy × DPS (v1.2.13). Vale em TODOS os presets:
 # a linha da Mercy contra os DPS é uma escala própria (+2 quem ela "pocketa",
 # −2 quem não aproveita o dano amplificado), então ela entra no score com peso
@@ -160,12 +162,9 @@ class ModelWeights:
     beta_meta: float = BETA_META  # peso do MetaStrength no score
     beta_ctr: float = BETA_CTR  # peso do counter term no score
     beta_syn: float = BETA_SYN  # peso da sinergia no score
+    beta_duo: float = BETA_DUO  # peso da coluna DUO (regra de dupla por tank inimigo)
     # Peso de sinergia específico para pares SUP × SUP; None ⇒ usa `beta_syn`.
     beta_syn_sup_sup: float | None = None
-    # Peso de sinergia específico para pares DPS × DPS; None ⇒ usa `beta_syn`.
-    # Default = 0.65 (vale em equilibrado/counter-first/meta-first); só o
-    # "conforto+" zera a regra (None) e usa o próprio beta_syn nesses pares.
-    beta_syn_dps_dps: float | None = BETA_SYN_DPS_DPS
     # Peso de sinergia específico do par Mercy × DPS; None ⇒ usa `beta_syn`.
     # Default = 1.0 e NENHUM preset o sobrescreve — a regra vale nos quatro.
     beta_syn_mercy_dps: float | None = BETA_SYN_MERCY_DPS
@@ -181,8 +180,7 @@ PRESETS: dict[str, ModelWeights] = {
     # Prioriza counterar o time inimigo: threat weighting por COUNTERS (λ=0.32) e
     # counter term cheio (β_ctr=1.0); meta recua (β_meta=0.75) e a sinergia geral
     # também (β_syn=0.325), EXCETO entre dois suportes (β_syn_sup_sup=0.65), onde a
-    # dupla de sup pesa como no preset equilibrado, e entre dois DPS
-    # (β_syn_dps_dps=0.65).
+    # dupla de sup pesa como no preset equilibrado.
     "counter-first": ModelWeights(
         lam=0.32,
         mu=0.23,
@@ -191,7 +189,6 @@ PRESETS: dict[str, ModelWeights] = {
         beta_ctr=1.00,
         beta_syn=0.325,
         beta_syn_sup_sup=0.65,
-        beta_syn_dps_dps=BETA_SYN_DPS_DPS,
     ),
     # Prioriza o desempenho estatístico no mapa atual (meta): β_meta=3.0. A ameaça
     # passa a pesar quem é FORTE NO MAPA (μ=0.70) e quem forma uma COMP COESA
@@ -203,13 +200,10 @@ PRESETS: dict[str, ModelWeights] = {
         beta_meta=3.0,
         beta_ctr=1.0,
         beta_syn=0.65,
-        beta_syn_dps_dps=BETA_SYN_DPS_DPS,
     ),
     # "Conforto+": mais sinergia no SEU time (β_syn=1.25) e ameaça inimiga
     # DE-ENFATIZADA em todos os eixos (λ=0.18, μ=0.20, ν=0.06) — o foco é o SEU time.
-    # Único preset SEM a regra de DPS × DPS (beta_syn_dps_dps=None): aqui um par de
-    # DPS usa o β_syn cheio (1.25), coerente com "jogue o que você domina".
-    "conforto+": ModelWeights(lam=0.18, mu=0.20, nu=0.06, beta_syn=1.25, beta_syn_dps_dps=None),
+    "conforto+": ModelWeights(lam=0.18, mu=0.20, nu=0.06, beta_syn=1.25),
 }
 
 WEIGHT_FIELD_NAMES = tuple(f.name for f in fields(ModelWeights))
@@ -314,8 +308,9 @@ def load_meta_strength(
 # ---------------------------------------------------------------------------
 # Roles cujo par (mesma role dos DOIS inimigos) é IGNORADO no termo de sinergia
 # do threat weighting — em todos os presets. Vale só para a ameaça: no T_syn do
-# ranking esses pares continuam contando.
-THREAT_SYNERGY_EXCLUDED_ROLES = frozenset({"SUP", "DPS"})
+# ranking esses pares continuam contando. (DPS × DPS saiu na v1.2.17, junto com
+# os valores DPS × DPS da matriz de sinergias.)
+THREAT_SYNERGY_EXCLUDED_ROLES = frozenset({"SUP"})
 
 
 def _threat_pair_excluded(role_a: str | None, role_b: str | None) -> bool:
@@ -391,13 +386,15 @@ def compute_threat_weights(
     mu: float = MU_THREAT,
     synergy_matrix: dict[str, dict[str, float]] | None = None,
     nu: float = NU_THREAT,
+    role: str | None = None,
+    duo_rules: DuoRules | None = None,
 ) -> dict[str, float]:
     """
     Para cada inimigo e:
-        raw = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')
+        raw = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e') − λ · D(e)
         w_e = threat_multiplier(raw) = exp(A · tanh(raw / S))
 
-    Três componentes do sinal bruto de ameaça (0 = neutro):
+    Quatro componentes do sinal bruto de ameaça (0 = neutro):
       • λ · Σ_a C(e,a)      — quão bem o inimigo countera o SEU time (counters).
       • μ · m(e,k)          — força do inimigo no mapa atual (MetaStrength).
       • ν · Σ_{e'≠e} Y(e,e') — sinergia do inimigo com o RESTO do time inimigo
@@ -406,9 +403,16 @@ def compute_threat_weights(
                                `Y` é a MESMA matriz de sinergia dos aliados
                                (`synergy_matrix`), aplicada aos pares de inimigos;
                                `None` ⇒ termo ausente (compatibilidade).
-                               EXCEÇÃO: pares de mesma role SUP × SUP e DPS × DPS
-                               contribuem 0 aqui, em todos os presets
-                               (THREAT_SYNERGY_EXCLUDED_ROLES).
+                               EXCEÇÃO: pares SUP × SUP contribuem 0 aqui, em
+                               todos os presets (THREAT_SYNERGY_EXCLUDED_ROLES).
+      • −λ · D(e)           — dupla de DPS ALIADA já formada contra o tank
+                               inimigo (`core.duo.duo_threat_value`): só jogando
+                               de SUP/TANK (`role`), com exatamente 2 DPS aliados
+                               e `e` como único tank inimigo. D(e) > 0 (a dupla
+                               que o tank sofre, trio com suporte) reduz a
+                               ameaça; D(e) < 0 aumenta. Usa o MESMO λ dos
+                               counters: a dupla é mais um counter entre o tank
+                               e o seu time. `duo_rules=None` ⇒ termo ausente.
 
     `raw = 0` dá w_e = 1 exatamente; raw < 0 ⇒ w_e < 1; raw > 0 ⇒ w_e > 1.
     `threat_multiplier` é contínuo, suave, monotônico (preserva a ordenação das
@@ -430,19 +434,25 @@ def compute_threat_weights(
         counter_sum = sum(row.get(a, 0.0) for a in allies_norm)
         map_bonus = meta.get(en, 0.0)  # MetaStrength do inimigo no mapa atual
         syn_row = syn.get(en, {})
-        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada). Pares de
-        # MESMA role SUP × SUP e DPS × DPS NÃO contam para a ameaça: dois suportes
-        # (ou dois DPS) juntos não tornam o inimigo mais perigoso para efeito de
-        # threat weighting. A exclusão vale em TODOS os presets e só aqui — no
-        # ranking principal (T_syn) esses pares seguem contando normalmente
-        # (DPS × DPS com o peso próprio; ver _pair_beta_syn).
+        # Sinergia com os OUTROS inimigos (diagonal e' == e ignorada). Pares
+        # SUP × SUP NÃO contam para a ameaça: dois suportes juntos não tornam o
+        # inimigo mais perigoso para efeito de threat weighting. A exclusão vale
+        # em TODOS os presets e só aqui — no ranking principal (T_syn) esses
+        # pares seguem contando normalmente.
         enemy_role = heroes.get_hero_role(en)
         synergy_sum = sum(
             syn_row.get(other, 0.0)
             for other in enemies_norm
             if other != en and not _threat_pair_excluded(enemy_role, heroes.get_hero_role(other))
         )
-        raw = lam * counter_sum + mu * map_bonus + nu * synergy_sum
+        # Dupla de DPS aliada já formada contra o tank inimigo (0 fora das
+        # condições da regra — ver core.duo.duo_threat_value).
+        duo_value = (
+            duo_threat_value(enemy, allies, enemies, role, duo_rules)
+            if duo_rules is not None
+            else 0.0
+        )
+        raw = lam * counter_sum + mu * map_bonus + nu * synergy_sum - lam * duo_value
         weights[en] = threat_multiplier(raw)
     # Ajuste do "pocket" da Mercy: aplicado DEPOIS, sobre os w_e prontos (não
     # entra no raw nem passa pela curva) — ver apply_mercy_pocket.
@@ -494,18 +504,16 @@ def _pair_beta_syn(
 ) -> float:
     """β_syn efetivo de um par de aliados, pela role (e, no caso da Mercy, nome).
 
-    Precedência: SUP × SUP → `beta_syn_sup_sup`; DPS × DPS → `beta_syn_dps_dps`;
-    Mercy × DPS → `beta_syn_mercy_dps`; qualquer outra combinação (ou peso não
-    definido no preset) → `beta_syn`. As duas primeiras exigem a MESMA role nos
-    dois heróis e a terceira exige roles distintas (SUP × DPS), então elas nunca
-    competem pelo mesmo par. Vale só para o `T_syn` do ranking — o threat
-    weighting tem regra própria (ver `compute_threat_weights`).
+    Precedência: SUP × SUP → `beta_syn_sup_sup`; Mercy × DPS →
+    `beta_syn_mercy_dps`; qualquer outra combinação (ou peso não definido no
+    preset) → `beta_syn`. A primeira exige a MESMA role nos dois heróis e a
+    segunda exige roles distintas (SUP × DPS), então elas nunca competem pelo
+    mesmo par. Vale só para o `T_syn` do ranking — o threat weighting tem regra
+    própria (ver `compute_threat_weights`).
     """
     if role_a == role_b:
         if role_a == "SUP" and weights.beta_syn_sup_sup is not None:
             return weights.beta_syn_sup_sup
-        if role_a == "DPS" and weights.beta_syn_dps_dps is not None:
-            return weights.beta_syn_dps_dps
         return weights.beta_syn
     if weights.beta_syn_mercy_dps is not None and (
         (key_a == MERCY_KEY and role_b == "DPS") or (key_b == MERCY_KEY and role_a == "DPS")
@@ -524,18 +532,22 @@ def calculate_hero_score(
     meta_strength: dict[str, float],
     weights: ModelWeights = DEFAULT_WEIGHTS,
     mapa: str | None = None,
+    role: str | None = None,
+    duo_rules: DuoRules | None = None,
 ) -> dict[str, float | str | list[str]]:
     hn = normalize_hero_name(hero_name)
 
     # Contribuições por origem (tarefa 6.4): cada termo relevante gera uma
-    # razão legível, na MESMA escala das colunas da tabela. As três colunas
-    # (META, COUNTER, SYNERGY) são as contribuições JÁ PONDERADAS que entram no
-    # TOTAL — cada peso (β_meta/β_ctr/β_syn) é aplicado AQUI, uma única vez —, de
-    # forma que vale exatamente TOTAL = META + COUNTER + SYNERGY (o usuário
-    # confere a soma olhando a tabela). Os números das razões batem com as colunas.
+    # razão legível, na MESMA escala das colunas da tabela. As quatro colunas
+    # (META, COUNTER, SYNERGY, DUO) são as contribuições JÁ PONDERADAS que entram
+    # no TOTAL — cada peso (β_meta/β_ctr/β_syn/β_duo) é aplicado AQUI, uma única
+    # vez —, de forma que vale exatamente TOTAL = META + COUNTER + SYNERGY + DUO
+    # (o usuário confere a soma olhando a tabela). Os números das razões batem
+    # com as colunas.
     REASON_MIN = 0.05  # contribuições abaixo disso são ruído e não explicam nada
     counter_reasons: list[tuple[float, str]] = []
     synergy_reasons: list[tuple[float, str]] = []
+    duo_reasons: list[tuple[float, str]] = []
 
     # --- counter term (threat weighting × β_ctr) ---
     enemy_row = enemy_matrix.get(hn, {})
@@ -556,8 +568,8 @@ def calculate_hero_score(
                 counter_reasons.append((contribution, f"sofre contra {enemy} ({contribution:.2f})"))
 
     # --- synergy term (× β_syn, diagonal ignorada) ---
-    # O peso do par sai de `_pair_beta_syn`: SUP × SUP, DPS × DPS e Mercy × DPS
-    # têm pesos próprios quando o preset os define; o resto usa β_syn.
+    # O peso do par sai de `_pair_beta_syn`: SUP × SUP e Mercy × DPS têm pesos
+    # próprios quando o preset os define; o resto usa β_syn.
     ally_row = ally_matrix.get(hn, {})
     hero_role = heroes.get_hero_role(hn)
     # Regra do "DPS prioritário": só quando a MERCY é a candidata, e num único
@@ -587,17 +599,27 @@ def calculate_hero_score(
                     (contribution, f"anti-sinergia com {ally} ({contribution:.2f})")
                 )
 
+    # --- duo term (regra de dupla de DPS por tank inimigo, × β_duo) ---
+    duo_score = 0.0
+    if duo_rules is not None:
+        for value, label in duo_terms(hero_name, allies, enemies, role, duo_rules):
+            contribution = weights.beta_duo * value
+            duo_score += contribution
+            if abs(contribution) >= REASON_MIN:
+                duo_reasons.append((contribution, f"{label} ({contribution:+.2f})"))
+
     # --- meta term (× β_meta) ---
     meta_score = weights.beta_meta * meta_strength.get(hn, 0.0)
 
-    total = meta_score + counter_score + synergy_score
+    total = meta_score + counter_score + synergy_score + duo_score
 
     # Razões ordenadas pelo IMPACTO (|contribuição|, desc) dentro de cada termo;
-    # counters primeiro, depois sinergias, mapa por último.
+    # counters primeiro, depois sinergias, depois a dupla, mapa por último.
     reasons = [
         r
         for _, r in sorted(counter_reasons, key=lambda c: abs(c[0]), reverse=True)
         + sorted(synergy_reasons, key=lambda c: abs(c[0]), reverse=True)
+        + sorted(duo_reasons, key=lambda c: abs(c[0]), reverse=True)
     ]
     if mapa and mapa != "UNKNOWN":
         if meta_score >= REASON_MIN:
@@ -610,6 +632,7 @@ def calculate_hero_score(
         "meta_score": meta_score,
         "counter_score": counter_score,
         "synergy_score": synergy_score,
+        "duo_score": duo_score,
         "total": total,
         "reasons": reasons,
     }
@@ -629,11 +652,14 @@ def rank_heroes(
     excluded_keys: set[str] | None = None,
     weights: ModelWeights = DEFAULT_WEIGHTS,
     mapa: str | None = None,
+    role: str | None = None,
+    duo_rules: DuoRules | None = None,
 ) -> tuple[list[Recommendation], list[str]]:
     """
     Ranqueia os heróis jogáveis, excluindo quem estiver em `excluded_keys`
     (aliados já no time + banidos). Retorna (recomendações ordenadas desc,
-    nomes excluídos). Puro — não imprime nem lê nada.
+    nomes excluídos). Puro — não imprime nem lê nada. `role` (do jogador) e
+    `duo_rules` alimentam a coluna DUO; sem `duo_rules` ela fica em 0.
     """
     excluded = excluded_keys or set()
     recs: list[Recommendation] = []
@@ -652,6 +678,8 @@ def rank_heroes(
             meta_strength,
             weights=weights,
             mapa=mapa,
+            role=role,
+            duo_rules=duo_rules,
         )
         reasons = data["reasons"]
         assert isinstance(reasons, list)
@@ -662,6 +690,7 @@ def rank_heroes(
                 counter=float(data["counter_score"]),  # pyright: ignore[reportArgumentType]
                 synergy=float(data["synergy_score"]),  # pyright: ignore[reportArgumentType]
                 total=float(data["total"]),  # pyright: ignore[reportArgumentType]
+                duo=float(data["duo_score"]),  # pyright: ignore[reportArgumentType]
                 reasons=reasons,
             )
         )

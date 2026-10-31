@@ -19,11 +19,13 @@ def isolated_settings(tmp_path, monkeypatch):
 
 def _result() -> RankingResult:
     recs = [
-        Recommendation(hero=Hero.from_name(n), meta=m, counter=c, synergy=s, total=m + c + s)
-        for n, m, c, s in [
-            ("Zarya", 1.0, 2.0, 0.5),
-            ("Ana", 0.5, 1.0, 0.2),
-            ("Ashe", 0.0, -0.5, 0.1),
+        Recommendation(
+            hero=Hero.from_name(n), meta=m, counter=c, synergy=s, duo=d, total=m + c + s + d
+        )
+        for n, m, c, s, d in [
+            ("Zarya", 1.0, 2.0, 0.5, 0.0),
+            ("Ana", 0.5, 1.0, 0.2, 0.0),
+            ("Ashe", 0.0, -0.5, 0.1, 1.75),
         ]
     ]
     return RankingResult(
@@ -47,10 +49,11 @@ def test_render_rich_contem_tabela_ameacas_e_dados(isolated_settings, capsys):
     assert "Ranking de Ameaças Inimigas" in out
     assert "Winston" in out and "1.80" in out
     # Tabela com colunas e heróis.
-    for token in ("RANK", "HERO", "MAP META", "COUNTER", "SYNERGY", "TOTAL"):
+    for token in ("RANK", "HERO", "MAP META", "COUNTER", "SYNERGY", "DUO", "TOTAL"):
         assert token in out
     for hero in ("Zarya", "Ana", "Ashe"):
         assert hero in out
+    assert "1.75" in out  # coluna DUO (regra de dupla de DPS por tank inimigo)
     # Barra de score presente para o melhor colocado.
     assert "█" in out
     assert "Banidos: Sombra" in out

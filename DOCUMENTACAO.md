@@ -22,7 +22,8 @@ OWPick é uma ferramenta desktop para jogadores de **Overwatch** que automatiza 
   - **MetaStrength** (`m_scaled`): desempenho estatístico do herói no mapa atual (z-score da winrate **bruta por role**, atenuado pela confiança da pickrate)
   - **Counter score** (`T_ctr`): quão bem o herói countera os inimigos, com ponderação por ameaça
   - **Sinergia score** (`T_syn`): quão bem o herói sinergiza com os aliados
-- **Threat weighting**: pondera automaticamente inimigos mais perigosos (baseado em counters e meta no mapa)
+  - **Regra de dupla** (`DUO`): a dupla de DPS do seu time ganha ou perde prioridade conforme o **tank inimigo** (classes de DPS, regras por tank e o trio com a Zenyatta, em `data/dps_duo_rules.json`)
+- **Threat weighting**: pondera automaticamente inimigos mais perigosos (counters, meta no mapa, sinergia do time inimigo e, jogando de Suporte/Tank, a dupla de DPS aliada contra o tank inimigo)
 - Exibição do ranking de ameaças inimigas antes do ranking de heróis
 - Gerenciamento de heróis favoritos por função (DPS, Suporte, Tank, Fila Aberta)
 - **Settings único e validado** (`settings.json` em `%APPDATA%\OWPick`): hotkey, idioma, debug, preset de pesos, overrides avançados de calibração, perfis
@@ -55,6 +56,7 @@ OWPick/
 │   │   ├── heroes.py        # Heróis/mapas embutidos + normalização + build_matrix_dict
 │   │   ├── resolution.py    # Escala/interpolação, banco de templates, região do mapa
 │   │   ├── models.py        # Dataclasses (Hero, Lineup, BanList, CaptureResult, ...)
+│   │   ├── duo.py           # Regra de dupla de DPS por tank inimigo (coluna DUO)
 │   │   ├── scoring.py       # MetaStrength + threat weighting + ranking + presets (ModelWeights)
 │   │   └── ports.py         # Protocols (ScreenCapturer, MetaSource, MatrixSource)
 │   ├── infra/               # I/O: captura, matching, OCR, dados, persistência, updater
@@ -103,6 +105,8 @@ OWPick/
 │   ├── counters.csv         # Matriz de counters — LIDA em runtime (empacotada)
 │   ├── heroes ally.xlsx     # Sinergias: fonte de EDIÇÃO (NÃO empacotada; vira synergies.csv)
 │   ├── heroes enemy.xlsx    # Counters: fonte de EDIÇÃO (NÃO empacotada; vira counters.csv)
+│   ├── dps_duo_rules.json   # Classes de DPS + regras de dupla por tank (coluna DUO) —
+│   │                        # LIDO em runtime (empacotado; editado à mão)
 │   ├── layouts/
 │   │   └── ow_hero_select.json  # Layout de captura versionado: slots do lineup,
 │   │                            # perks, slots de ban, região do nome do herói do
@@ -186,7 +190,8 @@ current_map.txt   # Mapa identificado na última captura (fluxo CLI)
 | app | `settings.py` | Settings único tipado/validado (`settings.json` em `%APPDATA%\OWPick`) |
 | app | `i18n.py` | Strings de UI por idioma (`assets/i18n/pt-BR.json`, `en.json`) |
 | app | `pipeline.py` | Casos de uso: `run_pipeline()` compõe infra + core → `RankingResult` |
-| core | `core/scoring.py` | MetaStrength + threat weighting + sinergia → `Recommendation` (puro) |
+| core | `core/scoring.py` | MetaStrength + threat weighting + sinergia + coluna DUO → `Recommendation` (puro) |
+| core | `core/duo.py` | Regra de dupla de DPS por tank inimigo: classes, regras e trio → termos da coluna DUO e da ameaça (puro) |
 | core | `core/heroes.py` | Heróis/mapas embutidos + normalização + `build_matrix_dict` |
 | core | `core/resolution.py` | Escala/interpolação, banco de templates, região do mapa |
 | core | `core/models.py` | Dataclasses de domínio; `Hero.from_name` normaliza na fronteira |
@@ -221,8 +226,8 @@ ui/console.main()
     ├── matching.match_bans() / match_lineup()   → BanList, Lineup (objetos Hero)
     ├── map_detect.detect(cap.full)       → MapDetection
     └── pipeline.rank(...)                → RankingResult
-        ├── datasource.get_ally_matrix() / get_enemy_matrix() / read_stats_inputs()
-        └── core/scoring: load_meta_strength + compute_threat_weights + rank_heroes
+        ├── datasource.get_ally_matrix() / get_enemy_matrix() / read_stats_inputs() / load_duo_rules()
+        └── core/scoring (+ core/duo): load_meta_strength + compute_threat_weights + rank_heroes
     → ui/ranking_view.render(result)      (única camada que imprime)
 ```
 
@@ -290,8 +295,10 @@ pipeline.analyze(full_img, role)
 pipeline.rank(role, playable, allies, enemies, banned, mapa) → RankingResult
   - datasource.get_ally_matrix()/get_enemy_matrix()  [data/*.csv, cacheados]
   - datasource.read_stats_inputs()   [override do usuário > embutido]
+  - datasource.load_duo_rules()      [data/dps_duo_rules.json, cacheado]
   - pesos: settings.weights_preset + custom_weights (resolve_weights)
   - core/scoring: load_meta_strength → compute_threat_weights → rank_heroes
+      - a role do jogador decide a regra de dupla (coluna DUO e termo da ameaça)
       - exclui aliados já no time E banidos (regra rígida)
       - Recommendation.reasons acumula as contribuições (explicabilidade)
         ↓
@@ -308,19 +315,23 @@ implementação de matching do fluxo em memória.
 ### Modelo de Scoring
 
 ```
-S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h)
+S(h) = β_meta · m_scaled(h, k) + β_ctr · T_ctr(h) + T_syn(h) + DUO(h)
 
 m_scaled(h, k) = α · clamp( conf · (wr(h) - wr̄_role(k)) / σ_role(k), -Mmax, +Mmax )  [MetaStrength]
 conf           = pr / (pr + k0_role),   k0_role = pickrate neutra da role            [confiança da pickrate]
 T_ctr(h)       = Σ_e w_e · C(h, e)                                                    [counter com threat weighting]
-raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')                   [sinal bruto de ameaça; 0 = neutro]
+raw_e          = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e') − λ · D(e)        [sinal bruto de ameaça; 0 = neutro]
 w_e            = exp( A · tanh(raw_e / S) )                                           [multiplicador de ameaça; log-simétrico]
 T_syn(h)       = Σ_a Y(h, a) · β_syn(h, a)                                            [sinergia; diagonal h==a ignorada]
 β_syn(h, a)    = β_syn_sup_sup   se role(h) = role(a) = SUP   (só o Counter-first o define)
-                 β_syn_dps_dps   se role(h) = role(a) = DPS   (0.65; todos menos o Conforto+)
                  β_syn_mercy_dps se {h, a} = {Mercy, um DPS}  (1.0; todos os presets)
                  β_syn           nos demais pares
+DUO(h)         = β_duo · ( dupla(h) + trio(h) )                                       [regra de dupla de DPS por tank inimigo]
 ```
+
+> `DUO(h)` e `D(e)` (a dupla de DPS aliada já formada contra o tank inimigo)
+> seguem as [Classes de DPS e regras por tank](#classes-de-dps-e-regras-por-tank-coluna-duo),
+> que dependem da **role do jogador**.
 
 > No `T_syn` da **Mercy** ainda entra a **regra do "DPS prioritário"**, que
 > descarta aliados DPS da soma antes de aplicar os pesos acima — ver
@@ -333,21 +344,27 @@ comparado apenas com heróis da mesma função.
 #### Multiplicador de Enemy Threat — `w_e = exp(A · tanh(raw_e / S))`
 
 O peso de ameaça de cada inimigo transforma o **sinal bruto**
-`raw_e = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e')` em um multiplicador
-aplicado ao counter term. São **três componentes** (0 = ameaça neutra):
+`raw_e = λ · Σ_a C(e,a) + μ · m(e,k) + ν · Σ_{e'≠e} Y(e,e') − λ · D(e)` em um
+multiplicador aplicado ao counter term. São **quatro componentes** (0 = ameaça
+neutra):
 
 - `λ · Σ_a C(e,a)` — quão bem o inimigo countera o **seu** time;
 - `μ · m(e,k)` — força do inimigo no mapa atual (MetaStrength);
 - `ν · Σ_{e'≠e} Y(e,e')` — **sinergia do inimigo com o resto do time inimigo**
   (combo: um inimigo numa comp coesa é mais perigoso; anti-sinergia reduz a
   ameaça). Usa a **mesma matriz de sinergia `Y`** dos aliados, aplicada aos pares
-  de inimigos, com a diagonal `e' == e` ignorada. **Exceção**: pares de **mesma
-  role** — **Support × Support** e **DPS × DPS** — contribuem **0** neste
-  somatório (dois suportes, ou dois DPS, juntos não elevam a ameaça). A exceção
-  vale em **todos os presets** e **apenas** para a sinergia usada pelo Enemy
-  Threat; o cálculo normal de sinergias do ranking (`T_syn`) continua
-  contabilizando SUP × SUP e DPS × DPS normalmente (o par DPS × DPS com o peso
-  próprio de 0.65 — ver a exceção de sinergia logo abaixo da tabela de presets).
+  de inimigos, com a diagonal `e' == e` ignorada. **Exceção**: pares
+  **Support × Support** contribuem **0** neste somatório (dois suportes juntos
+  não elevam a ameaça). A exceção vale em **todos os presets** e **apenas** para
+  a sinergia usada pelo Enemy Threat; o `T_syn` do ranking continua contando
+  SUP × SUP normalmente. (Até a v1.2.16, DPS × DPS também era excluído; a
+  exclusão saiu junto com os valores DPS × DPS da matriz.)
+- `−λ · D(e)` — **dupla de DPS aliada já formada contra o tank inimigo** (v1.2.17):
+  só jogando de **Suporte ou Tank**, com exatamente **2 DPS aliados** e `e` como
+  **único tank inimigo**. `D(e)` é o valor da dupla na regra do tank (±2) mais o
+  trio com a Zenyatta (+2), e usa o **mesmo λ** dos counters — a dupla é mais um
+  counter entre o tank e o seu time. Ver
+  [Classes de DPS e regras por tank](#classes-de-dps-e-regras-por-tank-coluna-duo).
 
 #### Ajuste de Mercy "pocket" (aplicado sobre os `w_e` prontos)
 
@@ -421,6 +438,7 @@ visivelmente o peso e a ordenação das ameaças.
 | `β_meta` | 1.5 | Peso do MetaStrength no score total (preset "equilibrado") |
 | `β_ctr` | 1.0 | Peso do counter term no score total |
 | `β_syn` | 0.65 | Peso da sinergia no score total |
+| `β_duo` | 1.0 | Peso da coluna DUO (regra de dupla de DPS por tank inimigo) |
 
 Os valores acima são o preset **"equilibrado"** (default). `core/scoring.py`
 expõe `ModelWeights` + `PRESETS`; o preset ativo vem de `settings.json`
@@ -429,12 +447,15 @@ avançado). Os presets reponderam os termos do score **e também o Enemy Threat*
 (via `λ`, `μ` e `ν`), mantendo comuns apenas `α` e as âncoras estruturais da
 curva de ameaça:
 
-| Preset | `β_meta` | `λ` | `μ` | `ν` | `β_ctr` | `β_syn` | Prioriza |
-|---|---|---|---|---|---|---|---|
-| **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 (0.65 em DPS×DPS; 1 em Mercy×DPS) | balanceia meta, counter e sinergia |
-| **Counter-first** | 0.75 | 0.32 | 0.23 | 0.10 | 1.00 | 0.325 (0.65 em SUP×SUP e em DPS×DPS; 1 em Mercy×DPS) | counterar o time inimigo (ameaça por counters) |
-| **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 (0.65 em DPS×DPS; 1 em Mercy×DPS) | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
-| **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 (**sem** exceção de DPS×DPS; 1 em Mercy×DPS) | sinergia com o seu time (ameaça de-enfatizada) |
+| Preset | `β_meta` | `λ` | `μ` | `ν` | `β_ctr` | `β_syn` | `β_duo` | Prioriza |
+|---|---|---|---|---|---|---|---|---|
+| **Equilibrado** (padrão) | 1.5 | 0.25 | 0.30 | 0.10 | 1.0 | 0.65 (1 em Mercy×DPS) | 1.0 | balanceia meta, counter e sinergia |
+| **Counter-first** | 0.75 | 0.32 | 0.23 | 0.10 | 1.00 | 0.325 (0.65 em SUP×SUP; 1 em Mercy×DPS) | 1.0 | counterar o time inimigo (ameaça por counters) |
+| **Meta-first** | 3.0 | 0.20 | 0.70 | 0.15 | 1.0 | 0.65 (1 em Mercy×DPS) | 1.0 | desempenho + comp coesa no mapa (ameaça por mapa e sinergia) |
+| **Conforto+** | 1.5 | 0.18 | 0.20 | 0.06 | 1.0 | 1.25 (1 em Mercy×DPS) | 1.0 | sinergia com o seu time (ameaça de-enfatizada) |
+
+O termo de dupla da ameaça (`−λ·D(e)`) usa o `λ` de cada preset. Por isso ele
+também muda com o preset, e `β_duo` pesa só a coluna DUO.
 
 > **Exceção de sinergia do Counter-first (SUP × SUP)**: no preset Counter-first,
 > pares **Support × Support** utilizam um peso de sinergia de **0.65**, enquanto
@@ -445,16 +466,6 @@ curva de ameaça:
 > implementada pelo campo opcional `ModelWeights.beta_syn_sup_sup` (`None` nos
 > demais presets ⇒ usa `beta_syn` para todos os pares).
 >
-> **Exceção de sinergia DPS × DPS (v1.2.12)**: quando **ambos** os heróis do par
-> são DPS, a contribuição usa um peso **fixo de 0.65**
-> (`ModelWeights.beta_syn_dps_dps`) no lugar do `β_syn` do preset. Vale em
-> **Equilibrado, Counter-first e Meta-first**; o **Conforto+** é o único preset
-> **sem** a regra (`beta_syn_dps_dps = None`) e mantém o `β_syn` cheio (1.25)
-> também nesses pares. Exemplo no Counter-first: `Y(Cassidy, Ashe) = -6` contribui
-> `-6 × 0.65 = -3.9` (e **não** `-6 × 0.325`), enquanto `Y(Cassidy, Ana) = 1`
-> (DPS × SUP) segue em `1 × 0.325`. Note que o 0.65 é uma **âncora independente**:
-> só coincide com o `β_syn` do Equilibrado por acaso.
->
 > **Exceção de sinergia Mercy × DPS (v1.2.13)**: quando um dos heróis do par é a
 > **Mercy** e o outro é **DPS**, a contribuição usa um peso **fixo de 1**
 > (`ModelWeights.beta_syn_mercy_dps`) no lugar do `β_syn` do preset. Vale nos
@@ -464,19 +475,26 @@ curva de ameaça:
 > com Mercy aliada). **Mercy × Tank** e **Mercy × Suporte** continuam com os pesos
 > normais do preset — inclusive a exceção SUP × SUP do Counter-first.
 >
-> **Precedência entre as três exceções**: `SUP × SUP → beta_syn_sup_sup` (se
-> definido) → `DPS × DPS → beta_syn_dps_dps` (se definido) →
-> `Mercy × DPS → beta_syn_mercy_dps` → `β_syn`. As duas primeiras exigem que os
-> dois heróis tenham a **mesma** role e a terceira exige roles **distintas**
+> **Precedência entre as duas exceções**: `SUP × SUP → beta_syn_sup_sup` (se
+> definido) → `Mercy × DPS → beta_syn_mercy_dps` → `β_syn`. A primeira exige que
+> os dois heróis tenham a **mesma** role e a segunda exige roles **distintas**
 > (Mercy é SUP, o outro lado é DPS), então elas nunca competem pelo mesmo par.
+>
+> **Saiu na v1.2.17 — exceção DPS × DPS**: desde a v1.2.12 os pares DPS × DPS
+> usavam um peso fixo de 0.65 (`beta_syn_dps_dps`, menos no Conforto+). O campo
+> saiu junto com os valores DPS × DPS da matriz, que deram lugar à
+> [regra de dupla por tank](#classes-de-dps-e-regras-por-tank-coluna-duo). Um
+> `custom_weights` antigo com `beta_syn_dps_dps` passa a ser inválido; como a
+> validação é tudo-ou-nada, **todos** os overrides daquele settings são
+> descartados, com aviso.
 
 O componente `ν` mede a **sinergia do inimigo com o próprio time inimigo** (combo):
 "Meta-first" o valoriza mais (comp coesa é ameaça), "Conforto+" o de-enfatiza junto
 com os demais eixos de ameaça. Como `λ`/`μ`/`ν` agora diferem por preset, **trocar o
 preset muda o multiplicador de ameaça, o ranking de ameaças, o counter score e o
 ranking final** — não só os pesos do score. As colunas da tabela de ranking (`MAP META`, `COUNTER`,
-`SYNERGY`) são as **contribuições já ponderadas** (por `β_meta`/`β_ctr`/`β_syn`)
-que entram no `TOTAL`, de modo que vale **`TOTAL = MAP META + COUNTER + SYNERGY`**
+`SYNERGY`, `DUO`) são as **contribuições já ponderadas** (por `β_meta`/`β_ctr`/`β_syn`/`β_duo`)
+que entram no `TOTAL`, de modo que vale **`TOTAL = MAP META + COUNTER + SYNERGY + DUO`**
 exatamente — o usuário confere a soma olhando a tabela.
 
 Heróis já presentes no time aliado **e heróis banidos no competitivo** são
@@ -489,7 +507,7 @@ O build completo é feito pelo **`packaging/build.bat`**, que executa três etap
 1. **PyInstaller** (`packaging/overwatch.spec`) → `dist/OWPick/` (one-folder). O spec espelha no bundle:
    - Todos os módulos Python do pacote `owpick`
    - `assets/` — templates de heróis (`heroes/720p|2k|bans`), Tesseract OCR (`ocr/`), strings de UI (`i18n/`) e o ícone
-   - `data/` — as matrizes **CSV** (`synergies.csv`, `counters.csv`), o layout de captura (`layouts/ow_hero_select.json`) e `stats_inputs.csv`
+   - `data/` — as matrizes **CSV** (`synergies.csv`, `counters.csv`), as regras de dupla de DPS (`dps_duo_rules.json`), o layout de captura (`layouts/ow_hero_select.json`) e `stats_inputs.csv`
    - `version.txt`
    - Os `.xlsx` de edição e as ferramentas de `tools/` **não** são empacotados
 2. **Zip do auto-updater** → `dist/OWPick_v<versão>.zip` (a pasta `dist/OWPick/` inteira; formato consumido pelo `updater.py`)
@@ -711,7 +729,7 @@ Dataclasses de domínio — a normalização acontece **uma vez, na fronteira**:
 | `Lineup` / `BanList` | Times identificados / heróis banidos |
 | `MapDetection` | `(name, score)`; `UNKNOWN` quando não identificado |
 | `CaptureResult` | Captura em memória: `full` + recortes por perk + recortes de ban |
-| `Recommendation` | `(hero, meta, counter, synergy, total, reasons)` — `reasons` alimenta a explicabilidade |
+| `Recommendation` | `(hero, meta, counter, synergy, total, duo, reasons)`. `total = meta + counter + synergy + duo`; `reasons` alimenta a explicabilidade |
 
 #### `core/scoring.py`
 
@@ -719,17 +737,31 @@ MetaStrength + threat weighting + ranking (ver [Modelo de Scoring](#modelo-de-sc
 
 | Item | Descrição |
 |---|---|
-| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `BETA_SYN_DPS_DPS` (0.65), `BETA_SYN_MERCY_DPS` (1.0), `NEUTRAL_WEIGHT` (= 1.0), `THREAT_SYNERGY_EXCLUDED_ROLES`, `MERCY_POCKET_*`, `MERCY_SYNERGY_PRIORITY_DPS` |
+| Constantes | `EPS`, `MMAX`, `ALPHA`, `LAMBDA`, `MU_THREAT`, `THREAT_ANCHOR_LOW/HIGH`, `THREAT_LOG_CAP`/`THREAT_SCALE` (derivados), `BETA_META/CTR/SYN`, `BETA_DUO` (1.0), `BETA_SYN_MERCY_DPS` (1.0), `NEUTRAL_WEIGHT` (= 1.0), `THREAT_SYNERGY_EXCLUDED_ROLES` (`{"SUP"}`), `MERCY_POCKET_*`, `MERCY_SYNERGY_PRIORITY_DPS` |
 | `threat_multiplier(raw, log_cap, scale)` | Multiplicador de ameaça `exp(A·tanh(raw/S))`; `w(0)=1`, log-simétrico, ancorado em `w(−1.5)=0.6` e `w(3.0)=2.5` |
 | `_fit_log_symmetric(anchor_lo, anchor_hi)` | Deriva `(A, S)` por bisseção para a curva passar pelos dois pontos-âncora |
 | `ModelWeights` + `PRESETS` + `resolve_weights` | Presets nomeados ("equilibrado" = default, "counter-first", "meta-first", "conforto+") + overrides do modo avançado |
 | `load_meta_strength(stats_df, mapa, alpha)` | z-score da winrate bruta **por role**, atenuado pela confiança da pickrate |
-| `compute_threat_weights(...)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e'))` (counters + mapa + sinergia do time inimigo; 0 = neutro). Pares de mesma role **SUP × SUP e DPS × DPS** são ignorados no termo de sinergia, em todos os presets (só aqui, não no `T_syn` do ranking). Encerra chamando `apply_mercy_pocket` |
+| `compute_threat_weights(..., role, duo_rules)` | `w_e = threat_multiplier(λ·Σ C(e,a) + μ·m(e,k) + ν·Σ Y(e,e') − λ·D(e))` (counters + mapa + sinergia do time inimigo + dupla de DPS aliada contra o tank, via `core.duo.duo_threat_value`; 0 = neutro). Pares **SUP × SUP** são ignorados no termo de sinergia, em todos os presets (só aqui, não no `T_syn` do ranking). Sem `duo_rules`, o termo de dupla some. Encerra chamando `apply_mercy_pocket` |
 | `apply_mercy_pocket(w, enemies)` | Etapa final do threat weighting: Mercy + DPS "pocketável" ⇒ ×1.5 no DPS de maior prioridade e ×0.5 na Mercy; Bastion + `{Sierra, Emre, Cassidy, Soldier: 76}` cancela o ajuste |
-| `_pair_beta_syn(weights, role_a, role_b, key_a, key_b)` | β_syn do par: `beta_syn_sup_sup` (SUP×SUP) → `beta_syn_dps_dps` (DPS×DPS) → `beta_syn_mercy_dps` (Mercy×DPS) → `beta_syn` |
+| `_pair_beta_syn(weights, role_a, role_b, key_a, key_b)` | β_syn do par: `beta_syn_sup_sup` (SUP×SUP) → `beta_syn_mercy_dps` (Mercy×DPS) → `beta_syn` |
 | `_mercy_dps_synergy_filter(ally_row, ally_keys)` | Regra do "DPS prioritário": chaves dos DPS aliados **descartados** do `T_syn` da Mercy (sobra só o prioritário de maior `Y(Mercy, ·)`). O(nº de aliados), aplicada só quando a candidata é a Mercy |
-| `calculate_hero_score(...)` | Componentes meta/ctr/syn **já ponderados por β** (⇒ `total = meta + ctr + syn`) + **acumula contribuições por origem em `reasons`**; o β de cada par de sinergia sai de `_pair_beta_syn`, e os DPS descartados por `_mercy_dps_synergy_filter` não somam nem geram razão |
-| `rank_heroes(...)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
+| `calculate_hero_score(..., role, duo_rules)` | Componentes meta/ctr/syn/duo **já ponderados por β** (⇒ `total = meta + ctr + syn + duo`) + **acumula contribuições por origem em `reasons`** (counters, sinergias, dupla, mapa); o β de cada par de sinergia sai de `_pair_beta_syn`, os DPS descartados por `_mercy_dps_synergy_filter` não somam nem geram razão, e a coluna DUO é `β_duo · Σ core.duo.duo_terms(...)` (0 sem `duo_rules`) |
+| `rank_heroes(..., role, duo_rules)` | Exclui aliados + banidos e devolve `Recommendation`s ordenadas |
+
+#### `core/duo.py`
+
+Regra de dupla de DPS por tank inimigo (v1.2.17; ver
+[Classes de DPS e regras por tank](#classes-de-dps-e-regras-por-tank-coluna-duo)).
+Puro: recebe as regras já lidas por parâmetro.
+
+| Item | Descrição |
+|---|---|
+| `DuoRules` / `TankRule` / `Trio` | Classes por eixo (`{eixo: {chave do herói: classe}}`), Flanker, regras por tank (valor de cada par de classes) e trios, com chaves de herói normalizadas. `EMPTY_DUO_RULES` = tudo neutro |
+| `parse_duo_rules(data)` | JSON de `data/dps_duo_rules.json` → `DuoRules`. Só estrutura (chave ausente ou par mal escrito levanta erro); a consistência é do `infra/validation` |
+| `class_pair` / `parse_class_pair` | Par de classes **sem ordem** (`"Hitscan+Flex"` = `"Flex+Hitscan"`) |
+| `duo_terms(candidate, allies, enemies, role, rules)` | `[(valor, rótulo)]` da coluna DUO: a dupla (jogando de DPS) e o trio (DPS ou Zen candidata). Lista vazia fora das condições da regra |
+| `duo_threat_value(enemy, allies, enemies, role, rules)` | `D(e)` da ameaça: a dupla aliada já formada contra o único tank inimigo (jogando de SUP/TANK), + trio |
 
 #### `core/ports.py`
 
@@ -939,13 +971,17 @@ Leitura/cache dos dados do modelo (tudo `lru_cache`):
 | `get_ally_matrix()` / `get_enemy_matrix()` | `data/synergies.csv` / `data/counters.csv` (o runtime lê **apenas** os CSVs; a edição é nos `.xlsx` + `tools/xlsx_to_csv.py`) |
 | `read_stats_inputs()` | `stats_inputs.csv` — **override do usuário** em `%APPDATA%\OWPick` tem prioridade sobre o embutido (`stats_source_path`); `refresh_stats_cache()` invalida após atualização |
 | `load_layout()` / `load_capture_config()` | `data/layouts/ow_hero_select.json` (geometria de captura + âncoras da região do mapa) |
+| `load_duo_rules()` / `read_duo_rules_data()` | `data/dps_duo_rules.json`: regras prontas (`core.duo.parse_duo_rules`) / JSON cru para o validador. Se a leitura falhar, `load_duo_rules` avisa e devolve regras **vazias**: o ranking segue, sem a coluna DUO e sem o termo de dupla na ameaça |
 
 #### `infra/validation.py`
 
 Validação dos dados na carga com **aviso claro do que falta**: `validate_matrix`
 (linhas E colunas ≡ `HEROES_ROLES` — pega órfãos/typos), `validate_stats` (30
 mapas × roles), `validate_templates` (retratos 720p/2k + ícone de ban para todo
-herói), `validate_all` + `report_problems`. Roda nos testes e no boot com `--debug`.
+herói), `validate_duo_rules` (regras de dupla: cada eixo cobre os DPS sem herói em
+duas classes, Flanker dentro do Médio, cada tank em exatamente uma regra, pares e
+trios só com classes, suportes e tanks válidos), `validate_all` + `report_problems`.
+Roda nos testes e no boot com `--debug`.
 
 `validate_matrix(matrix, name, columns=None)` confere as **colunas** contra o
 **cabeçalho real** do CSV (`columns`, passado pelo `validate_all`) e não contra os
@@ -1028,8 +1064,10 @@ disparo duplo. Combinações **com TAB** usam `keyboard.hook()` + `HotkeyDetecto
 #### `ui/ranking_view.py`
 
 Apresentação `rich` do `RankingResult`: tabela com cores por role (DPS/TANK/SUP),
-top-3 em negrito, barra proporcional ao score, painel do ranking de ameaças,
-spinner durante o pipeline e explicações do top-3 (`settings.explain_ranking`).
+colunas `MAP META | COUNTER | SYNERGY | DUO | TOTAL` (a `DUO`, da regra de dupla,
+aparece sempre, mesmo zerada), top-3 em negrito, barra proporcional ao score,
+painel do ranking de ameaças, spinner durante o pipeline e explicações do top-3
+(`settings.explain_ranking`).
 
 **Destaque por preset (v1.2.11)** — o nome do herói líder da coluna que o preset
 ativo prioriza é pintado em **laranja** (`HIGHLIGHT_STYLE = "bold orange1"`),
@@ -1041,6 +1079,8 @@ segundo o mapa `PRESET_HIGHLIGHT_FIELD`:
 | **Meta-first** | maior `MAP META` |
 | **Conforto+** | maior `SYNERGY` |
 | **Equilibrado** | nenhum destaque especial |
+
+A coluna `DUO` não é destacada em nenhum preset.
 
 É **só apresentação**: a coluna vem pronta da `Recommendation`, o herói continua
 na mesma posição e nada é recalculado, reordenado ou reponderado.
@@ -1145,50 +1185,104 @@ ele. O projeto trata isso como estado normal, sem caminho de código especial:
 > **neutra** é a **célula vazia**; o `0` é um valor de winrate como outro
 > qualquer para a estatística por role.
 
-### Categorias de DPS (sinergias DPS × DPS)
+### Classes de DPS e regras por tank (coluna DUO)
 
-As sinergias **entre dois DPS** em `data/heroes ally.xlsx` não são atribuídas
-herói a herói: saem de uma classificação por **estilo de alcance/engajamento**
-(v1.2.12). Dois DPS que disputam o mesmo espaço no time se anti-sinergizam; estilos
-complementares, não.
+Desde a **v1.2.17** a matriz de sinergias não tem valores entre dois DPS: o bloco
+DPS × DPS de `data/heroes ally.xlsx` está **vazio** (só a diagonal ficou). No lugar
+dele, a **dupla de DPS** do seu time ganha ou perde prioridade conforme o **tank
+inimigo**. Classes, regras e valores ficam em `data/dps_duo_rules.json`, lido por
+`infra/datasource.load_duo_rules` e conferido por `infra/validation.validate_duo_rules`.
+A lógica fica em `core/duo.py`.
 
-| Categoria | Heróis |
-|---|---|
-| **Hitscan** | Ashe, Cassidy, Emre, Hanzo, Sierra, Sojourn, Soldier: 76 |
-| **Meio Hitscan** | Bastion, Torbjörn |
-| **Flex** | Anran, Genji, Mei, Vendetta, Venture, Widowmaker |
-| **Meio Flex** | Echo, Freja, Junkrat, Pharah, Reaper, Shion, Symmetra |
+**Classes** — dois eixos, e cada um cobre os 23 DPS:
 
-> A **Sombra** era Flex até a v1.2.15. Na v1.2.16 ela virou Suporte e passou a
-> seguir as [Categorias de Suporte](#categorias-de-suporte-sinergias-sup--sup).
+| Eixo | Classe | Heróis |
+|---|---|---|
+| dano | **Forte** | Ashe, Bastion, Cassidy, Emre, Hanzo, Junkrat, Reaper, Sierra, Sojourn, Soldier: 76, Symmetra, Torbjörn |
+| dano | **Médio** | Anran, Echo, Freja, Genji, Mei, Pharah, Shion, Tracer, Vendetta, Venture, Widowmaker |
+| estilo | **Hitscan** | Ashe, Bastion, Cassidy, Emre, Sierra, Sojourn, Soldier: 76, Widowmaker |
+| estilo | **Flex** | Anran, Echo, Genji, Hanzo, Junkrat, Mei, Pharah, Vendetta, Venture |
+| estilo | **Os dois** | Freja, Reaper, Shion, Symmetra, Torbjörn, Tracer |
 
-Valor da sinergia por par de categorias (**tabela simétrica** — o valor é gravado
-nas duas células, `Y(h,a)` e `Y(a,h)`):
+A **Flanker** (Anran, Genji, Shion, Tracer, Vendetta, Venture) é registrada como
+subconjunto do Dano Médio e ainda **não** tem efeito no score.
 
-| | Hitscan | Meio Hitscan | Flex | Meio Flex |
+**Regras por tank inimigo** — valor da dupla. O par não tem ordem, e par ausente
+vale 0:
+
+| Tank inimigo | Eixo | +2 (sobe) | 0 | −2 (desce) |
 |---|---|---|---|---|
-| **Hitscan** | −6 | −2 | +2 | 0 |
-| **Meio Hitscan** | −2 | −6 | 0 | 0 |
-| **Flex** | +2 | 0 | −6 | 0 |
-| **Meio Flex** | 0 | 0 | 0 | −2 |
+| D.Mon, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Winston, Zarya — *ruim contra dupla de Dano Forte* | dano | Forte+Forte | Forte+Médio | Médio+Médio |
+| D.Va, Domina, Doomfist, Hazard, Junker Queen, Wrecking Ball — *ruim contra dupla mista* | estilo | mista: Hitscan+Flex, ou qualquer dupla com um "Os dois" | — | Hitscan+Hitscan, Flex+Flex |
+| Sigma — *forte contra dupla de Hitscan* | estilo | — | as demais | Hitscan+Hitscan |
 
-**Tracer é caso à parte**: não pertence a categoria alguma e sinergiza **+2 com
-qualquer outro DPS**, com **precedência** sobre a tabela.
+- **"Os dois" é coringa na mista**: completa o estilo que faltar (com Hitscan, com
+  Flex ou com outro "Os dois"). Para o Sigma, porém, **não** conta como Hitscan.
+- **Trio com a Zenyatta** (+2, somado ao da dupla): dupla Forte+Forte + Zenyatta,
+  contra os 8 tanks da primeira linha (D.Mon incluída).
 
-A tabela cobre **todos** os pares de categorias, então **todo** par DPS × DPS
-(253 = C(23,2)) tem valor definido. O que a regra **não** toca: a diagonal
-(mantida em −11) e qualquer par que envolva Tank/Suporte — esses continuam sendo
-valores editados à mão, e a assimetria `Y(h,a) ≠ Y(a,h)` que existe fora dos pares
-DPS × DPS é preservada de propósito.
+**Onde entra**:
 
-> Ao adicionar um DPS novo, coloque-o em uma das quatro categorias e preencha a
-> linha/coluna dele conforme a tabela — senão ele fica com sinergia herdada/vazia
-> contra os demais DPS.
+| Onde | Quando vale | Efeito |
+|---|---|---|
+| Coluna `DUO`, jogando de **DPS** | candidato DPS, exatamente **1 DPS aliado** e **1 tank inimigo** | valor da dupla candidato + DPS aliado; mais **+2** do trio se os dois são Forte, a Zenyatta é aliada e o tank está na lista |
+| Coluna `DUO`, jogando de **Suporte** | Zenyatta candidata, exatamente **2 DPS aliados**, ambos Forte, e **1 tank inimigo** da lista | **+2** do trio (a regra da dupla não vale para candidatos de Suporte) |
+| **Enemy Threat**, jogando de **Suporte ou Tank** | exatamente **2 DPS aliados** (a dupla já formada) e **1 tank inimigo** | o `raw` do tank recebe `−λ·D(e)`, onde `D(e)` é o valor da dupla aliada, mais +2 do trio se a Zenyatta é aliada |
+
+Fora disso a regra vale **0**: Fila Aberta (ALL), DPS aliado ou tank inimigo não
+identificado, 2+ DPS aliados no ranking, 2+ tanks inimigos. Jogando de DPS a
+ameaça não muda, porque a dupla depende do candidato e o `w_e` é um número por
+inimigo, calculado antes dos candidatos.
+
+**Pesos**: `DUO(h) = β_duo · (dupla + trio)`, com `β_duo = 1.0` nos quatro presets
+(ajustável via `custom_weights`). O valor entra **direto**, sem multiplicar pela
+ameaça do tank. A ameaça usa o **λ do preset**: a dupla conta como mais um counter
+entre o tank e o seu time. Por isso `β_duo = 0` zera a coluna `DUO`, mas **não** o
+termo da ameaça.
+
+**Explicação** (opção 6 do menu): as razões da dupla vêm depois das sinergias e
+antes do mapa, com o valor já ponderado. A classe do candidato vem primeiro:
+`dupla Forte+Forte com Cassidy contra Mauga (+2.00)`,
+`dupla Flex+Hitscan com Ashe contra D.Va (+2.00)`,
+`trio com Zenyatta contra Mauga (+2.00)` e, para a Zenyatta candidata,
+`trio com Cassidy e Ashe contra Mauga (+2.00)`.
+
+Exemplos (Equilibrado, mapa desconhecido):
+
+| Cenário | Efeito |
+|---|---|
+| Mauga inimigo, Cassidy aliado | Forte (Ashe, Sojourn, Hanzo…) `DUO` +2; Médio (Genji, Mei, Widowmaker…) 0 |
+| O mesmo, com a Zenyatta aliada | Ashe `DUO` +4 |
+| D.Va inimiga, Ashe aliada | Genji, Hanzo, Reaper +2; Cassidy, Widowmaker −2 |
+| Sigma inimigo, Soldier: 76 aliado | Ashe, Cassidy, Widowmaker −2; Hanzo, Reaper 0 |
+| Jogando de Suporte com Cassidy + Ashe, contra Mauga | `raw` do Mauga −0.5 (×0.84 isolado); com a Zenyatta aliada, −1.0 (×0.71) |
+
+**Valores individuais tank × DPS** não ficam na regra de dupla: moram na matriz de
+**counters**, na convenção "+ = o tank leva vantagem" (`C(Tank, DPS) = v` e
+`C(DPS, Tank) = −v`). A v1.2.17 gravou sete pares, nos dois sentidos:
+
+| Par | `C(Tank, DPS)` |
+|---|---|
+| D.Va × Bastion, Hanzo, Junkrat, Soldier: 76 | +2 → **+1** |
+| D.Va × Sierra | 0 → **+1** |
+| Zarya × Mei | −2 → **−1** |
+| Sigma × Hanzo | 0 → **+1** |
+
+> **Histórico**: da v1.2.12 à v1.2.16 o bloco DPS × DPS vinha de quatro categorias
+> (Hitscan, Meio Hitscan, Flex, Meio Flex, com valores −6/−2/+2/0 e a Tracer +2 com
+> todos), tinha peso fixo `beta_syn_dps_dps = 0.65` e ficava fora do Enemy Threat.
+> As três coisas saíram na v1.2.17. A **Sombra** era Flex até a v1.2.15; desde a
+> v1.2.16 segue as [Categorias de Suporte](#categorias-de-suporte-sinergias-sup--sup).
+
+> Ao adicionar um **DPS** novo, ponha-o em uma classe de cada eixo (e na Flanker, se
+> for o caso); o validador acusa DPS sem classe. Um **tank** novo precisa entrar em
+> exatamente uma regra e, se fizer sentido, na lista do trio. `tests/test_duo.py`
+> confere classes, regras, trio, validação e o efeito no ranking e na ameaça.
 
 ### Categorias de Suporte (sinergias SUP × SUP)
 
-As sinergias **entre dois suportes** em `data/heroes ally.xlsx` também saem de uma
-classificação, por **estilo de suporte**. A divisão já existia nos valores da
+As sinergias **entre dois suportes** em `data/heroes ally.xlsx` saem de uma
+classificação por **estilo de suporte**. A divisão já existia nos valores da
 planilha; a v1.2.16 a registrou aqui e mudou um valor da tabela.
 
 | Categoria | Heróis |
@@ -1638,9 +1732,9 @@ A ordem abaixo é a que a v1.2.14 (D.Mon) seguiu.
    com maiúsculas antes: `DMon`, `DVa`, `Doctrine`, `Domina`) e rode
    `python tools/xlsx_to_csv.py` para regenerar `data/synergies.csv` /
    `data/counters.csv`, que são o que o runtime lê. Nas **sinergias**, um DPS novo
-   deve receber os valores da sua categoria (ver
-   [Categorias de DPS](#categorias-de-dps-sinergias-dps--dps)) e um valor em
-   `Y(Mercy, <DPS>)` na escala do
+   **não** recebe valores contra os outros DPS (o bloco DPS × DPS fica vazio — ver
+   [Classes de DPS e regras por tank](#classes-de-dps-e-regras-por-tank-coluna-duo)),
+   mas recebe um valor em `Y(Mercy, <DPS>)` na escala do
    [DPS prioritário](#dps-prioritário-sinergia-mercy--dps); um Suporte novo, os
    valores da sua [categoria de suporte](#categorias-de-suporte-sinergias-sup--sup).
    Ainda sem opinião formada sobre o herói? Deixe as células **vazias** — é
@@ -1648,15 +1742,21 @@ A ordem abaixo é a que a v1.2.14 (D.Mon) seguiu.
    [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)). Para
    preencher a partir de dados externos, veja como a
    [Tabela da D.Mon](#tabela-da-dmon-pesquisa-v1216) calibrou a conversão.
-5. **Stats**: rode `tools/coletar_stats.py` (ou `coletar_stats2.py`) para
+5. **Regras de dupla** (`data/dps_duo_rules.json`, editado à mão): um **DPS** novo
+   entra em uma classe de cada eixo (`dano` e `estilo`) e, se for o caso, na
+   `flanker`; um **Tank** novo entra em exatamente uma regra (e na lista do trio,
+   se fizer sentido). Ver
+   [Classes de DPS e regras por tank](#classes-de-dps-e-regras-por-tank-coluna-duo).
+   Suporte novo não entra aqui, a menos que vire suporte de um trio.
+6. **Stats**: rode `tools/coletar_stats.py` (ou `coletar_stats2.py`) para
    regenerar `data/stats_inputs.csv` com o herói novo nos 30 mapas. Enquanto o
    site não tiver dados dele, as células saem **vazias** — leia o aviso sobre
    winrate `0` vs vazio em [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)
    antes de preencher à mão.
-6. **Testes**: atualize as contagens oficiais em `tests/test_utils.py`
-   (`TestCanonicalData`) e use `tests/test_dmon.py` (Tank) ou
-   `tests/test_doctrine.py` (Suporte com dados vazios) como gabarito da aceitação
-   ponta a ponta do herói novo.
+7. **Testes**: atualize as contagens oficiais em `tests/test_utils.py`
+   (`TestCanonicalData`) e as listas de classes/regras em `tests/test_duo.py`, e
+   use `tests/test_dmon.py` (Tank) ou `tests/test_doctrine.py` (Suporte com dados
+   vazios) como gabarito da aceitação ponta a ponta do herói novo.
 
 O validador (`infra/validation.py`, roda nos testes e no boot com `--debug`)
 aponta exatamente o que estiver faltando em cada um desses pontos.
@@ -1677,7 +1777,9 @@ role precisa acompanhar:
    muda de lugar (a pasta é plana).
 3. **Matrizes**: os pares do herói com a role antiga e a nova seguiam regras de
    categoria que não valem mais. Classifique-o na categoria da role nova e
-   reavalie/limpe o resto da linha e da coluna.
+   reavalie/limpe o resto da linha e da coluna. Se ele entrou ou saiu de DPS ou
+   Tank, atualize também `data/dps_duo_rules.json` (classes do DPS, regra do
+   tank); o validador acusa herói da role errada ali.
 4. **Stats**: a coluna `role` do `stats_inputs.csv` decide com quem o herói é
    comparado no MetaStrength. Troque a role nas 30 linhas e mova-as para o bloco
    da role nova (a ordem de `HEROES_ROLES` é a que os scrapers gravam). Se o
@@ -1686,7 +1788,8 @@ role precisa acompanhar:
 5. **Favoritos dos usuários**: nada a fazer. `storage.sync_role_files` roda no
    boot e refaz `DPS/SUP/TANK.txt` a partir do `ALL.txt` com a role atual.
 6. **Testes que fixam contagens** (`tests/test_utils.py`) e listas por role nos
-   testes sintéticos (ex.: a escala de `Y(Mercy, <DPS>)` em `tests/test_scoring.py`).
+   testes sintéticos (ex.: a escala de `Y(Mercy, <DPS>)` em `tests/test_scoring.py`
+   e as classes/regras em `tests/test_duo.py`).
 
 Alterações de dados em lote (inserir linha/coluna nas planilhas preservando
 estilos e formatação condicional, inserir o herói em todos os mapas do

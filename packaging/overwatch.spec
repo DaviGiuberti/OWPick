@@ -8,7 +8,8 @@ que utils.resource_path funcione idêntico em .py e .exe):
     src/owpick/       módulos Python (main.py = entry point)
     assets/heroes/    templates de imagem       -> bundle: assets/heroes/
     assets/ocr/       Tesseract OCR embutido    -> bundle: assets/ocr/
-    data/             layouts/, stats, matrizes .csv -> bundle: data/
+    data/             layouts/, stats, matrizes .csv,
+                      regras de dupla de DPS (.json) -> bundle: data/
                       (os .xlsx de edição e tools/xlsx_to_csv.py NÃO entram)
     version.txt       versão (raiz)             -> bundle: raiz (_MEIPASS)
 
@@ -66,6 +67,8 @@ a = Analysis(
         # de EDIÇÃO e o conversor tools/xlsx_to_csv.py NÃO são empacotados.
         (os.path.join(DATA_DIR, "synergies.csv"), "data"),
         (os.path.join(DATA_DIR, "counters.csv"), "data"),
+        # Classes de DPS + regras de dupla por tank inimigo (coluna DUO, v1.2.17).
+        (os.path.join(DATA_DIR, "dps_duo_rules.json"), "data"),
         (os.path.join(BASE_DIR, "version.txt"), "."),
     ],
     hiddenimports=[
@@ -99,6 +102,7 @@ a = Analysis(
         "owpick.core.resolution",
         "owpick.core.models",
         "owpick.core.ports",
+        "owpick.core.duo",
         "owpick.core.scoring",
         "owpick.infra.resources",
         "owpick.infra.datasource",

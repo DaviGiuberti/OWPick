@@ -78,6 +78,13 @@ def test_templates_detecta_ausencia(tmp_path):
     assert "ícones de BAN ausentes" in joined
 
 
+def test_validate_all_inclui_as_regras_de_dupla(monkeypatch):
+    """As regras de dupla de DPS (data/dps_duo_rules.json, v1.2.17) entram na
+    validação consolidada — os casos detalhados estão em tests/test_duo.py."""
+    monkeypatch.setattr(validation.datasource, "read_duo_rules_data", lambda *_: {"axes": {}})
+    assert any(p.startswith("[duo] estrutura inválida") for p in validation.validate_all())
+
+
 def test_report_problems_ok_e_com_erros():
     out: list[str] = []
     assert validation.report_problems([], echo=out.append) is True

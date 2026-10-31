@@ -151,6 +151,9 @@ def rank(
     """Calcula o ranking a partir de dados já resolvidos (nomes)."""
     ally_matrix = datasource.get_ally_matrix()
     enemy_matrix = datasource.get_enemy_matrix()
+    # Regra de dupla de DPS por tank inimigo: depende da role do jogador (coluna
+    # DUO jogando de DPS/SUP; termo da ameaça jogando de SUP/TANK).
+    duo_rules = datasource.load_duo_rules()
 
     # Pesos efetivos do modelo: preset do settings.json + overrides do modo
     # avançado (tarefa 6.3). Default = "equilibrado" (modelo atual).
@@ -167,6 +170,8 @@ def rank(
         mu=weights.mu,
         synergy_matrix=ally_matrix,
         nu=weights.nu,
+        role=role,
+        duo_rules=duo_rules,
     )
 
     ally_keys = {normalize_hero_name(a) for a in allies if a}
@@ -189,6 +194,8 @@ def rank(
         excluded_keys=ally_keys | ban_keys,
         weights=weights,
         mapa=mapa,
+        role=role,
+        duo_rules=duo_rules,
     )
 
     return RankingResult(

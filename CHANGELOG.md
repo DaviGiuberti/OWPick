@@ -4,6 +4,115 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.17] — 2026-10-30
+
+A sinergia entre dois DPS por categoria saiu. No lugar dela, a **dupla de DPS** do
+seu time ganha ou perde prioridade conforme o **tank inimigo**, numa coluna nova do
+ranking (**DUO**). Jogando de Suporte ou Tank, a dupla aliada também mexe na ameaça
+do tank inimigo. Sete counters tank × DPS foram revistos.
+
+### Regra de dupla de DPS por tank inimigo (coluna DUO)
+
+Os 23 DPS ganharam duas classificações, cada uma cobrindo todos:
+
+| Eixo | Classe | Heróis |
+|---|---|---|
+| dano | **Forte** | Ashe, Bastion, Cassidy, Emre, Hanzo, Junkrat, Reaper, Sierra, Sojourn, Soldier: 76, Symmetra, Torbjörn |
+| dano | **Médio** | Anran, Echo, Freja, Genji, Mei, Pharah, Shion, Tracer, Vendetta, Venture, Widowmaker |
+| estilo | **Hitscan** | Ashe, Bastion, Cassidy, Emre, Sierra, Sojourn, Soldier: 76, Widowmaker |
+| estilo | **Flex** | Anran, Echo, Genji, Hanzo, Junkrat, Mei, Pharah, Vendetta, Venture |
+| estilo | **Os dois** | Freja, Reaper, Shion, Symmetra, Torbjörn, Tracer |
+
+A **Flanker** (Anran, Genji, Shion, Tracer, Vendetta, Venture, dentro do Médio) fica
+registrada, ainda sem efeito no score.
+
+Cada tank pertence a uma regra, e o valor depende da dupla (candidato + DPS aliado):
+
+| Tank inimigo | +2 | 0 | −2 |
+|---|---|---|---|
+| D.Mon, Mauga, Orisa, Ramattra, Reinhardt, Roadhog, Winston, Zarya | Forte+Forte | Forte+Médio | Médio+Médio |
+| D.Va, Domina, Doomfist, Hazard, Junker Queen, Wrecking Ball | mista: Hitscan+Flex ou com um "Os dois" | — | Hitscan+Hitscan, Flex+Flex |
+| Sigma | — | as demais | Hitscan+Hitscan |
+
+- **"Os dois" é coringa na mista**, mas não conta como Hitscan para o Sigma.
+- **Trio com a Zenyatta**: Forte+Forte + Zenyatta contra os 8 tanks da primeira
+  linha vale **+2 a mais**. O bônus vai para quem completa o trio: o DPS Forte
+  candidato (com DPS aliado Forte e a Zen aliada) ou a Zenyatta candidata (com os 2
+  DPS aliados Forte).
+- **Onde vale**: jogando de DPS, com exatamente 1 DPS aliado e 1 tank inimigo
+  (jogando de Suporte, só o trio da Zen). Em Fila Aberta, com DPS aliado ou tank não
+  identificado, ou com 2+ DPS aliados ou 2+ tanks inimigos, vale 0.
+- **Peso**: `DUO = β_duo · (dupla + trio)`, com o novo `ModelWeights.beta_duo = 1.0`
+  nos quatro presets (ajustável em `custom_weights`). O valor entra direto, sem
+  multiplicar pela ameaça. Vale `TOTAL = MAP META + COUNTER + SYNERGY + DUO`.
+- **Explicação** (opção 6): `dupla Forte+Forte com Cassidy contra Mauga (+2.00)`,
+  `trio com Zenyatta contra Mauga (+2.00)`, entre as sinergias e o mapa.
+- **Dados**: `data/dps_duo_rules.json` (novo, empacotado; classes, regras e valores),
+  lido por `datasource.load_duo_rules()`. Se o arquivo faltar ou estiver quebrado, o
+  app avisa e segue sem a coluna DUO. A lógica é o novo `core/duo.py` (puro), e
+  `validation.validate_duo_rules()` acusa DPS sem classe, herói em duas classes,
+  tank sem regra ou em duas, e classes, suportes ou tanks inválidos.
+
+### Enemy Threat: a dupla aliada já formada pesa no tank inimigo
+
+- Novo 4º componente no `raw` do tank inimigo: `−λ · D(e)`, onde `D(e)` é o valor da
+  dupla de DPS aliada na regra do tank, mais +2 do trio se a Zenyatta é aliada. Usa
+  o **λ do preset**, o mesmo dos counters.
+- Só jogando de **Suporte ou Tank**, com exatamente 2 DPS aliados e 1 tank inimigo.
+  Jogando de DPS a ameaça não muda: a dupla depende do candidato.
+- Efeito isolado da dupla no `w_e` do tank: Equilibrado ×0.84/×1.19, Counter-first
+  ×0.80/×1.25, Meta-first ×0.87/×1.15, Conforto+ ×0.88/×1.14.
+
+### O que saiu
+
+- **Bloco DPS × DPS de `heroes ally.xlsx`**: as 506 células fora da diagonal estão
+  **vazias** (categorias Hitscan/Meio Hitscan/Flex/Meio Flex e a regra da Tracer). A
+  diagonal, os estilos e a formatação condicional ficaram como estavam.
+  `synergies.csv` regenerado.
+- **`beta_syn_dps_dps`** (peso fixo 0.65 dos pares DPS × DPS): saiu de
+  `ModelWeights` e dos presets. Um `custom_weights` antigo com esse campo vira
+  inválido e, como a validação é tudo-ou-nada, os overrides daquele settings são
+  descartados com aviso.
+- **Exclusão DPS × DPS no termo ν do Enemy Threat**: só SUP × SUP continua excluído.
+
+### Counters tank × DPS revistos
+
+Gravados nos dois sentidos (`C(Tank, DPS) = v`, `C(DPS, Tank) = −v`; + = o tank
+leva vantagem), em `heroes enemy.xlsx` → `counters.csv`:
+
+| Par | `C(Tank, DPS)` |
+|---|---|
+| D.Va × Bastion, Hanzo, Junkrat, Soldier: 76 | +2 → +1 |
+| D.Va × Sierra | 0 → +1 |
+| Zarya × Mei | −2 → −1 |
+| Sigma × Hanzo | 0 → +1 |
+
+### Efeito no ranking (Equilibrado, mapa desconhecido, os 22 DPS candidatos)
+
+- **Mauga inimigo + Cassidy aliado**: Ashe e Sojourn sobem de 17º/18º (−2.07,
+  puxados pela antiga anti-sinergia Hitscan × Hitscan) para 1º/2º (+3.83). Mei cai
+  de 1º para 12º (perdeu a sinergia +1.30; Forte+Médio é neutra).
+- **D.Va inimiga + Ashe aliada**: Symmetra vai de 6º para 1º (mista +2).
+  Widowmaker cai de 5º para 16º (Hitscan+Hitscan −2). Hanzo sobe de 21º para 11º
+  (virou Flex, e a vantagem da D.Va sobre ele caiu de 2 para 1).
+- **Sigma inimigo + Soldier: 76 aliado**: as duplas Hitscan+Hitscan ficam no fundo
+  (Widowmaker de 12º para 21º). Hanzo sobe de 19º para 12º (sai a anti-sinergia −3.9
+  e entra o counter −1 do Sigma).
+
+### Testes
+
+- Novo `tests/test_duo.py` (101 testes): classes e regras iguais às definidas, o
+  validador (dados reais limpos, 15 problemas sintéticos acusados), as três regras
+  par a par, o coringa "Os dois", os casos neutros, o trio nos dois sentidos,
+  `beta_duo`, o texto e a ordem das razões, o termo da ameaça nos 4 presets, o
+  pipeline pela role e os dados das duas matrizes.
+- Ajustados: `test_scoring.py` (só SUP × SUP fica fora do ν), `test_presets.py`
+  (sem `beta_syn_dps_dps`), `test_ranking_view.py` (coluna DUO) e
+  `test_validation.py` (as regras entram no `validate_all`).
+- Golden de matching sem regressão (31 passaram, 4 xfailed).
+
+---
+
 ## [v1.2.16] — 2026-10-16
 
 Season 5: novo Suporte **Doctrine**, **Sombra** passa de DPS para Suporte,

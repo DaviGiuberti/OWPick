@@ -133,20 +133,25 @@ class TestComputeThreatWeights:
 
 
 # ---------------------------------------------------------------------------
-# Exclusão de pares de MESMA role no termo de sinergia da ameaça (v1.2.12)
+# Exclusão de pares de MESMA role no termo de sinergia da ameaça (v1.2.12;
+# desde a v1.2.17 só SUP × SUP — o bloco DPS × DPS da matriz ficou vazio)
 # ---------------------------------------------------------------------------
 
 
 class TestThreatSynergyPairExclusion:
-    """SUP × SUP e DPS × DPS contribuem 0 no somatório ν do threat weighting.
+    """SUP × SUP contribui 0 no somatório ν do threat weighting, em TODOS os presets.
 
-    Vale em TODOS os presets (inclusive conforto+) — ao contrário da regra de
-    β_syn_dps_dps do ranking, que não se aplica ao conforto+.
+    DPS × DPS também era excluído até a v1.2.16; a exclusão saiu junto com os
+    valores DPS × DPS da matriz de sinergias (regra de dupla por tank, v1.2.17).
     """
 
+    def test_so_sup_x_sup_e_excluido(self):
+        assert scoring.THREAT_SYNERGY_EXCLUDED_ROLES == frozenset({"SUP"})
+
     @pytest.mark.parametrize("preset", ["equilibrado", "counter-first", "meta-first", "conforto+"])
-    def test_dps_x_dps_nao_soma_ameaca(self, preset):
-        # Cassidy × Ashe: dois DPS (Hitscan), Y = -6 -> contribuição 0 (w_e = 1).
+    def test_dps_x_dps_conta_como_qualquer_par(self, preset):
+        # Valor DPS × DPS só existe em matriz sintética (o bloco real está vazio):
+        # se existir, entra no ν como qualquer par.
         w_preset = scoring.resolve_weights(preset)
         synergy_matrix = {"cassidy": {"ashe": -6.0}, "ashe": {"cassidy": -6.0}}
         w = scoring.compute_threat_weights(
@@ -158,17 +163,9 @@ class TestThreatSynergyPairExclusion:
             synergy_matrix=synergy_matrix,
             nu=w_preset.nu,
         )
-        assert w["cassidy"] == pytest.approx(1.0)
-        assert w["ashe"] == pytest.approx(1.0)
-
-    def test_dps_x_dps_de_categorias_diferentes_tambem_e_zero(self):
-        # Ashe × Genji: sinergia POSITIVA que conta no T_syn, mas 0 na ameaça.
-        synergy_matrix = {"ashe": {"genji": 2.0}, "genji": {"ashe": 2.0}}
-        w = scoring.compute_threat_weights(
-            ["Ashe", "Genji"], {}, allies=[], synergy_matrix=synergy_matrix
-        )
-        assert w["ashe"] == pytest.approx(1.0)
-        assert w["genji"] == pytest.approx(1.0)
+        esperado = scoring.threat_multiplier(w_preset.nu * -6.0)
+        assert w["cassidy"] == pytest.approx(esperado)
+        assert w["ashe"] == pytest.approx(esperado)
 
     def test_sup_x_sup_continua_excluido(self):
         synergy_matrix = {"ana": {"mercy": 2.0}, "mercy": {"ana": 2.0}}
@@ -468,7 +465,7 @@ class TestMercyDpsPrioritario:
             ["Mercy", "Pharah", "Tracer"], {}, allies=[], synergy_matrix=syn
         )
         # Mercy × DPS continua somando na ameaça com o ν do preset (nada é
-        # descartado lá); DPS × DPS é que é excluído. Depois vem o pocket.
+        # descartado lá). Depois vem o pocket.
         raw_mercy = scoring.NU_THREAT * (2.0 - 2.0)
         assert w["mercy"] == pytest.approx(
             scoring.threat_multiplier(raw_mercy) * scoring.MERCY_POCKET_MERCY_MULT

@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "description": "Regras de dupla de DPS por tank inimigo (coluna DUO e termo de dupla do Enemy Threat). Ver DOCUMENTACAO.md, 'Classes de DPS e regras por tank'. Pares sem ordem ('Hitscan+Flex' = 'Flex+Hitscan'); par ausente vale 0.",
+  "axes": {
+    "dano": {
+      "Forte": ["Ashe", "Bastion", "Cassidy", "Emre", "Hanzo", "Junkrat", "Reaper", "Sierra", "Sojourn", "Soldier: 76", "Symmetra", "Torbjörn"],
+      "Médio": ["Anran", "Echo", "Freja", "Genji", "Mei", "Pharah", "Shion", "Tracer", "Vendetta", "Venture", "Widowmaker"]
+    },
+    "estilo": {
+      "Hitscan": ["Ashe", "Bastion", "Cassidy", "Emre", "Sierra", "Sojourn", "Soldier: 76", "Widowmaker"],
+      "Flex": ["Anran", "Echo", "Genji", "Hanzo", "Junkrat", "Mei", "Pharah", "Vendetta", "Venture"],
+      "Os dois": ["Freja", "Reaper", "Shion", "Symmetra", "Torbjörn", "Tracer"]
+    }
+  },
+  "flanker": ["Anran", "Genji", "Shion", "Tracer", "Vendetta", "Venture"],
+  "rules": [
+    {
+      "name": "ruim contra dupla de Dano Forte",
+      "axis": "dano",
+      "pairs": { "Forte+Forte": 2, "Forte+Médio": 0, "Médio+Médio": -2 },
+      "tanks": ["D.Mon", "Mauga", "Orisa", "Ramattra", "Reinhardt", "Roadhog", "Winston", "Zarya"]
+    },
+    {
+      "name": "ruim contra dupla mista",
+      "axis": "estilo",
+      "pairs": {
+        "Hitscan+Flex": 2,
+        "Hitscan+Os dois": 2,
+        "Flex+Os dois": 2,
+        "Os dois+Os dois": 2,
+        "Hitscan+Hitscan": -2,
+        "Flex+Flex": -2
+      },
+      "tanks": ["D.Va", "Domina", "Doomfist", "Hazard", "Junker Queen", "Wrecking Ball"]
+    },
+    {
+      "name": "forte contra dupla de Hitscan",
+      "axis": "estilo",
+      "pairs": { "Hitscan+Hitscan": -2 },
+      "tanks": ["Sigma"]
+    }
+  ],
+  "trios": [
+    {
+      "support": "Zenyatta",
+      "axis": "dano",
+      "pair": "Forte+Forte",
+      "value": 2,
+      "tanks": ["D.Mon", "Mauga", "Orisa", "Ramattra", "Reinhardt", "Roadhog", "Winston", "Zarya"]
+    }
+  ]
+}
