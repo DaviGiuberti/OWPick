@@ -1,5 +1,5 @@
 {
-    "version": "1.2.17",
-    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.17/OWPick_v1.2.17.zip",
-    "notas": "A sinergia entre dois DPS por categoria saiu. No lugar dela, a **dupla de DPS** do seu time ganha ou perde prioridade conforme o **tank inimigo**, numa coluna nova do ranking (**DUO**). Jogando de Suporte ou Tank, a dupla aliada também mexe na ameaça do tank inimigo. Sete counters tank × DPS foram revistos. ### Regra de dupla de DPS por tank inimigo (coluna DUO) Os 23 DPS ganharam duas classificaç"
+    "version": "1.2.18",
+    "download_url": "https://github.com/DaviGiuberti/OWPick/releases/download/v1.2.18/OWPick_v1.2.18.zip",
+    "notas": "O Doctrine e a Sombra Suporte passam a ter counters contra todos os heróis, e a Sombra ganha sinergias com DPS e Tanks, a partir de pesquisa feita depois do lançamento da Season 5. As sinergias do Doctrine com DPS e Tanks foram preenchidas, e a tabela da D.Mon foi revisada depois dos nerfs dela. ### Counters do Doctrine e da Sombra, sinergias da Sombra (pesquisa) O Doctrine e a Sombra Suporte entr"
 }
