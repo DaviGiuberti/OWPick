@@ -4,6 +4,62 @@ Todas as mudanças relevantes de versão são documentadas aqui.
 
 ---
 
+## [v1.2.18] — 2026-11-13
+
+O Doctrine e a Sombra Suporte passam a ter counters contra todos os heróis, e a
+Sombra ganha sinergias com DPS e Tanks, a partir de pesquisa feita depois do
+lançamento da Season 5. As sinergias do Doctrine com DPS e Tanks foram
+preenchidas, e a tabela da D.Mon foi revisada depois dos nerfs dela.
+
+### Counters do Doctrine e da Sombra, sinergias da Sombra (pesquisa)
+
+O Doctrine e a Sombra Suporte entraram na v1.2.16 com as matrizes quase vazias.
+Uma pesquisa feita depois do lançamento da Season 5 preencheu, com a mesma
+metodologia da D.Mon:
+
+- **Counters** dos dois (linha e coluna, contra os outros 53 heróis): *counter
+  rating* do counterwatch.gg (Doctrine 206 mil partidas, Sombra 150 mil),
+  convertido pelos limiares calibrados na D.Mon. Guias e vídeos só movem um valor
+  em ±1 com 2 fontes independentes contra o rating, o que mudou 5 células do
+  Doctrine.
+  - O Doctrine sofre com **dive e flankers** (Tracer, Vendetta, Genji, Winston,
+    Doomfist…) e pune tanks de brawl e DPS parados (Roadhog, Ramattra, Bastion…).
+  - A Sombra sofre com Baptiste, Venture, Tracer, Kiriko e Doomfist e pune **tanks
+    grandes**: Mauga (−2), Junker Queen, Roadhog, Sigma, Zarya.
+- **Sinergias da Sombra só contra DPS e Tanks**: dado de dupla do counterwatch
+  (2 pontos) e guias/vídeos (1 ponto). +2 com **Tracer, Genji, Winston e
+  Doomfist**; +1 com Hazard, Vendetta, Anran, Pharah, Soldier: 76, Wrecking Ball,
+  Venture, Zarya e Hanzo. Sem evidência, a média de Kiriko, Brigitte e Jetpack Cat
+  (perfil mais próximo).
+
+Não mudaram nesta pesquisa: o bloco SUP × SUP (inclusive Mercy × Sombra), os
+cruzamentos com a D.Mon e as diagonais. Detalhes, fontes e descartes em
+DOCUMENTACAO.md ("Tabela do Doctrine e da Sombra"). Testes:
+`tests/test_sombra.py` (novo) e `tests/test_doctrine.py`.
+
+### Sinergias do Doctrine com DPS e Tanks (à mão)
+
+Preenchidas pelo autor, fora da pesquisa: +2 com Anran, Vendetta, Mauga e
+Ramattra; +1 com Ashe, Bastion, Cassidy, Emre, Genji, Hazard, Orisa, Reaper,
+Reinhardt, Sierra, Sojourn, Soldier: 76, Winston e Zarya; 0 com os demais. Mesmo
+valor nos dois sentidos.
+
+### Revisão da tabela da D.Mon (pós-Season 5)
+
+A D.Mon levou dois nerfs depois da pesquisa da v1.2.16. O processo foi refeito com
+a mesma calibração: rating atual do counterwatch, dado de dupla atualizado e guias
+e vídeos como desempate.
+
+- **Counters** (8 pares): Illari **+2 → −1** e D.Va +1 → −1 (o rating virou);
+  Torbjörn +2 → +1; Junkrat 0 → +1; Sombra −1 → 0. Por ajuste (2 fontes contra o
+  rating): Genji −1 → +1, Echo 0 → +1, Wrecking Ball −1 → 0.
+- **Sinergias** (3 pares, nos dois sentidos): Pharah **−1 → +1** e Baptiste 0 → +1
+  (dado de dupla); Genji +1 → +2.
+
+Detalhes em DOCUMENTACAO.md ("Revisão pós-Season 5"). Testes: `tests/test_dmon.py`.
+
+---
+
 ## [v1.2.17] — 2026-10-30
 
 A sinergia entre dois DPS por categoria saiu. No lugar dela, a **dupla de DPS** do

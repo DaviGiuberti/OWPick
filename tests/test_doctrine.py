@@ -4,10 +4,12 @@ Segue o gabarito da D.Mon (tests/test_dmon.py): fonte de verdade, normalização
 templates de lineup nos dois bancos, ícone de ban, matrizes, stats e o scoring
 rodando com ele dos dois lados.
 
-Os dados que ainda não existem ficam VAZIOS (decisão do autor): nas matrizes só o
-bloco SUP x SUP das sinergias (= Kiriko, categoria Flex — ver tests/test_suportes.py)
-e o cruzamento com a D.Mon (pesquisa da v1.2.16) têm valor; nas stats, winrate e
-pickrate vazios nos 30 mapas.
+Matrizes: o bloco SUP x SUP das sinergias segue a categoria Flex (= Kiriko — ver
+tests/test_suportes.py) e o cruzamento com a D.Mon veio da pesquisa da v1.2.16. Os
+counters contra os outros 53 heróis vieram da pesquisa do Doctrine e da Sombra
+da v1.2.18 (counter rating do counterwatch.gg na Season 5, com a calibração da
+D.Mon e ajustes por guias/vídeos — DOCUMENTACAO.md, "Tabela do Doctrine e da
+Sombra"). As sinergias com DPS e Tanks foram preenchidas à mão pelo autor (v1.2.18).
 """
 
 from __future__ import annotations
@@ -147,14 +149,61 @@ def test_sinergia_com_suportes_igual_a_da_kiriko():
     assert ally[KEY][KEY] == ally[kiriko][kiriko] == -11
 
 
-def test_resto_das_matrizes_vazio_exceto_dmon():
-    """Sem dado inventado: fora do bloco SUP x SUP (sinergias), a única célula com
-    valor é o cruzamento com a D.Mon, preenchido pela pesquisa dela."""
-    ally, enemy = _matrices()
-    assert set(ally[KEY]) == _keys("SUP") | {"dmon"}
-    assert {h for h, row in ally.items() if KEY in row} == _keys("SUP") | {"dmon"}
-    assert enemy[KEY] == {"dmon": 0.0}
-    assert {h for h, row in enemy.items() if KEY in row} == {"dmon"}
+def test_sinergias_com_dps_e_tanks_completas_simetricas_e_na_escala():
+    """As sinergias do Doctrine com DPS e Tanks foram preenchidas à mão pelo autor
+    (fora da pesquisa): linha e coluna completas, mesmo valor nos dois sentidos,
+    dentro de -2..+2. O cruzamento com a D.Mon segue o da pesquisa dela (+1)."""
+    ally, _enemy = _matrices()
+    todos = {normalize_hero_name(h) for h in heroes.get_all_heroes()}
+    assert set(ally[KEY]) == todos
+    assert {h for h, row in ally.items() if KEY in row} == todos
+    for x in _keys("DPS") | _keys("TANK"):
+        assert ally[KEY][x] == ally[x][KEY], x
+        assert -2 <= ally[KEY][x] <= 2, x
+    assert ally[KEY]["dmon"] == ally["dmon"][KEY] == 1
+
+
+def test_counters_completos_antissimetricos_e_na_escala():
+    """Linha e coluna de counters com valor contra os outros 53 heróis (a diagonal
+    fica vazia), C(Doctrine, X) = -C(X, Doctrine) e nenhum rating chegou a ±2."""
+    _ally, enemy = _matrices()
+    outros = {normalize_hero_name(h) for h in heroes.get_all_heroes()} - {KEY}
+    assert set(enemy[KEY]) == outros
+    assert {h for h, row in enemy.items() if KEY in row} == outros
+    for x in outros:
+        assert enemy[KEY][x] == -enemy[x][KEY], x
+        assert -1 <= enemy[x][KEY] <= 1, x
+
+
+@pytest.mark.parametrize(
+    "heroi,valor",
+    [
+        # Dive e flankers: maiores ratings contra ele (Tracer +9.6, Vendetta +7.5).
+        ("Tracer", 1),
+        ("Vendetta", 1),
+        ("Genji", 1),
+        ("Winston", 1),
+        ("Doomfist", 1),
+        # EMP apaga o ult (2 vídeos) e o rating (+4.5) concorda.
+        ("Sombra", 1),
+        # Ajustes: 2 fontes independentes contra o rating.
+        ("Hazard", 1),  # rating -0.9; KarQ + SenseOS
+        ("Cassidy", 1),  # rating -1.2; Awkward + SenseOS
+        ("Widowmaker", 1),  # rating -1.3; Hardcore Gamer + SenseOS
+        ("Ashe", 0),  # rating -5.8; Hardcore Gamer + SenseOS
+        ("Zarya", 0),  # rating -9.2; KarQ + Hardcore Gamer
+        # Quem ele pune: tanks de brawl e DPS estáticos.
+        ("Roadhog", -1),  # rating -11.4, logo abaixo do limiar de ±2
+        ("Ramattra", -1),
+        ("Bastion", -1),
+        # Mantido da pesquisa da D.Mon (v1.2.16).
+        ("D.Mon", 0),
+    ],
+)
+def test_counters_ancorados_na_pesquisa(heroi, valor):
+    """C(X, Doctrine) = quanto X countera o Doctrine (positivo = X leva vantagem)."""
+    _ally, enemy = _matrices()
+    assert enemy[normalize_hero_name(heroi)][KEY] == valor
 
 
 # ---------------------------------------------------------------------------
@@ -195,7 +244,9 @@ def test_scoring_com_doctrine_dos_dois_lados():
     data = scoring.calculate_hero_score(HERO, ally, enemy, ["Lúcio"], enemies, w, meta)
     beta = scoring.DEFAULT_WEIGHTS.beta_syn
     assert data["synergy_score"] == pytest.approx(2 * beta)
-    assert data["counter_score"] == 0.0  # sem counters conhecidos
+    # C(Doctrine, Tracer) = C(Doctrine, Winston) = -1; o próprio Doctrine (espelho) é ignorado.
+    assert enemy[KEY]["tracer"] == enemy[KEY]["winston"] == -1
+    assert data["counter_score"] == pytest.approx(-(w["tracer"] + w["winston"]))
 
     sups = heroes.HEROES_ROLES[ROLE]
     recs, _excluded = scoring.rank_heroes(sups, ["Lúcio"], enemies, ally, enemy, w, meta)

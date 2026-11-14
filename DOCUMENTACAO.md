@@ -1150,18 +1150,27 @@ injetável para testes.
 > **D.Mon** entrou na v1.2.14 com a linha/coluna **vazias** nas duas matrizes. Na
 > **v1.2.16** elas foram preenchidas por pesquisa (ver
 > [Tabela da D.Mon](#tabela-da-dmon-pesquisa-v1216)) e o ícone de ban foi gerado.
+> Na **v1.2.18**, depois dos nerfs da Season 5, a tabela foi revisada (ver
+> [Revisão pós-Season 5](#revisão-pós-season-5-v1218)).
 > O `stats_inputs.csv` continua com winrate/pickrate `0.00` nos 30 mapas.
 >
-> **Doctrine (v1.2.16)** — Suporte novo da Season 5. Só o bloco SUP × SUP das
-> sinergias (categoria Flex, igual à Kiriko) e o cruzamento com a D.Mon têm valor;
-> o resto das matrizes e as stats estão **vazios** (ver
-> [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)).
+> **Doctrine (v1.2.16)** — Suporte novo da Season 5. Entrou com só o bloco SUP × SUP
+> das sinergias (categoria Flex, igual à Kiriko) e o cruzamento com a D.Mon; as
+> stats ficaram **vazias** (ver
+> [Herói sem dados](#herói-sem-dados-linhacoluna-vazia-e-winrate-0)). Na **v1.2.18**,
+> a linha e a coluna de **counters** foram preenchidas por pesquisa (ver
+> [Tabela do Doctrine e da Sombra](#tabela-do-doctrine-e-da-sombra-pesquisa-v1218)). As
+> sinergias dele com DPS e Tanks foram preenchidas à mão pelo autor (fora da
+> pesquisa).
 >
 > **Sombra (v1.2.16)** passou de **DPS para Suporte** (rework da Season 5). As
 > stats ficaram vazias (os números antigos eram da Sombra DPS, outro kit), as
-> matrizes têm só o bloco SUP × SUP (categoria Meio, igual à Mizuki) e o cruzamento
-> com a D.Mon, e os templates do lineup foram para `sup/`. Ver
-> [Mudança de role de um herói](#mudança-de-role-de-um-herói).
+> matrizes ficaram só com o bloco SUP × SUP (categoria Meio, igual à Mizuki) e o
+> cruzamento com a D.Mon, e os templates do lineup foram para `sup/`. Ver
+> [Mudança de role de um herói](#mudança-de-role-de-um-herói). Na **v1.2.18**, os
+> **counters** (contra todos) e as **sinergias contra DPS e Tanks** foram
+> preenchidos por pesquisa (ver
+> [Tabela do Doctrine e da Sombra](#tabela-do-doctrine-e-da-sombra-pesquisa-v1218)).
 
 ### Herói sem dados (linha/coluna vazia e winrate 0)
 
@@ -1380,8 +1389,9 @@ inimigos). Perfil do counterwatch: Poke 20% / **Rush 100%** / Dive 50%.
 
 **Counters** (`heroes enemy.xlsx`):
 
-- Fonte: o *counter rating* do counterwatch.gg contra a D.Mon (Season 5, 149 mil
-  partidas, todas as ranks), que cobre os 53 outros heróis. O rating é
+- Fonte: o *counter rating* do counterwatch.gg contra a D.Mon (coleta da v1.2.16:
+  149 mil partidas, todas as ranks; a [revisão](#revisão-pós-season-5-v1218) usou a
+  coleta de 13/11), que cobre os 53 outros heróis. O rating é
   antissimétrico entre páginas (Reinhardt → D.Mon +1.4, D.Mon → Reinhardt −1.4),
   como a matriz.
 - Calibração: o mesmo rating foi coletado para **9 tanques já preenchidos**
@@ -1393,12 +1403,13 @@ inimigos). Perfil do counterwatch: Poke 20% / **Rush 100%** / Dive 50%.
 - `C(X, D.Mon)` = rating convertido e `C(D.Mon, X) = −C(X, D.Mon)`; o espelho
   D.Mon × D.Mon é 0.
 
-| Quem countera a D.Mon (`C(X, D.Mon)`) | Valor |
+| Quem countera a D.Mon (`C(X, D.Mon)`, após a revisão abaixo) | Valor |
 |---|---|
-| Torbjörn, Illari (torreta/pilão no alto, onde ela não chega) | **+2** |
-| Mauga, Ramattra, D.Va, Roadhog, Orisa, Bastion, Freja, Pharah, Jetpack Cat, Zenyatta | +1 |
-| Mercy, Kiriko, Lifeweaver, Brigitte, Sombra, Anran, Widowmaker, Venture, Sierra, Soldier: 76, Shion, Genji, Vendetta, Winston, Wrecking Ball | −1 (a D.Mon leva vantagem) |
-| Os outros 26 (inclusive Doctrine) | 0 |
+| Mauga, Ramattra, Jetpack Cat, Bastion, Torbjörn, Zenyatta, Roadhog, Orisa, Pharah, Freja, Junkrat; por ajuste, Genji e Echo | +1 |
+| Anran, Widowmaker, Lifeweaver, Mercy, D.Va, Kiriko, Venture, Brigitte, Soldier: 76, Winston, Shion, Illari, Sierra, Vendetta | −1 (a D.Mon leva vantagem) |
+| Os outros 26 (inclusive Doctrine, Sombra e, por ajuste, Wrecking Ball) | 0 |
+
+Nenhum rating atual chega a ±11.5 (o maior é o do Mauga, +10.5), então não há ±2.
 
 **Sinergias** (`heroes ally.xlsx`) — não há rating público completo de duplas,
 então a regra é:
@@ -1408,11 +1419,12 @@ então a regra é:
    par) vale 2; cada guia vale 1 (allthings.how, playerauctions, esports.gg,
    mobalytics, bo3.gg, gamer.org, elevateboost.fr, overpicker). Soma ≥ 3 → **+2**;
    1–2 → **+1**; negativa → **−1**.
-   - **+2**: Lúcio e Juno (speed boost para o engage), Tracer, Echo, Shion
-     (seguem o dash).
-   - **+1**: Ana, Mei, Sombra (dado de dupla), Genji, Anran, Freja, Zenyatta
-     (peel para o Zen), D.Va (dupla MEKA, 6v6), Doctrine.
-   - **−1**: Ashe, Pharah, Widowmaker ("o poke a deixa sozinha na linha de
+   - **+2**: Lúcio e Juno (speed boost para o engage), Tracer, Echo, Shion,
+     Genji (seguem o dash; o Genji subiu na revisão).
+   - **+1**: Ana, Mei, Sombra (dado de dupla), Anran, Freja, Zenyatta
+     (peel para o Zen), D.Va (dupla MEKA, 6v6), Doctrine; na revisão, Baptiste
+     e Pharah (dado de dupla).
+   - **−1**: Ashe, Widowmaker ("o poke a deixa sozinha na linha de
      frente"), Junkrat, Jetpack Cat.
 2. **Sem evidência**: média do que a planilha já dava aos 4 tanques de perfil mais
    próximo — **Junker Queen, Hazard, Mauga** (distância 30 no perfil
@@ -1431,6 +1443,194 @@ As duas células da linha da D.Mon que já estavam preenchidas e discordavam da
 pesquisa mudaram: `C(D.Mon, Bastion)` 0 → −1 e `C(D.Mon, Illari)` 0 → −2. Os
 números e scripts da coleta não ficam no repositório (como nas outras alterações
 de dados em lote); os valores finais são conferidos em `tests/test_dmon.py`.
+
+#### Revisão pós-Season 5 (v1.2.18)
+
+A tabela acima foi montada com os dados de meados de outubro. Desde então a D.Mon
+levou dois nerfs (17/09 e 13/10: *Propulsors* gastam mais combustível,
+*Fusion Repeater* mais fraco, armadura 275 → 250). A revisão refez o processo com
+a mesma calibração:
+
+- **Counters**: rating recoletado no counterwatch.gg (5v5, todas as ranks,
+  96.379 partidas, 13/11/2026) e a regra de ajuste da
+  [Tabela do Doctrine e da Sombra](#tabela-do-doctrine-e-da-sombra-pesquisa-v1218)
+  (±1 só com ≥ 2 fontes independentes contra o rating). Fontes de desempate: os
+  vídeos do Awkward ("A Complete D.Mon Guide", 13/08) e do Ants ("The BEST
+  D.mon Guide", 24/08), a SenseOS (18/10) e a allthings.how (12/08). Os vídeos e
+  a allthings.how são do kit de lançamento.
+- **Sinergias**: dado de dupla atualizado (página da D.Mon e páginas dos
+  parceiros em que ela aparece no top-3 de tanks) e guias acessíveis hoje
+  (allthings.how, elevateboost, gamer.org, vídeo do Awkward). Parte da evidência
+  da v1.2.16 veio de sites que hoje bloqueiam o acesso (mobalytics, esports.gg,
+  playerauctions); por isso a evidência nova só **troca** um valor quando o
+  contradiz (sinal oposto) ou o **reforça** (≥ 3 pontos sobre um +1). O fallback
+  recalculado bate com a planilha.
+
+| Célula | Rating | Antes → depois | Motivo |
+|---|---|---|---|
+| `C(Illari, D.Mon)` | −3.4 | **+2 → −1** | o rating virou (era +23.2) |
+| `C(Torbjörn, D.Mon)` | +5.7 | +2 → +1 | o rating caiu (era +24.2) |
+| `C(D.Va, D.Mon)` | −6.6 | +1 → −1 | rating |
+| `C(Junkrat, D.Mon)` | +3.0 | 0 → +1 | rating, exatamente no limiar |
+| `C(Sombra, D.Mon)` | +0.9 | −1 → 0 | rating (as duas páginas dão ±0.9) |
+| `C(Genji, D.Mon)` | −2.6 | −1 → **+1** | ajuste: Awkward ("sofre com mobilidade vertical: Genji, Cat, Ball") + SenseOS (flankers) |
+| `C(Echo, D.Mon)` | −1.4 | 0 → +1 | ajuste: allthings.how + SenseOS (quem voa) |
+| `C(Wrecking Ball, D.Mon)` | −3.4 | −1 → 0 | ajuste: Awkward + allthings.how |
+| `Y(D.Mon, Pharah)` / `Y(Pharah, D.Mon)` | — | −1 → **+1** | dado de dupla nas duas páginas (+1.1%) pesa mais que o "evite poke" do elevateboost |
+| `Y(D.Mon, Genji)` / `Y(Genji, D.Mon)` | — | +1 → +2 | dado de dupla + allthings.how |
+| `Y(D.Mon, Baptiste)` / `Y(Baptiste, D.Mon)` | — | 0 → +1 | dado de dupla |
+
+Os counters mudaram nos dois sentidos (16 células) e as sinergias em 6 células.
+
+> **Descartado**: os counters do elevateboost (citam o próprio counterwatch, não
+> são fonte independente), o "win rate combinado" do counterwatch e os sites que
+> não abrem (bo3.gg vazio, dotesports e playerauctions bloqueados).
+> **Menor confiança**: a virada da Illari (+2 → −1, conferir), os ajustes de Genji
+> e Wrecking Ball (vídeo do kit de lançamento) e o Junkrat no limiar.
+
+### Tabela do Doctrine e da Sombra (pesquisa, v1.2.18)
+
+O Doctrine (novo) e a Sombra (rework para Suporte) chegaram na v1.2.16 com as
+matrizes quase vazias. Uma pesquisa feita depois do lançamento da Season 5
+(6/10/2026) preencheu, com a metodologia da [Tabela da D.Mon](#tabela-da-dmon-pesquisa-v1216):
+
+| Matriz | Doctrine | Sombra |
+|---|---|---|
+| Counters (`heroes enemy.xlsx`) | linha e coluna, contra os outros 53 | linha e coluna, contra os outros 53 |
+| Sinergias (`heroes ally.xlsx`) | fora da pesquisa (ver abaixo) | linha e coluna, **só contra DPS e Tanks** |
+
+O bloco SUP × SUP segue as [Categorias de Suporte](#categorias-de-suporte-sinergias-sup--sup)
+(inclusive Mercy × Sombra), e os cruzamentos com a D.Mon ficaram como a pesquisa
+dela os deixou (a [revisão da D.Mon](#revisão-pós-season-5-v1218) depois mudou
+`C(Sombra, D.Mon)` para 0). As diagonais de counters dos dois continuam
+**vazias** (o espelho vale 0 do mesmo jeito).
+
+As **sinergias do Doctrine com DPS e Tanks** foram preenchidas à mão pelo autor,
+depois da pesquisa e sem passar por ela: valor igual nos dois sentidos, **+2** com
+Anran, Vendetta, Mauga e Ramattra (que mais aproveitam a velocidade de ataque dos
+drones), **+1** com Ashe, Bastion, Cassidy, Emre, Genji, Hazard, Orisa, Reaper,
+Reinhardt, Sierra, Sojourn, Soldier: 76, Winston e Zarya, e 0 com os demais.
+
+**Kit relevante** (Season 5):
+
+- **Doctrine** — 250 HP, subrole *Survivor* (regen ao usar a mobilidade). Cetro
+  hitscan de médio alcance que cura ou causa dano (60, com crítico 1,5×). *Infuse*
+  (2 cargas) amplia a próxima ação: o tiro perfura, cura 120 e não tem crítico;
+  *Shrouded Momentum* vira voo livre. O *Shrouded Momentum* é a **única
+  mobilidade** (cooldown 8 s, −40% de dano, **sem** imunidade a crítico desde o
+  lançamento). Os drones dão +30% de velocidade de ataque e cura. O ult
+  (*Deliverance*) corta até 50% da vida máxima dos inimigos e é **apagado pelo EMP
+  da Sombra**; o Suzu da Kiriko e a bolha da Zarya limpam o debuff. Perfil do
+  counterwatch: **Poke 70%** / Rush 50% / Dive 50%.
+- **Sombra Suporte** — 225 HP, subrole *Tactician*. Não hackeia mais inimigos:
+  *Hot Fix* (2 cargas) cura um aliado à distância e fica nele por até 12 s, curando
+  quando ele toma dano. *Cyberspace* é uma zona que cura aliados, causa dano e
+  aplica *Weaken* (−50% de dano e cura dos inimigos). O *Translocator* é a fuga
+  (alcance menor, 7,5 s, invisibilidade só após 0,75 s). O EMP ficou mais caro.
+  Perfil: Poke 10% / Rush 40% / **Dive 100%**.
+
+**Counters** (`heroes enemy.xlsx`):
+
+- Fonte principal: o *counter rating* do counterwatch.gg (5v5, todas as ranks,
+  coletado em 13/11/2026) contra o **Doctrine** (206.303 partidas) e contra a
+  **Sombra** (150.601). O par Doctrine × Sombra aparece nas duas páginas com o
+  mesmo valor e sinal oposto (+4.5 / −4.5).
+- Conversão: os limiares calibrados na D.Mon (`|rating| < 3.0 → 0`,
+  `< 11.5 → ±1`, `≥ 11.5 → ±2`). `C(X, h)` recebe o valor e `C(h, X) = −C(X, h)`.
+- **Ajuste por guias e vídeos**: um valor se move **±1** só quando **≥ 2 fontes
+  independentes** concordam contra o rating (fontes em conflito não movem nada).
+  Par **sem rating**: decide a evidência dos guias; sem nenhuma, 0.
+
+| Quem countera o Doctrine (`C(X, Doctrine)`) | Valor |
+|---|---|
+| Tracer, Vendetta, Genji, Anran, Venture, Winston, Doomfist, D.Va, Lúcio, Kiriko, Juno, Moira, Sombra (EMP apaga o ult), Baptiste, Mercy; por ajuste: Hazard, Cassidy, Widowmaker | **+1** |
+| Os outros 23 (inclusive D.Mon; por ajuste, Ashe e Zarya, que eram −1) | 0 |
+| Bastion, Domina, Hanzo, Mauga, Mei, Orisa, Ramattra, Reinhardt, Roadhog (−11.4), Sigma, Symmetra, Torbjörn | −1 (o Doctrine leva vantagem) |
+
+Nenhum rating contra o Doctrine chega a ±11.5, então não há ±2. O resumo é:
+**dive e flankers** o pegam (o *Shrouded Momentum* é a única fuga), e ele pune
+**tanks de brawl e DPS parados**.
+
+| Quem countera a Sombra (`C(X, Sombra)`) | Valor |
+|---|---|
+| Baptiste, Venture, Tracer, Kiriko, Doomfist, Junkrat, Vendetta, Moira, Pharah, Torbjörn | **+1** |
+| Os outros 33 (inclusive Winston, Genji, D.Va, Hazard, Sojourn e D.Mon) | 0 |
+| Ana, Ashe, Bastion, Doctrine, Junker Queen, Ramattra, Roadhog, Sigma, Zarya | −1 (a Sombra leva vantagem) |
+| Mauga (−11.7) | **−2** |
+
+A Sombra pune **tanks grandes** (Weaken corta o dano deles pela metade) e sofre com
+quem a alcança depois do Translocator.
+
+**Ajustes aplicados** (rating → valor final):
+
+| Célula | Rating | Faixa | Final | Fontes contra o rating |
+|---|---|---|---|---|
+| `C(Hazard, Doctrine)` | −0.9 | 0 | **+1** | vídeo do KarQ ("quem me contesta: Winston, Hazard, Doomfist, Tracer, Genji"); SenseOS |
+| `C(Cassidy, Doctrine)` | −1.2 | 0 | **+1** | VOD do Awkward ("perco 1v1 de Cassidy quase sempre"); SenseOS |
+| `C(Widowmaker, Doctrine)` | −1.3 | 0 | **+1** | Hardcore Gamer; SenseOS |
+| `C(Ashe, Doctrine)` | −5.8 | −1 | **0** | Hardcore Gamer; SenseOS |
+| `C(Zarya, Doctrine)` | −9.2 | −1 | **0** | KarQ (a bolha limpa o debuff do ult); Hardcore Gamer (o tiro não atravessa a bolha) |
+
+Doomfist × Doctrine, Reaper × Doctrine e Winston × Sombra tinham fontes dos dois
+lados e ficaram com o rating.
+
+**Sinergias da Sombra × DPS/Tank** (`heroes ally.xlsx`) — a regra de pontos da
+D.Mon, com o mesmo valor nos dois sentidos:
+
+1. Pontos: dado de dupla do counterwatch ("acima do esperado", ≥ 200 partidas por
+   par, na página da Sombra **ou** na do parceiro) vale 2; cada guia ou vídeo
+   independente vale 1. Soma ≥ 3 → **+2**; 1–2 → **+1**; evidência negativa → −1
+   (nenhuma foi encontrada).
+   - **+2**: Tracer, Genji (dupla + games.gg + Samito: "o Hot Fix é insano em
+     Genji, em Tracer, em qualquer flanker"), Winston, Doomfist (dupla + games.gg:
+     "tanks de dive são parceiros naturais").
+   - **+1**: Hazard, Vendetta, Anran, Pharah, Soldier: 76 (dado de dupla);
+     Wrecking Ball, Venture (games.gg); Zarya, Hanzo (KarQ: o Weaken corta o
+     Transcendence e deixa o combo de grav + dragão matar); D.Mon (mantido da v1.2.16).
+2. **Sem evidência**: média do que a planilha dá a **Kiriko, Brigitte e Jetpack
+   Cat**, os três suportes de perfil Poke/Rush/Dive mais próximo da Sombra
+   (distâncias 80, 50 e 40). Pelo kit, a Kiriko também tem teleporte e cleanse, e
+   o Samito compara a Sombra nova à Brigitte ("o melhor pocket do jogo; antes era
+   o pack da Brig"). Arredondada em direção ao neutro (`|média| ≤ 0.5 → 0`).
+   `Y(Sombra, a)` usa as linhas desses suportes e `Y(a, Sombra)` as colunas, então
+   as assimetrias se repetem:
+
+| Sem evidência | `Y(Sombra, a)` | `Y(a, Sombra)` |
+|---|---|---|
+| Cassidy | 0 | **+2** |
+| Ashe, Ramattra | +1 | +1 |
+| D.Va, Emre, Reaper, Sigma, Sojourn, Torbjörn | 0 | +1 |
+| Domina | −1 | 0 |
+| Echo, Mauga, Shion, Widowmaker | 0 | −1 |
+| Bastion, Freja, Junker Queen, Junkrat, Mei, Orisa, Reinhardt, Roadhog, Sierra, Symmetra | 0 | 0 |
+
+**Fontes usadas**: counterwatch.gg (counters, perfil e duplas); vídeos do YouTube
+posteriores ao lançamento — KarQ (kit do Doctrine e da Sombra, guia prático do
+Doctrine), Z3tliX (guia do Doctrine), Awkward (VOD Unranked → GM de Doctrine) e
+Samito (guia da Sombra Suporte); guias SenseOS (Doctrine e Sombra), Hardcore Gamer
+(Doctrine) e games.gg (Sombra). Os vídeos foram lidos pela legenda automática no
+idioma original; os keyframes (OCR) só mostraram gameplay, scoreboard, telas de
+kit e patch notes.
+
+> **Descartado como evidência**:
+> - vídeos do **trial** do Doctrine (12–14/09, kit anterior aos nerfs do
+>   lançamento) e vídeos sem afirmação de matchup;
+> - o **GGClan** (pré-lançamento; afirma que a Sombra Suporte ainda hackeia
+>   inimigos) e guias da **Sombra DPS** (ex.: PC Gamer de 2017);
+> - a **boostingfactory**, que repete o texto da games.gg (contou como uma fonte);
+> - do counterwatch: o "win rate combinado" e a tabela bruta de pares (não
+>   reproduzem o "acima do esperado" publicado), as páginas **6v6** e os win rates
+>   por matchup do blog (mesmo provedor do rating, não é fonte independente).
+>
+> A SenseOS lista counters por **categoria** (atiradores, flankers, tanks de
+> iniciação), com o mesmo molde para os dois heróis. Ela entra em 4 dos 5 ajustes:
+> são os valores de **menor confiança** da tabela.
+
+Nenhuma célula já preenchida mudou nesta pesquisa: os cruzamentos com a D.Mon
+ficaram como estavam. O de counters D.Mon × Sombra só mudou (−1 → 0) na
+[revisão da D.Mon](#revisão-pós-season-5-v1218). Os números e scripts da coleta não
+ficam no repositório. Os valores finais são conferidos em `tests/test_doctrine.py`
+e `tests/test_sombra.py`.
 
 ### Mapas Suportados (30 total)
 
@@ -1755,8 +1955,9 @@ A ordem abaixo é a que a v1.2.14 (D.Mon) seguiu.
    antes de preencher à mão.
 7. **Testes**: atualize as contagens oficiais em `tests/test_utils.py`
    (`TestCanonicalData`) e as listas de classes/regras em `tests/test_duo.py`, e
-   use `tests/test_dmon.py` (Tank) ou `tests/test_doctrine.py` (Suporte com dados
-   vazios) como gabarito da aceitação ponta a ponta do herói novo.
+   use `tests/test_dmon.py` (Tank) ou `tests/test_doctrine.py` (Suporte) como
+   gabarito da aceitação ponta a ponta do herói novo. Para fixar valores vindos de
+   pesquisa, `tests/test_sombra.py` é o modelo mais curto.
 
 O validador (`infra/validation.py`, roda nos testes e no boot com `--debug`)
 aponta exatamente o que estiver faltando em cada um desses pontos.

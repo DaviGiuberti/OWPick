@@ -102,15 +102,18 @@ def test_sinergia_da_sombra_com_suportes_igual_a_da_mizuki():
     assert ally["sombra"]["mizuki"] == ally["mizuki"]["sombra"] == -4
 
 
-def test_resto_da_sombra_vazio_exceto_dmon():
-    """O autor limpou a linha/coluna da Sombra (outro kit, dados antigos de DPS):
-    só o bloco SUP x SUP e o cruzamento com a D.Mon (pesquisa) têm valor."""
+def test_resto_da_sombra_preenchido_pela_pesquisa():
+    """A v1.2.16 limpou a linha/coluna da Sombra (os dados eram da Sombra DPS). A
+    pesquisa pós-rework preencheu os counters contra todos e as sinergias contra
+    DPS e Tanks; o bloco SUP x SUP segue a categoria (teste acima). Os valores
+    ficam fixados em tests/test_sombra.py."""
     ally = datasource.get_ally_matrix()
     enemy = datasource.get_enemy_matrix()
-    assert set(ally["sombra"]) == SUP_KEYS | {"dmon"}
-    assert {h for h, row in ally.items() if "sombra" in row} == SUP_KEYS | {"dmon"}
-    assert enemy["sombra"] == {"dmon": -1.0}
-    assert {h: row["sombra"] for h, row in enemy.items() if "sombra" in row} == {"dmon": 1.0}
+    todos = {normalize_hero_name(h) for h in heroes.get_all_heroes()}
+    assert set(ally["sombra"]) == todos
+    assert {h for h, row in ally.items() if "sombra" in row} == todos
+    assert set(enemy["sombra"]) == todos - {"sombra"}  # diagonal fica vazia
+    assert {h for h, row in enemy.items() if "sombra" in row} == todos - {"sombra"}
 
 
 def test_stats_da_sombra_como_suporte_e_sem_dados():

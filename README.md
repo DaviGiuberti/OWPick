@@ -204,7 +204,7 @@ RANK  | HERO               |    META |      CTR |    SYN |    TOTAL
 
 A versão pronta para uso está disponível na página de [Releases do GitHub](https://github.com/DaviGiuberti/OWPick/releases).
 
-**Versão atual**: `1.2.2`
+**Versão atual**: `1.2.18`
 
 Para instalar:
 1. Baixe o arquivo **`OWPick Installer.exe`**

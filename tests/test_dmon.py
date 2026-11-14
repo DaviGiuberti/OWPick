@@ -6,6 +6,9 @@ counterwatch.gg na Season 5, convertido com limiares calibrados contra os tanque
 já preenchidos; sinergias por evidência de duplas + guias, com base nos tanques
 de perfil mais próximo) e o ícone de ban foi gerado do retrato oficial. A
 metodologia está em DOCUMENTACAO.md ("Tabela da D.Mon").
+v1.2.18 — revisão pós-Season 5: rating do counterwatch recoletado (a D.Mon foi
+nerfada em 17/09 e 13/10), guias/vídeos como desempate (±1 com 2 fontes) e dado
+de dupla atualizado nas sinergias — mudaram 8 pares de counters e 3 de sinergias.
 
 Cobre o caminho inteiro de uma hero nova: fonte de verdade (`HEROES_ROLES`),
 normalização, templates de lineup nos dois bancos, ícone de ban, matrizes, stats
@@ -204,13 +207,25 @@ def test_counters_da_dmon_sao_antissimetricos():
 @pytest.mark.parametrize(
     "heroi,valor",
     [
-        # Os dois counters mais fortes do dado (rating +24.2 e +23.2).
-        ("Torbjörn", 2),
-        ("Illari", 2),
+        # Revisão pós-S5: o rating caiu (Torbjörn +24.2 -> +5.7) ou virou
+        # (Illari +23.2 -> -3.4, D.Va -> -6.6).
+        ("Torbjörn", 1),
+        ("Illari", -1),
+        ("D.Va", -1),
+        # Os mais fortes hoje (+10.5 / +7.4), abaixo do limiar de ±2.
+        ("Mauga", 1),
+        ("Ramattra", 1),
         # Quem voa ou tem mobilidade vertical escapa do sabre (ela não tem lift).
         ("Pharah", 1),
         ("Freja", 1),
         ("Jetpack Cat", 1),
+        # Ajustes (2 fontes contra o rating): Genji -2.6 e Echo -1.4 -> +1;
+        # Wrecking Ball -3.4 -> 0.
+        ("Genji", 1),
+        ("Echo", 1),
+        ("Wrecking Ball", 0),
+        ("Junkrat", 1),  # rating +3.0, exatamente no limiar
+        ("Sombra", 0),  # ±0.9 nas duas páginas
         # Quem a D.Mon mais pune: alvos frágeis sem defesa instantânea.
         ("Mercy", -1),
         ("Kiriko", -1),
@@ -237,9 +252,11 @@ def test_counters_ancorados_na_pesquisa(heroi, valor):
         ("Tracer", 2),
         ("Echo", 2),
         ("Shion", 2),
+        ("Genji", 2),  # revisão: dado de dupla + allthings.how
+        ("Baptiste", 1),  # revisão: dado de dupla
+        ("Pharah", 1),  # revisão: dado de dupla nas duas páginas (era -1)
         # Poke que "a deixa sozinha na linha de frente" / piores parceiros.
         ("Ashe", -1),
-        ("Pharah", -1),
         ("Widowmaker", -1),
         ("Junkrat", -1),
         ("Jetpack Cat", -1),
@@ -316,7 +333,7 @@ def test_dmon_como_inimiga_pesa_pelos_counters():
     assert w[KEY] > scoring.NEUTRAL_WEIGHT
 
     data = scoring.calculate_hero_score("Torbjörn", ally, enemy, allies, [HERO], w, meta)
-    assert data["counter_score"] == pytest.approx(2 * w[KEY])  # C(Torbjörn, D.Mon) = 2
+    assert data["counter_score"] == pytest.approx(1 * w[KEY])  # C(Torbjörn, D.Mon) = 1
     assert any(r.startswith(f"countera {HERO}") for r in _reasons(data))
 
 
